@@ -283,5 +283,144 @@
         // ============================================
         // CONFIGURATION SUPABASE - À MODIFIER !
         // ============================================
-        const SUPABASE_URL = "https://votre-projet.supabase.co";  // REMPLACEZ ICI
-        const SUPABASE_KEY = "votre-clé-anon";                    // REMPL
+        const SUPABASE_URL = "sb_publishable_UGGXS_aHeX92VO44kw6DSw_9xK_MRMV";  // REMPLACEZ ICI
+        const SUPABASE_KEY = "sb_secret_c-NT5J9Uly-B-uJawVhC7g__dLN9EJb";                    // REMPLACEZ ICI
+        
+        // Initialisation Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let watchId = null;
+        let lastPosition = null;
+        
+        // ============================================
+        // COMPTEUR DE MEMBRES CONNECTÉS
+        // ============================================
+        async function countMembers() {
+            const { count } = await supabase
+                .from('bus_positions')
+                .select('*', { count: 'exact', head: true })
+                .eq('etape', 'connected');
+            
+            document.getElementById('onlineCounter').innerHTML = 
+                `👥 ${count || 0} membre${count > 1 ? 's' : ''} connecté${count > 1 ? 's' : ''}`;
+            document.getElementById('memberCountDisplay').innerText = count || 0;
+        }
+        
+        // Mettre à jour toutes les 3 secondes
+        setInterval(countMembers, 3000);
+        
+        // ============================================
+        // GPS
+        // ============================================
+        function startGps() {
+            if (navigator.geolocation) {
+                document.getElementById('gpsStatus').innerHTML = '● Recherche du signal...';
+                document.getElementById('gpsStatus').className = 'gps-inactive';
+                
+                watchId = navigator.geolocation.watchPosition(
+                    async position => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        lastPosition = { lat, lng };
+                        
+                        // Mettre à jour l'affichage
+                        document.getElementById('gpsCoords').innerHTML = 
+                            `Latitude: ${lat.toFixed(6)}<br>Longitude: ${lng.toFixed(6)}`;
+                        document.getElementById('gpsStatus').innerHTML = '● Actif';
+                        document.getElementById('gpsStatus').className = 'gps-active';
+                        
+                        // Afficher les boutons
+                        document.getElementById('startGps').style.display = 'none';
+                        document.getElementById('stopGps').style.display = 'block';
+                        
+                        // Sauvegarder la position dans Supabase
+                        await supabase.from('bus_positions').insert([{
+                            etape: 'position',
+                            latitude: lat,
+                            longitude: lng,
+                            message: 'Mise à jour position'
+                        }]);
+                    },
+                    error => {
+                        alert('Erreur GPS : ' + error.message);
+                        document.getElementById('gpsStatus').innerHTML = '✗ Erreur';
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        maximumAge: 0,
+                        timeout: 5000
+                    }
+                );
+            } else {
+                alert('GPS non supporté sur cet appareil');
+            }
+        }
+        
+        function stopGps() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+                
+                document.getElementById('gpsStatus').innerHTML = '○ Inactif';
+                document.getElementById('gpsStatus').className = 'gps-inactive';
+                document.getElementById('startGps').style.display = 'block';
+                document.getElementById('stopGps').style.display = 'none';
+            }
+        }
+        
+        // ============================================
+        // MISES À JOUR DES ÉTAPES
+        // ============================================
+        async function updateStatus(etape) {
+            if (!lastPosition) {
+                alert('Veuillez d\'abord démarrer le GPS');
+                return;
+            }
+            
+            const now = new Date();
+            const heure = now.getHours() + 'h' + (now.getMinutes()<10?'0':'') + now.getMinutes();
+            
+            let notificationMsg = '';
+            
+            switch(etape) {
+                case 'depart':
+                    notificationMsg = '🚌 DÉPART de l\'église - Arrivée Brement dans 15 min';
+                    break;
+                case 'brement':
+                    notificationMsg = '✅ ARRIVÉE à Brement - Prochain arrêt Noisy-le-Sec';
+                    break;
+                case 'noisy':
+                    notificationMsg = '🟣 ARRIVÉE à Noisy-le-Sec - Retour église dans 15 min';
+                    break;
+                case 'retour':
+                    notificationMsg = '🔚 RETOUR à l\'église Charisma - Fin du trajet';
+                    break;
+            }
+            
+            // Envoyer à Supabase
+            await supabase.from('bus_positions').insert([{
+                etape: etape,
+                latitude: lastPosition.lat,
+                longitude: lastPosition.lng,
+                message: 'Notification:' + notificationMsg
+            }]);
+            
+            // Mettre à jour l'affichage
+            document.getElementById('lastUpdate').innerHTML = `
+                Dernière mise à jour : ${notificationMsg} à ${heure}<br>
+                Position: ${lastPosition.lat.toFixed(6)}, ${lastPosition.lng.toFixed(6)}
+            `;
+            
+            // Ouvrir WhatsApp
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
+                notificationMsg + '\n\n📍 Suivez le bus en direct : https://lykset.github.io/CHARISMA-BUS/'
+            )}`;
+            window.open(whatsappUrl, '_blank');
+        }
+        
+        // Initialisation
+        countMembers();
+    </script>
+</body>
+</html>
