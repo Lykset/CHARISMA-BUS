@@ -181,25 +181,21 @@
 
         // === VARIABLES ===
         let watchId = null;
-        let lastPos = { lat: 48.9397, lng: 2.4486 }; // Position par défaut (église)
+        let lastPos = { lat: 48.9397, lng: 2.4486 };
 
-        // === FONCTION D'AFFICHAGE DES MESSAGES ===
+        // === FONCTION D'AFFICHAGE ===
         function showMessage(text, isSuccess = true) {
             const box = document.getElementById('messageBox');
             box.style.display = 'block';
             box.className = `message-box ${isSuccess ? 'success' : 'error'}`;
             box.innerHTML = text;
-            
-            // Faire disparaître après 3 secondes
-            setTimeout(() => {
-                box.style.display = 'none';
-            }, 3000);
+            setTimeout(() => { box.style.display = 'none'; }, 3000);
         }
 
         // === FONCTIONS GPS ===
         function demarrerGPS() {
             if (!navigator.geolocation) {
-                showMessage("GPS non supporté sur cet appareil", false);
+                showMessage("GPS non supporté", false);
                 return;
             }
             
@@ -218,27 +214,13 @@
                     document.getElementById('startBtn').style.display = 'none';
                     document.getElementById('stopBtn').style.display = 'block';
                     
-                    // Envoi position à Supabase (sans attendre la réponse)
+                    // Envoi position (sans bloquer)
                     envoyerPosition();
                 },
                 error => {
-                    let message = "Erreur GPS : ";
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            message += "Autorisation refusée";
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            message += "Position indisponible";
-                            break;
-                        case error.TIMEOUT:
-                            message += "Délai dépassé";
-                            break;
-                        default:
-                            message += error.message;
-                    }
-                    showMessage(message, false);
+                    showMessage("Erreur GPS: " + error.message, false);
                 },
-                { enableHighAccuracy: true, timeout: 10000 }
+                { enableHighAccuracy: true }
             );
         }
 
@@ -253,83 +235,62 @@
             document.getElementById('gpsCoords').innerHTML = 'Latitude: --<br>Longitude: --';
         }
 
-        async function envoyerPosition() {
-            try {
-                const { error } = await supabaseClient
-                    .from('bus_positions')
-                    .insert([{
-                        etape: 'position',
-                        latitude: lastPos.lat,
-                        longitude: lastPos.lng,
-                        message: 'Mise à jour position'
-                    }]);
-                
-                if (error) {
-                    // Gestion spécifique de l'erreur 409 (conflit)
-                    if (error.code === '23505' || error.status === 409) {
-                        console.log("Conflit d'insertion ignoré (c'est normal pour les tests)");
-                    } else {
-                        console.warn("Erreur envoi position:", error.message);
+        function envoyerPosition() {
+            // Version SANS await et SANS catch pour éviter l'erreur
+            supabaseClient
+                .from('bus_positions')
+                .insert([{
+                    etape: 'position',
+                    latitude: lastPos.lat,
+                    longitude: lastPos.lng,
+                    message: 'Mise à jour position'
+                }])
+                .then(response => {
+                    if (response.error) {
+                        if (response.error.code === '23505' || response.error.status === 409) {
+                            console.log("Position déjà enregistrée (normal)");
+                        } else {
+                            console.warn("Erreur position:", response.error.message);
+                        }
                     }
-                }
-            } catch (e) {
-                console.warn("Exception lors de l'envoi position:", e);
-            }
+                });
         }
 
-        // === FONCTION DE MISE À JOUR DES ÉTAPES (SANS REDIRECTION WHATSAPP) ===
-        async function envoyerEtape(etape, message) {
+        // === FONCTION DE MISE À JOUR ===
+        function envoyerEtape(etape, message) {
             const now = new Date();
             const heure = now.getHours() + 'h' + (now.getMinutes()<10?'0':'') + now.getMinutes();
             const notif = `${message} (${heure})`;
             
-            // Mise à jour de l'affichage local
+            // Mise à jour locale
             document.getElementById('lastUpdate').innerHTML = 
                 `✅ ${notif}<br>📍 ${lastPos.lat.toFixed(6)}, ${lastPos.lng.toFixed(6)}`;
-            
             showMessage(`✅ ${notif}`, true);
             
-            try {
-                // Envoi à Supabase (tentative)
-                const { error } = await supabaseClient
-                    .from('bus_positions')
-                    .insert([{
-                        etape: etape,
-                        latitude: lastPos.lat,
-                        longitude: lastPos.lng,
-                        message: 'Notification:' + notif
-                    }]);
-                
-                if (error) {
-                    if (error.code === '23505' || error.status === 409) {
-                        console.log("Conflit d'insertion pour l'étape (c'est normal)");
-                        // On simule quand même la mise à jour pour les membres via localStorage
-                        sauvegarderLocalement(etape, notif, heure);
-                    } else {
-                        console.error("Erreur envoi étape:", error);
-                        sauvegarderLocalement(etape, notif, heure); // Fallback
-                    }
-                } else {
-                    console.log("✅ Étape envoyée avec succès");
-                }
-            } catch (e) {
-                console.warn("Exception:", e);
-                sauvegarderLocalement(etape, notif, heure); // Fallback
-            }
-        }
-        
-        // === FONCTION DE SECOURS : SAUVEGARDE LOCALE ===
-        function sauvegarderLocalement(etape, message, heure) {
+            // Sauvegarde locale (pour que la page membre puisse lire)
             const data = {
                 etape: etape,
-                message: message,
+                message: notif,
                 heure: heure,
                 lat: lastPos.lat,
-                lng: lastPos.lng,
-                timestamp: Date.now()
+                lng: lastPos.lng
             };
             localStorage.setItem('busData', JSON.stringify(data));
-            console.log("Données sauvegardées localement");
+            
+            // Tentative d'envoi à Supabase (version sans await)
+            supabaseClient
+                .from('bus_positions')
+                .insert([{
+                    etape: etape,
+                    latitude: lastPos.lat,
+                    longitude: lastPos.lng,
+                    message: 'Notification:' + notif
+                }])
+                .then(response => {
+                    if (response.error) {
+                        console.log("Supabase non disponible, utilisation du localStorage uniquement");
+                    }
+                });
         }
 
         // === BOUTONS ===
@@ -340,7 +301,7 @@
         document.getElementById('btnNoisy').addEventListener('click', () => envoyerEtape('noisy', '🟣 ARRIVÉE Noisy - Retour église 15min'));
         document.getElementById('btnRetour').addEventListener('click', () => envoyerEtape('retour', '🔚 RETOUR Église - Fin du trajet'));
 
-        console.log("✅ Page chauffeur prête (sans redirection WhatsApp)");
+        console.log("✅ Page chauffeur prête");
     </script>
 </body>
 </html>
