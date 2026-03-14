@@ -385,7 +385,7 @@
     </style>
 </head>
 <body>
-    <!-- En-tête avec "bus de la vie" -->
+    <!-- En-tête -->
     <div class="top-bar">
         <div class="church-name">⛪ Église Charisma</div>
         <div class="bus-de-la-vie">
@@ -446,7 +446,7 @@
             <div class="stop-icon">🏠</div>
             <div class="stop-info">
                 <div class="stop-name">Brement</div>
-                <div class="stop-address">Général de Gaulle</div>
+                <div class="stop-address">Arrêt Général de Gaulle</div>
                 <span class="stop-badge" id="badgeBrement">--</span>
             </div>
         </div>
@@ -455,7 +455,7 @@
             <div class="stop-icon">🚉</div>
             <div class="stop-info">
                 <div class="stop-name">Noisy-le-Sec</div>
-                <div class="stop-address">5 Bd de la République</div>
+                <div class="stop-address">Gare de Noisy-le-Sec</div>
                 <span class="stop-badge" id="badgeNoisy">--</span>
             </div>
         </div>
@@ -470,7 +470,7 @@
         </div>
     </div>
 
-    <!-- Bannière BON CULTE ÉGLISE -->
+    <!-- Bannière BON CULTE -->
     <div class="culte-banner">
         ⛪ BON CULTE ÉGLISE ⛪
     </div>
@@ -509,15 +509,15 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Coordonnées
+        // ===== COORDONNÉES CORRIGÉES =====
         const STOPS = {
-            eglise: [48.94525, 2.47403],
-            brement: [48.8925, 2.4568],
-            noisy: [48.8967, 2.4600],
-            retour: [48.94525, 2.47403]
+            eglise: [48.94525, 2.47403],      // Église Charisma
+            brement: [48.8925, 2.4568],        // Arrêt Brement (Général de Gaulle)
+            noisy: [48.8967, 2.4600],          // Gare de Noisy-le-Sec
+            retour: [48.94525, 2.47403]        // Retour Église
         };
 
-        // ===== TES MESSAGES PERSONNALISÉS =====
+        // ===== MESSAGES PERSONNALISÉS =====
         const MESSAGES = {
             depart: {
                 principal: "Église, réjouis-toi, le bus céleste arrive pour t'emmener à la maison de notre Père.",
@@ -540,11 +540,12 @@
         // ===== INIT CARTE =====
         const map = L.map('map').setView([48.92, 2.46], 13);
         
+        // Carte satellite
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 19
         }).addTo(map);
 
-        // Marqueurs
+        // Marqueurs avec popups
         function createMarker(emoji, pos, text) {
             L.marker(pos, {
                 icon: L.divIcon({
@@ -555,11 +556,11 @@
         }
 
         createMarker('⛪', STOPS.eglise, 'Église Charisma');
-        createMarker('🏠', STOPS.brement, 'Brement');
-        createMarker('🚉', STOPS.noisy, 'Noisy-le-Sec');
+        createMarker('🏠', STOPS.brement, 'Brement - Général de Gaulle');
+        createMarker('🚉', STOPS.noisy, 'Gare de Noisy-le-Sec');
         createMarker('⛪', STOPS.retour, 'Retour Église');
 
-        // Ligne
+        // Ligne du trajet
         L.polyline([STOPS.eglise, STOPS.brement, STOPS.noisy, STOPS.retour], {
             color: '#fbbf24',
             weight: 6,
@@ -567,7 +568,7 @@
             dashArray: '10, 15'
         }).addTo(map);
 
-        // GROS BUS
+        // GROS BUS bien visible
         const busMarker = L.marker(STOPS.eglise, {
             icon: L.divIcon({
                 html: '<div style="background:#3b82f6; width:60px; height:60px; border-radius:60px; display:flex; align-items:center; justify-content:center; font-size:35px; border:4px solid white; box-shadow:0 0 40px #3b82f6;">🚌</div>',
@@ -638,7 +639,7 @@
                     
                     msgElement.innerText = MESSAGES.noisy.principal;
                     bigIcon.innerHTML = '🚉';
-                    bigLocation.innerText = 'Arrêt Noisy';
+                    bigLocation.innerText = 'Arrêt Gare Noisy';
                     
                     document.getElementById('cardEglise').classList.add('completed');
                     document.getElementById('cardBrement').classList.add('completed');
