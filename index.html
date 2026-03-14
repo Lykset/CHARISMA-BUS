@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Charisma Bus - Suivi GPS en direct</title>
-    <!-- Leaflet CSS (pour la carte) -->
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -25,10 +27,9 @@
             margin: 0 auto;
         }
         
-        /* En-tête */
         .hero {
             background: rgba(255,255,255,0.95);
-            border-radius: 30px 30px 30px 30px;
+            border-radius: 30px;
             padding: 20px;
             margin-bottom: 15px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
@@ -57,7 +58,6 @@
             font-size: 0.95em;
         }
         
-        /* Carte */
         .map-container {
             background: white;
             border-radius: 30px;
@@ -104,7 +104,6 @@
             border-radius: 50%;
         }
         
-        /* Statut en direct */
         .live-status {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 20px;
@@ -152,7 +151,6 @@
             font-size: 0.4em;
         }
         
-        /* Timeline */
         .timeline {
             background: white;
             border-radius: 30px;
@@ -240,7 +238,6 @@
             background: #ff9800;
         }
         
-        /* Notifications */
         .notifications {
             background: white;
             border-radius: 30px;
@@ -288,10 +285,25 @@
             color: rgba(255,255,255,0.8);
             font-size: 0.8em;
         }
+        
+        .member-count {
+            background: white;
+            border-radius: 50px;
+            padding: 8px 15px;
+            display: inline-block;
+            font-size: 0.9em;
+            color: #333;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Compteur de membres -->
+        <div class="member-count" id="memberCount">
+            👥 0 personne connectée
+        </div>
+        
         <!-- En-tête -->
         <div class="hero">
             <div class="church-name">
@@ -303,7 +315,7 @@
             </div>
         </div>
         
-        <!-- Carte de géolocalisation -->
+        <!-- Carte -->
         <div class="map-container">
             <div id="map"></div>
             <div class="map-legend">
@@ -327,8 +339,8 @@
                 </div>
                 <div>🚌 Bus en circulation</div>
             </div>
-            <div class="bus-position" id="busPosition">En direction de Brement</div>
-            <div class="eta" id="eta">15 <small>min</small></div>
+            <div class="bus-position" id="busPosition">En attente du signal...</div>
+            <div class="eta" id="eta">-- <small>min</small></div>
         </div>
         
         <!-- Timeline -->
@@ -339,18 +351,18 @@
             </div>
             
             <div class="stop-item" id="stopEglise">
-                <div class="stop-icon completed">⛪</div>
+                <div class="stop-icon pending">⛪</div>
                 <div class="stop-info">
                     <div class="stop-name">Église Charisma</div>
-                    <div class="stop-time">09h30 <span class="stop-badge">DÉPART</span></div>
+                    <div class="stop-time" id="timeEglise">En attente</div>
                 </div>
             </div>
             
             <div class="stop-item" id="stopBrement">
-                <div class="stop-icon active">🏠</div>
+                <div class="stop-icon pending">🏠</div>
                 <div class="stop-info">
                     <div class="stop-name">Brement</div>
-                    <div class="stop-time">Estimé 09h45 <span class="stop-badge orange">EN COURS</span></div>
+                    <div class="stop-time" id="timeBrement">En attente</div>
                 </div>
             </div>
             
@@ -358,7 +370,7 @@
                 <div class="stop-icon pending">🏠</div>
                 <div class="stop-info">
                     <div class="stop-name">Noisy-le-Sec</div>
-                    <div class="stop-time">Estimé 10h00</div>
+                    <div class="stop-time" id="timeNoisy">En attente</div>
                 </div>
             </div>
             
@@ -366,7 +378,7 @@
                 <div class="stop-icon pending">⛪</div>
                 <div class="stop-info">
                     <div class="stop-name">Retour Église</div>
-                    <div class="stop-time">Estimé 10h30</div>
+                    <div class="stop-time" id="timeRetour">En attente</div>
                 </div>
             </div>
         </div>
@@ -379,8 +391,8 @@
             </div>
             <div id="notificationsList">
                 <div class="notif-item">
-                    <div class="notif-time">09h30</div>
-                    <div>🚌 DÉPART de l'église - Arrivée Brement dans 15 min</div>
+                    <div class="notif-time">En attente</div>
+                    <div>Le bus n'est pas encore en service</div>
                 </div>
             </div>
         </div>
@@ -393,127 +405,235 @@
     <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Coordonnées des points d'arrêt (approximatives - à ajuster)
+        // ============================================
+        // CONFIGURATION SUPABASE - À MODIFIER !
+        // ============================================
+        const SUPABASE_URL = "https://votre-projet.supabase.co";  // REMPLACEZ ICI
+        const SUPABASE_KEY = "votre-clé-anon";                    // REMPLACEZ ICI
+        
+        // Initialisation Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Coordonnées des points d'arrêt
         const STOP_COORDINATES = {
-            eglise: [48.9397, 2.4486],      // Église Charisma (Blanc-Mesnil)
-            brement: [48.9315, 2.4621],      // Brement
-            noisy: [48.8897, 2.4646],        // Noisy-le-Sec
-            retour: [48.9397, 2.4486]        // Retour Église
+            eglise: [48.9397, 2.4486],
+            brement: [48.9315, 2.4621],
+            noisy: [48.8897, 2.4646],
+            retour: [48.9397, 2.4486]
         };
         
         // Initialisation de la carte
         const map = L.map('map').setView(STOP_COORDINATES.eglise, 13);
         
-        // Ajout des tuiles OpenStreetMap (gratuit)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
         
-        // Ajout des marqueurs pour chaque arrêt
-        const stopMarkers = [];
+        // Marqueurs des arrêts
+        L.marker(STOP_COORDINATES.eglise, {
+            icon: L.divIcon({ html: '⛪', iconSize: [30, 30] })
+        }).addTo(map).bindPopup('Église Charisma');
         
-        // Marqueur Église (départ)
-        const egliseMarker = L.marker(STOP_COORDINATES.eglise, {
-            icon: L.divIcon({
-                className: 'custom-marker',
-                html: '⛪',
-                iconSize: [30, 30]
-            })
-        }).addTo(map).bindPopup('Église Charisma (Départ)');
-        stopMarkers.push(egliseMarker);
-        
-        // Marqueur Brement
-        const brementMarker = L.marker(STOP_COORDINATES.brement, {
-            icon: L.divIcon({
-                className: 'custom-marker',
-                html: '🏠',
-                iconSize: [30, 30]
-            })
+        L.marker(STOP_COORDINATES.brement, {
+            icon: L.divIcon({ html: '🏠', iconSize: [30, 30] })
         }).addTo(map).bindPopup('Brement');
-        stopMarkers.push(brementMarker);
         
-        // Marqueur Noisy
-        const noisyMarker = L.marker(STOP_COORDINATES.noisy, {
-            icon: L.divIcon({
-                className: 'custom-marker',
-                html: '🏠',
-                iconSize: [30, 30]
-            })
+        L.marker(STOP_COORDINATES.noisy, {
+            icon: L.divIcon({ html: '🏠', iconSize: [30, 30] })
         }).addTo(map).bindPopup('Noisy-le-Sec');
-        stopMarkers.push(noisyMarker);
         
-        // Marqueur Retour
-        const retourMarker = L.marker(STOP_COORDINATES.retour, {
-            icon: L.divIcon({
-                className: 'custom-marker',
-                html: '⛪',
-                iconSize: [30, 30]
-            })
+        L.marker(STOP_COORDINATES.retour, {
+            icon: L.divIcon({ html: '⛪', iconSize: [30, 30] })
         }).addTo(map).bindPopup('Retour Église');
-        stopMarkers.push(retourMarker);
         
-        // Dessiner la ligne du trajet
-        const routeLine = L.polyline([
+        // Ligne du trajet
+        L.polyline([
             STOP_COORDINATES.eglise,
             STOP_COORDINATES.brement,
             STOP_COORDINATES.noisy,
             STOP_COORDINATES.retour
-        ], {
-            color: '#667eea',
-            weight: 4,
-            opacity: 0.6,
-            dashArray: '5, 8'
-        }).addTo(map);
+        ], { color: '#667eea', weight: 4, opacity: 0.6, dashArray: '5, 8' }).addTo(map);
         
-        // Marqueur du bus (sera mis à jour)
-        const busIcon = L.divIcon({
-            className: 'bus-marker',
-            html: '🚌',
-            iconSize: [40, 40]
-        });
+        // Marqueur du bus
+        const busIcon = L.divIcon({ html: '🚌', iconSize: [40, 40] });
+        const busMarker = L.marker(STOP_COORDINATES.eglise, { icon: busIcon }).addTo(map);
         
-        const busMarker = L.marker(STOP_COORDINATES.eglise, {
-            icon: busIcon,
-            zIndexOffset: 1000
-        }).addTo(map);
-        busMarker.bindPopup('🚌 Bus en direct');
+        // ============================================
+        // COMPTEUR DE MEMBRES CONNECTÉS
+        // ============================================
+        let memberCount = 0;
+        let channel;
         
-        // Fonction pour mettre à jour la position du bus
-        function updateBusPosition(lat, lng, etape) {
-            busMarker.setLatLng([lat, lng]);
-            map.panTo([lat, lng]);
+        async function initRealtime() {
+            // Générer un ID unique pour cette session
+            const sessionId = Math.random().toString(36).substring(2, 15);
             
-            // Mise à jour du statut
-            document.getElementById('busPosition').innerText = 
-                etape === 'depart' ? 'En direction de Brement' :
-                etape === 'brement' ? 'Arrêt à Brement' :
-                etape === 'noisy' ? 'Arrêt à Noisy-le-Sec' :
-                etape === 'retour' ? 'Retour vers l\'église' : 'En attente';
+            // Envoyer un signal que quelqu'un est connecté
+            await supabase.from('bus_positions').insert([{
+                etape: 'connected',
+                latitude: 0,
+                longitude: 0,
+                message: `member_${sessionId}`
+            }]);
+            
+            // Nettoyer les anciennes connexions (plus de 10 secondes)
+            setInterval(async () => {
+                const fiveSecondsAgo = new Date(Date.now() - 10000).toISOString();
+                await supabase
+                    .from('bus_positions')
+                    .delete()
+                    .lt('timestamp', fiveSecondsAgo)
+                    .eq('etape', 'connected');
+            }, 5000);
+            
+            // Écouter les connexions
+            supabase
+                .channel('members')
+                .on('postgres_changes', 
+                    { event: 'INSERT', schema: 'public', table: 'bus_positions', filter: 'etape=eq.connected' },
+                    () => {
+                        countMembers();
+                    }
+                )
+                .subscribe();
+            
+            // Écouter les déconnexions
+            supabase
+                .channel('members_delete')
+                .on('postgres_changes', 
+                    { event: 'DELETE', schema: 'public', table: 'bus_positions' },
+                    () => {
+                        countMembers();
+                    }
+                )
+                .subscribe();
         }
         
-        // Simulation de mouvement (pour la démo - sera remplacé par les données réelles)
-        let step = 0;
-        const path = [
-            { lat: 48.9397, lng: 2.4486, etape: 'depart' },     // Départ église
-            { lat: 48.9350, lng: 2.4520, etape: 'depart' },     // En route
-            { lat: 48.9315, lng: 2.4621, etape: 'brement' },    // Brement
-            { lat: 48.9200, lng: 2.4630, etape: 'noisy' },      // Vers Noisy
-            { lat: 48.8897, lng: 2.4646, etape: 'noisy' },      // Noisy
-            { lat: 48.9000, lng: 2.4600, etape: 'retour' },     // Retour
-            { lat: 48.9397, lng: 2.4486, etape: 'retour' }      // Retour église
-        ];
+        async function countMembers() {
+            const { count } = await supabase
+                .from('bus_positions')
+                .select('*', { count: 'exact', head: true })
+                .eq('etape', 'connected');
+            
+            memberCount = count || 0;
+            document.getElementById('memberCount').innerHTML = 
+                `👥 ${memberCount} personne${memberCount > 1 ? 's' : ''} connectée${memberCount > 1 ? 's' : ''}`;
+        }
         
-        // Charger l'état sauvegardé
-        function loadState() {
-            const saved = localStorage.getItem('busState');
-            if(saved) {
-                const state = JSON.parse(saved);
-                if(state.position) {
-                    updateBusPosition(state.position.lat, state.position.lng, state.etape);
-                }
-                if(state.notification) {
-                    addNotification(state.notification.time, state.notification.message);
-                }
+        // ============================================
+        // ÉCOUTER LES MISES À JOUR DU BUS
+        // ============================================
+        function listenToBusUpdates() {
+            supabase
+                .channel('bus_updates')
+                .on('postgres_changes', 
+                    { event: 'INSERT', schema: 'public', table: 'bus_positions', filter: 'etape=neq.connected' },
+                    (payload) => {
+                        const data = payload.new;
+                        
+                        // Mettre à jour la position du bus
+                        if (data.latitude && data.longitude) {
+                            busMarker.setLatLng([data.latitude, data.longitude]);
+                            map.panTo([data.latitude, data.longitude]);
+                        }
+                        
+                        // Mettre à jour le statut
+                        updateUI(data);
+                        
+                        // Ajouter la notification
+                        if (data.message && data.message.includes('Notification:')) {
+                            addNotification(
+                                new Date(data.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+                                data.message.replace('Notification:', '')
+                            );
+                        }
+                    }
+                )
+                .subscribe();
+        }
+        
+        function updateUI(data) {
+            const heure = new Date(data.timestamp).toLocaleTimeString('fr-FR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            switch(data.etape) {
+                case 'depart':
+                    document.getElementById('busPosition').innerText = 'En direction de Brement';
+                    document.getElementById('eta').innerHTML = '15 <small>min</small>';
+                    
+                    document.getElementById('stopEglise').innerHTML = `
+                        <div class="stop-icon completed">⛪</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Église Charisma</div>
+                            <div class="stop-time">${heure} <span class="stop-badge">DÉPART</span></div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('stopBrement').innerHTML = `
+                        <div class="stop-icon active">🏠</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Brement</div>
+                            <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'brement':
+                    document.getElementById('busPosition').innerText = 'Arrêt à Brement';
+                    document.getElementById('eta').innerHTML = '10 <small>min</small>';
+                    
+                    document.getElementById('stopBrement').innerHTML = `
+                        <div class="stop-icon completed">🏠</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Brement</div>
+                            <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('stopNoisy').innerHTML = `
+                        <div class="stop-icon active">🏠</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Noisy-le-Sec</div>
+                            <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'noisy':
+                    document.getElementById('busPosition').innerText = 'Arrêt à Noisy-le-Sec';
+                    document.getElementById('eta').innerHTML = '15 <small>min</small>';
+                    
+                    document.getElementById('stopNoisy').innerHTML = `
+                        <div class="stop-icon completed">🏠</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Noisy-le-Sec</div>
+                            <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('stopRetour').innerHTML = `
+                        <div class="stop-icon active">⛪</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Retour Église</div>
+                            <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'retour':
+                    document.getElementById('busPosition').innerText = 'Retour à l\'église';
+                    document.getElementById('eta').innerHTML = '5 <small>min</small>';
+                    
+                    document.getElementById('stopRetour').innerHTML = `
+                        <div class="stop-icon completed">⛪</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Retour Église</div>
+                            <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
+                        </div>
+                    `;
+                    break;
             }
         }
         
@@ -526,6 +646,7 @@
                 <div>${message}</div>
             `;
             list.insertBefore(newNotif, list.firstChild);
+            
             while(list.children.length > 5) {
                 list.removeChild(list.lastChild);
             }
@@ -536,9 +657,10 @@
             day: 'numeric', month: 'long'
         });
         
-        // Vérifier les mises à jour toutes les 3 secondes
-        setInterval(loadState, 3000);
-        loadState();
+        // Initialisation
+        initRealtime();
+        listenToBusUpdates();
+        countMembers();
     </script>
 </body>
 </html>
