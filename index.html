@@ -406,13 +406,13 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // ============================================
-        // CONFIGURATION SUPABASE - À MODIFIER !
+        // CONFIGURATION SUPABASE
         // ============================================
-        const SUPABASE_URL = "https://pbxtdkdblpydwzldnipc.supabase.co";  // REMPLACEZ ICI https://pbxtdkdblpydwzldnipc.supabase.co
-        const SUPABASE_KEY = "sb_publishable_UGGXS_aHeX92VO44kw6DSw_9xK_MRMV";                    // REMPLACEZ ICI
+        const SUPABASE_URL = "https://pbxtdkdblpydwzldnipc.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_UGGXS_aHeX92VO44kw6DSw_9xK_MRMV";
         
-        // Initialisation Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // ⚠️ On utilise supabaseClient pour éviter les conflits
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
         // Coordonnées des points d'arrêt
         const STOP_COORDINATES = {
@@ -462,14 +462,13 @@
         // COMPTEUR DE MEMBRES CONNECTÉS
         // ============================================
         let memberCount = 0;
-        let channel;
         
         async function initRealtime() {
             // Générer un ID unique pour cette session
             const sessionId = Math.random().toString(36).substring(2, 15);
             
-            // Envoyer un signal que quelqu'un est connecté
-            await supabase.from('bus_positions').insert([{
+            // Envoyer un signal que quelqu'un est connecté (via supabaseClient)
+            await supabaseClient.from('bus_positions').insert([{
                 etape: 'connected',
                 latitude: 0,
                 longitude: 0,
@@ -478,16 +477,16 @@
             
             // Nettoyer les anciennes connexions (plus de 10 secondes)
             setInterval(async () => {
-                const fiveSecondsAgo = new Date(Date.now() - 10000).toISOString();
-                await supabase
+                const tenSecondsAgo = new Date(Date.now() - 10000).toISOString();
+                await supabaseClient
                     .from('bus_positions')
                     .delete()
-                    .lt('timestamp', fiveSecondsAgo)
+                    .lt('timestamp', tenSecondsAgo)
                     .eq('etape', 'connected');
             }, 5000);
             
             // Écouter les connexions
-            supabase
+            supabaseClient
                 .channel('members')
                 .on('postgres_changes', 
                     { event: 'INSERT', schema: 'public', table: 'bus_positions', filter: 'etape=eq.connected' },
@@ -498,7 +497,7 @@
                 .subscribe();
             
             // Écouter les déconnexions
-            supabase
+            supabaseClient
                 .channel('members_delete')
                 .on('postgres_changes', 
                     { event: 'DELETE', schema: 'public', table: 'bus_positions' },
@@ -510,7 +509,7 @@
         }
         
         async function countMembers() {
-            const { count } = await supabase
+            const { count } = await supabaseClient
                 .from('bus_positions')
                 .select('*', { count: 'exact', head: true })
                 .eq('etape', 'connected');
@@ -524,7 +523,7 @@
         // ÉCOUTER LES MISES À JOUR DU BUS
         // ============================================
         function listenToBusUpdates() {
-            supabase
+            supabaseClient
                 .channel('bus_updates')
                 .on('postgres_changes', 
                     { event: 'INSERT', schema: 'public', table: 'bus_positions', filter: 'etape=neq.connected' },
