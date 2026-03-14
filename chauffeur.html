@@ -1,81 +1,427 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conducteur - Bus Charisma</title>
-    <!-- Firebase version 8 (la plus simple pour les pages HTML) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Charisma Bus • Conducteur</title>
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        body {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            font-family: Arial, sans-serif;
-            padding: 20px;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
         }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
         .container {
             max-width: 500px;
             margin: 0 auto;
         }
-        h1 {
+
+        /* ===== EN-TÊTE CONDUCTEUR ===== */
+        .driver-header {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 25px 20px;
+            margin-bottom: 20px;
+            color: white;
             text-align: center;
-            margin-bottom: 30px;
+            border: 2px solid rgba(255,255,255,0.2);
         }
-        .status-box {
-            background: white;
-            color: #333;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
+
+        .driver-icon {
+            font-size: 4em;
+            margin-bottom: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .driver-title {
+            font-size: 2em;
             font-weight: bold;
+            margin-bottom: 5px;
         }
-        button {
-            width: 100%;
+
+        .driver-subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        /* ===== CARTE GPS SIMPLIFIÉE ===== */
+        .gps-card {
+            background: white;
+            border-radius: 40px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .gps-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .gps-status-box {
+            background: #f0f9ff;
+            border-radius: 30px;
             padding: 20px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #e0f2fe;
+        }
+
+        .gps-status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .gps-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        .gps-value {
+            font-family: monospace;
             font-size: 1.2em;
             font-weight: bold;
-            cursor: pointer;
-            color: white;
-            transition: transform 0.2s;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 40px;
+            color: #333;
         }
-        button:active {
+
+        .gps-coords-box {
+            background: #1e293b;
+            color: #4ade80;
+            padding: 15px;
+            border-radius: 20px;
+            font-family: monospace;
+            font-size: 1.1em;
+            text-align: center;
+            margin: 15px 0;
+            letter-spacing: 1px;
+        }
+
+        /* ===== BOUTONS GPS ===== */
+        .gps-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .gps-btn {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .gps-btn:active {
             transform: scale(0.95);
         }
-        .btn-depart { background: #ff9800; }
-        .btn-brement { background: #2196F3; }
-        .btn-noisy { background: #9C27B0; }
-        .btn-retour { background: #4CAF50; }
+
+        .gps-btn.start {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .gps-btn.stop {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        /* ===== BOUTONS D'ÉTAPES (TRÈS GROS) ===== */
+        .steps-section {
+            background: white;
+            border-radius: 40px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .steps-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .step-btn {
+            width: 100%;
+            padding: 30px 20px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.8em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            color: white;
+            transition: all 0.2s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+
+        .step-btn:active {
+            transform: scale(0.97);
+        }
+
+        .step-btn.depart {
+            background: linear-gradient(135deg, #FF8C42, #FF6B35);
+        }
+
+        .step-btn.brement {
+            background: linear-gradient(135deg, #4A90E2, #357ABD);
+        }
+
+        .step-btn.noisy {
+            background: linear-gradient(135deg, #9B59B6, #8E44AD);
+        }
+
+        .step-btn.retour {
+            background: linear-gradient(135deg, #2ECC71, #27AE60);
+        }
+
+        .step-btn span {
+            font-size: 2.2em;
+        }
+
+        .step-btn small {
+            font-size: 0.5em;
+            opacity: 0.9;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* ===== DERNIÈRE MISE À JOUR ===== */
+        .last-update-card {
+            background: white;
+            border-radius: 40px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 2px solid #f0f0f0;
+        }
+
+        .update-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .update-content {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .update-time {
+            color: #999;
+            font-size: 1em;
+        }
+
+        /* ===== MESSAGE DE CONFIRMATION ===== */
+        .confirm-message {
+            background: #4ade80;
+            color: #166534;
+            padding: 15px;
+            border-radius: 30px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* ===== RAPPEL DES ARRÊTS ===== */
+        .stops-reminder {
+            background: rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 20px;
+            margin-top: 20px;
+            color: white;
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.2em;
+        }
+
+        .reminder-item {
+            text-align: center;
+        }
+
+        .reminder-item span {
+            display: block;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚌 Conducteur Charisma</h1>
-        
-        <div class="status-box" id="status">
-            Prêt à démarrer
+        <!-- En-tête conducteur -->
+        <div class="driver-header">
+            <div class="driver-icon">🚌</div>
+            <div class="driver-title">Conducteur</div>
+            <div class="driver-subtitle">Église Charisma • Blanc-Mesnil</div>
         </div>
-        
-        <button class="btn-depart" onclick="sendUpdate('depart', '🚌 DÉPART Église')">
-            DÉPART Église
-        </button>
-        <button class="btn-brement" onclick="sendUpdate('brement', '✅ ARRIVÉE Brement')">
-            ARRIVÉE Brement
-        </button>
-        <button class="btn-noisy" onclick="sendUpdate('noisy', '🟣 ARRIVÉE Noisy')">
-            ARRIVÉE Noisy
-        </button>
-        <button class="btn-retour" onclick="sendUpdate('retour', '🔚 RETOUR Église')">
-            RETOUR Église
-        </button>
+
+        <!-- Message de confirmation (apparaît quand on clique) -->
+        <div class="confirm-message" id="confirmMessage">
+            ✅ Message envoyé aux membres !
+        </div>
+
+        <!-- Carte GPS simplifiée -->
+        <div class="gps-card">
+            <div class="gps-title">
+                <span>📍</span> Ma position
+            </div>
+            
+            <div class="gps-status-box">
+                <div class="gps-status-row">
+                    <div class="gps-label">
+                        <span>🛰️</span> GPS
+                    </div>
+                    <div class="gps-value" id="gpsStatus">Inactif</div>
+                </div>
+                
+                <div class="gps-coords-box" id="gpsCoords">
+                    📡 En attente du signal...
+                </div>
+                
+                <div class="gps-buttons">
+                    <button class="gps-btn start" id="startGpsBtn">
+                        <span>▶️</span> Démarrer
+                    </button>
+                    <button class="gps-btn stop" id="stopGpsBtn" style="display: none;">
+                        <span>⏹️</span> Arrêter
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Boutons d'étapes (TRÈS GROS) -->
+        <div class="steps-section">
+            <div class="steps-title">
+                <span>🎮</span> Contrôle du trajet
+            </div>
+
+            <button class="step-btn depart" id="btnDepart">
+                <span>⛪</span>
+                DÉPART Église
+                <small>Je quitte l'église</small>
+            </button>
+
+            <button class="step-btn brement" id="btnBrement">
+                <span>🏠</span>
+                ARRIVÉE Brement
+                <small>Je suis à Brement</small>
+            </button>
+
+            <button class="step-btn noisy" id="btnNoisy">
+                <span>🚉</span>
+                ARRIVÉE Noisy
+                <small>Je suis à la gare</small>
+            </button>
+
+            <button class="step-btn retour" id="btnRetour">
+                <span>⛪</span>
+                RETOUR Église
+                <small>Je rentre à l'église</small>
+            </button>
+        </div>
+
+        <!-- Dernière mise à jour -->
+        <div class="last-update-card" id="lastUpdateCard">
+            <div class="update-title">
+                <span>⏱️</span> Dernière action
+            </div>
+            <div class="update-content" id="lastUpdateMessage">
+                Aucune action pour l'instant
+            </div>
+            <div class="update-time" id="lastUpdateTime">
+                --
+            </div>
+        </div>
+
+        <!-- Rappel des arrêts (visuel) -->
+        <div class="stops-reminder">
+            <div class="reminder-item">
+                <span>⛪</span>
+                1
+            </div>
+            <div class="reminder-item">
+                <span>→</span>
+            </div>
+            <div class="reminder-item">
+                <span>🏠</span>
+                2
+            </div>
+            <div class="reminder-item">
+                <span>→</span>
+            </div>
+            <div class="reminder-item">
+                <span>🚉</span>
+                3
+            </div>
+            <div class="reminder-item">
+                <span>→</span>
+            </div>
+            <div class="reminder-item">
+                <span>⛪</span>
+                4
+            </div>
+        </div>
     </div>
 
     <script>
-        // === TA CONFIGURATION FIREBASE ===
+        // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyC4sWMc3fNaMpZ9cD8ahQdMJn6BjRyJDzk",
             authDomain: "charisma-bus.firebaseapp.com",
@@ -86,31 +432,158 @@
             appId: "1:630450080183:web:c204b463f63b12a8d30032"
         };
 
-        // Initialiser Firebase (version 8)
+        // Initialiser Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        function sendUpdate(etape, message) {
-            const now = new Date();
-            const time = now.getHours() + ':' + 
-                        (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+        // ===== VARIABLES GPS =====
+        let watchId = null;
+        let dernierePosition = { lat: 48.94525, lng: 2.47403 }; // Église par défaut
+
+        // ===== FONCTIONS GPS =====
+        function demarrerGPS() {
+            if (!navigator.geolocation) {
+                alert("📡 GPS non disponible sur cet appareil");
+                return;
+            }
+
+            document.getElementById('gpsStatus').innerText = 'Recherche...';
             
-            // Créer l'objet à envoyer
+            watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    dernierePosition = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    // Mise à jour de l'affichage
+                    document.getElementById('gpsCoords').innerHTML = 
+                        `Lat: ${dernierePosition.lat.toFixed(6)}<br>Lng: ${dernierePosition.lng.toFixed(6)}`;
+                    document.getElementById('gpsStatus').innerHTML = '<span style="color:#4CAF50;">● Actif</span>';
+                    
+                    // Changer les boutons
+                    document.getElementById('startGpsBtn').style.display = 'none';
+                    document.getElementById('stopGpsBtn').style.display = 'block';
+                },
+                (error) => {
+                    let message = "Erreur GPS : ";
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            message += "Autorisation refusée";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message += "Position indisponible";
+                            break;
+                        case error.TIMEOUT:
+                            message += "Délai dépassé";
+                            break;
+                    }
+                    alert(message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        function arreterGPS() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            
+            document.getElementById('gpsStatus').innerText = 'Inactif';
+            document.getElementById('gpsCoords').innerHTML = '📡 GPS arrêté';
+            document.getElementById('startGpsBtn').style.display = 'block';
+            document.getElementById('stopGpsBtn').style.display = 'none';
+        }
+
+        // ===== FONCTION POUR ENVOYER UNE MISE À JOUR =====
+        async function envoyerMAJ(etape, messageCourt, messageLong) {
+            if (!dernierePosition) {
+                alert("📡 Activez d'abord le GPS !");
+                return;
+            }
+
+            const now = new Date();
+            const heure = now.getHours() + ':' + 
+                        (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+
+            // Préparer les données pour Firebase
             const data = {
                 etape: etape,
-                message: message,
-                time: time
+                message: messageCourt,
+                messageLong: messageLong,
+                time: heure,
+                lat: dernierePosition.lat,
+                lng: dernierePosition.lng
             };
-            
-            // Envoyer à Firebase
-            database.ref('bus-status').set(data);
-            
-            // Mettre à jour l'affichage
-            document.getElementById('status').innerHTML = 
-                `✅ ${message}<br><small>${time}</small>`;
-            
-            console.log('Message envoyé:', message);
+
+            try {
+                // Envoyer à Firebase
+                await database.ref('bus-status').set(data);
+                
+                // Afficher le message de confirmation
+                const confirmMsg = document.getElementById('confirmMessage');
+                confirmMsg.style.display = 'block';
+                setTimeout(() => {
+                    confirmMsg.style.display = 'none';
+                }, 2000);
+
+                // Mettre à jour la carte "dernière action"
+                document.getElementById('lastUpdateMessage').innerText = messageCourt;
+                document.getElementById('lastUpdateTime').innerText = heure;
+
+                console.log('✅ Message envoyé:', messageCourt);
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('❌ Erreur de connexion. Réessaie !');
+            }
         }
+
+        // ===== BOUTONS =====
+        document.getElementById('startGpsBtn').addEventListener('click', demarrerGPS);
+        document.getElementById('stopGpsBtn').addEventListener('click', arreterGPS);
+
+        // Bouton DÉPART Église
+        document.getElementById('btnDepart').addEventListener('click', () => {
+            envoyerMAJ(
+                'depart',
+                '🚌 DÉPART Église',
+                'Église, réjouis-toi, le bus céleste arrive ! 🙏'
+            );
+        });
+
+        // Bouton ARRIVÉE Brement
+        document.getElementById('btnBrement').addEventListener('click', () => {
+            envoyerMAJ(
+                'brement',
+                '✅ ARRIVÉE Brement',
+                'Noisy-LE-FEUX, on arrive ! 🔥'
+            );
+        });
+
+        // Bouton ARRIVÉE Noisy
+        document.getElementById('btnNoisy').addEventListener('click', () => {
+            envoyerMAJ(
+                'noisy',
+                '🟣 ARRIVÉE Noisy',
+                'C'est partie ! 🎉'
+            );
+        });
+
+        // Bouton RETOUR Église
+        document.getElementById('btnRetour').addEventListener('click', () => {
+            envoyerMAJ(
+                'retour',
+                '🔚 RETOUR Église',
+                'Merci d\'avoir voyagé ! ❤️'
+            );
+        });
+
+        console.log('✅ Page conducteur prête !');
     </script>
 </body>
 </html>
