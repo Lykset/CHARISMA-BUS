@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Charisma Bus • En direct</title>
+    <title>Charisma Bus • Live Tracker</title>
     <!-- Leaflet pour la carte -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Firebase -->
@@ -14,86 +14,117 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         body {
-            background: #f8fafc;
+            background: #f1f5f9;
             min-height: 100vh;
         }
 
-        /* En-tête avec dégradé */
-        .hero-header {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
-            padding: 30px 20px 40px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-header::before {
-            content: "🚌";
-            position: absolute;
-            right: -20px;
-            bottom: -20px;
-            font-size: 120px;
-            opacity: 0.1;
-            transform: rotate(-10deg);
-        }
-
-        .church-name {
-            font-size: 2em;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin-bottom: 5px;
-            position: relative;
-        }
-
-        .church-address {
-            font-size: 0.9em;
-            opacity: 0.8;
-            margin-bottom: 15px;
-        }
-
-        .route-tag {
-            background: rgba(255,255,255,0.15);
-            padding: 8px 16px;
-            border-radius: 100px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9em;
-            backdrop-filter: blur(5px);
-        }
-
-        /* Carte */
-        .map-container {
-            margin: -25px 15px 20px;
+        /* Header moderne avec glassmorphism */
+        .header {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            padding: 28px 24px 32px;
+            border-bottom-left-radius: 32px;
+            border-bottom-right-radius: 32px;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
             position: relative;
             z-index: 10;
         }
 
+        .church-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef2ff;
+            padding: 8px 16px;
+            border-radius: 40px;
+            margin-bottom: 16px;
+            color: #4f46e5;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .church-name {
+            font-size: 2.2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+        }
+
+        .church-address {
+            color: #64748b;
+            font-size: 0.95em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .route-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .route-stops {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            padding: 10px 18px;
+            border-radius: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            border: 1px solid #e2e8f0;
+        }
+
+        .stop-dot {
+            width: 6px;
+            height: 6px;
+            background: #94a3b8;
+            border-radius: 50%;
+        }
+
+        .stop-dot.active {
+            background: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.2);
+        }
+
+        /* Carte */
+        .map-wrapper {
+            padding: 0 20px;
+            margin-top: -20px;
+            position: relative;
+            z-index: 20;
+        }
+
         #map {
-            height: 380px;
+            height: 320px;
             border-radius: 28px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.2);
             border: 4px solid white;
         }
 
         .map-legend {
             position: absolute;
-            bottom: 15px;
-            right: 15px;
+            bottom: 20px;
+            right: 35px;
             background: white;
             padding: 10px 18px;
-            border-radius: 50px;
+            border-radius: 60px;
             display: flex;
             gap: 20px;
             font-size: 0.85em;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-            z-index: 1000;
             font-weight: 500;
-            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border: 1px solid #f1f5f9;
+            backdrop-filter: blur(8px);
+            z-index: 100;
         }
 
         .legend-item {
@@ -105,11 +136,11 @@
         .legend-dot.bus {
             width: 12px;
             height: 12px;
-            background: #3b82f6;
+            background: #4f46e5;
             border-radius: 50%;
             border: 2px solid white;
-            box-shadow: 0 0 0 2px #3b82f6;
-            animation: pulse-blue 1.5s infinite;
+            box-shadow: 0 0 0 2px #4f46e5;
+            animation: pulse 1.5s infinite;
         }
 
         .legend-dot.stop {
@@ -120,149 +151,191 @@
             border: 2px solid white;
         }
 
-        @keyframes pulse-blue {
-            0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.7); }
-            50% { box-shadow: 0 0 0 8px rgba(59,130,246,0); }
-            100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(79,70,229,0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(79,70,229,0); }
+            100% { box-shadow: 0 0 0 0 rgba(79,70,229,0); }
         }
 
-        /* Message inspirant */
-        .message-card {
+        /* Live status card */
+        .live-card {
             background: white;
+            margin: 24px 20px;
+            padding: 24px;
             border-radius: 28px;
-            margin: 15px 15px 20px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.03);
+            box-shadow: 0 15px 35px -10px rgba(0,0,0,0.05);
+            border: 1px solid #e9eef2;
+        }
+
+        .live-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .live-badge {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .live-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: #dc2626;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .time-display {
+            color: #64748b;
+            font-size: 0.9em;
+            font-weight: 500;
         }
 
         .inspirational-message {
-            font-size: 1.4em;
+            font-size: 1.5em;
             font-weight: 600;
-            color: #1e293b;
             line-height: 1.4;
-            margin-bottom: 15px;
+            color: #0f172a;
+            margin-bottom: 20px;
+            padding: 16px 0;
+            border-bottom: 2px solid #f1f5f9;
             font-style: italic;
+            quotes: "«" "»";
         }
 
-        .message-time {
-            color: #64748b;
-            font-size: 0.9em;
+        .inspirational-message::before {
+            content: "«";
+            color: #4f46e5;
+            font-size: 1.2em;
+            margin-right: 4px;
+            opacity: 0.5;
+        }
+
+        .inspirational-message::after {
+            content: "»";
+            color: #4f46e5;
+            font-size: 1.2em;
+            margin-left: 4px;
+            opacity: 0.5;
+        }
+
+        .eta-info {
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            background: #f8fafc;
+            padding: 16px 20px;
+            border-radius: 20px;
         }
 
-        .live-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: #eef2ff;
-            padding: 4px 12px;
-            border-radius: 50px;
-            color: #3b82f6;
+        .eta-label {
+            color: #475569;
             font-weight: 500;
-            font-size: 0.8em;
         }
 
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: #3b82f6;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
+        .eta-value {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #4f46e5;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        /* Points d'arrêt */
+        /* Stops timeline */
         .stops-section {
             background: white;
+            margin: 20px;
+            padding: 24px;
             border-radius: 28px;
-            margin: 15px 15px 20px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-shadow: 0 15px 35px -10px rgba(0,0,0,0.05);
         }
 
         .section-title {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            color: #0f172a;
+            font-weight: 600;
+            margin-bottom: 24px;
+            font-size: 1.1em;
         }
 
-        .stop-cards {
+        .stops-timeline {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
 
-        .stop-card {
+        .stop-timeline-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px;
+            gap: 16px;
+            padding: 16px;
             background: #f8fafc;
             border-radius: 20px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             border: 2px solid transparent;
         }
 
-        .stop-card.completed {
+        .stop-timeline-item.completed {
             background: #f0fdf4;
             border-color: #86efac;
         }
 
-        .stop-card.active {
+        .stop-timeline-item.active {
             background: #fff7ed;
             border-color: #fed7aa;
-            animation: glow 1.5s infinite;
+            animation: borderPulse 1.5s infinite;
         }
 
-        @keyframes glow {
-            0% { border-color: #fed7aa; }
+        @keyframes borderPulse {
+            0%,100% { border-color: #fed7aa; }
             50% { border-color: #f97316; }
-            100% { border-color: #fed7aa; }
         }
 
         .stop-icon {
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             background: white;
-            border-radius: 50px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5em;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            font-size: 1.4em;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
         }
 
-        .stop-card.completed .stop-icon {
+        .stop-timeline-item.completed .stop-icon {
             background: #86efac;
             color: #166534;
         }
 
-        .stop-card.active .stop-icon {
+        .stop-timeline-item.active .stop-icon {
             background: #fed7aa;
             color: #9a3412;
         }
 
-        .stop-details {
+        .stop-info {
             flex: 1;
         }
 
         .stop-name {
             font-weight: 700;
-            color: #1e293b;
+            color: #0f172a;
             margin-bottom: 4px;
-            font-size: 1.1em;
+            font-size: 1.05em;
         }
 
         .stop-address {
@@ -271,19 +344,19 @@
         }
 
         .stop-status {
-            font-size: 0.8em;
-            padding: 4px 12px;
-            border-radius: 50px;
+            font-size: 0.85em;
+            padding: 6px 16px;
+            border-radius: 40px;
             background: white;
             font-weight: 600;
         }
 
-        .stop-card.completed .stop-status {
+        .stop-timeline-item.completed .stop-status {
             background: #86efac;
             color: #166534;
         }
 
-        .stop-card.active .stop-status {
+        .stop-timeline-item.active .stop-status {
             background: #fed7aa;
             color: #9a3412;
         }
@@ -291,85 +364,123 @@
         /* Notifications */
         .notifications-section {
             background: white;
+            margin: 20px;
+            padding: 24px;
             border-radius: 28px;
-            margin: 15px 15px 20px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-shadow: 0 15px 35px -10px rgba(0,0,0,0.05);
         }
 
-        .notif-list {
-            margin-top: 15px;
+        .notifications-list {
+            margin-top: 16px;
         }
 
-        .notif-item {
+        .notification-item {
             background: #f8fafc;
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-left: 4px solid #3b82f6;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 5px solid #4f46e5;
+            transition: all 0.2s;
         }
 
-        .notif-time {
+        .notification-time {
             color: #64748b;
             font-size: 0.8em;
-            margin-bottom: 5px;
-        }
-
-        .notif-message {
-            color: #1e293b;
+            margin-bottom: 6px;
             font-weight: 500;
-            font-size: 1em;
+        }
+
+        .notification-message {
+            color: #0f172a;
+            font-weight: 500;
             line-height: 1.5;
+            font-size: 0.95em;
         }
 
-        .notif-message i {
+        .notification-message i {
             font-style: italic;
-            color: #3b82f6;
+            color: #4f46e5;
         }
 
+        /* Footer */
         .footer {
             text-align: center;
-            margin: 20px 15px 30px;
+            margin: 30px 20px 24px;
             color: #94a3b8;
             font-size: 0.85em;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <!-- En-tête -->
-    <div class="hero-header">
-        <div class="church-name">⛪ Église Charisma</div>
-        <div class="church-address">7 Rue Isaac Newton, Le Blanc-Mesnil</div>
-        <div class="route-tag">
-            <span>🚌</span> Église → Brement → Noisy-le-Sec → Retour
+    <!-- Header -->
+    <div class="header">
+        <div class="church-badge">
+            <span>⛪</span> Église Charisma
+        </div>
+        <h1 class="church-name">Suivez la navette</h1>
+        <div class="church-address">
+            <span>📍</span> 7 Rue Isaac Newton, Blanc-Mesnil
+        </div>
+        <div class="route-info">
+            <div class="route-stops">
+                <span>🚌</span>
+                <span>Église</span>
+                <span class="stop-dot"></span>
+                <span>Brement</span>
+                <span class="stop-dot"></span>
+                <span>Noisy</span>
+                <span class="stop-dot"></span>
+                <span>Retour</span>
+            </div>
         </div>
     </div>
 
     <!-- Carte -->
-    <div class="map-container">
+    <div class="map-wrapper">
         <div id="map"></div>
         <div class="map-legend">
             <div class="legend-item">
                 <span class="legend-dot bus"></span>
-                <span>Bus en direct</span>
+                <span>Bus</span>
             </div>
             <div class="legend-item">
                 <span class="legend-dot stop"></span>
-                <span>Points d'arrêt</span>
+                <span>Arrêts</span>
             </div>
         </div>
     </div>
 
-    <!-- Message inspirant -->
-    <div class="message-card" id="messageCard">
+    <!-- Live Card -->
+    <div class="live-card" id="liveCard">
+        <div class="live-header">
+            <div class="live-badge">
+                <span class="dot"></span>
+                EN DIRECT
+            </div>
+            <div class="time-display" id="currentTime">--:--</div>
+        </div>
+        
         <div class="inspirational-message" id="inspirationalMessage">
             Le bus céleste se prépare à partir...
         </div>
-        <div class="message-time">
-            <span class="live-indicator">
-                <span class="live-dot"></span> EN DIRECT
-            </span>
-            <span id="currentTime"></span>
+
+        <div class="eta-info">
+            <span class="eta-label">Arrivée estimée</span>
+            <span class="eta-value" id="etaTime">-- min</span>
         </div>
     </div>
 
@@ -378,41 +489,41 @@
         <div class="section-title">
             <span>📍</span> Points d'arrêt
         </div>
-        <div class="stop-cards" id="stopCards">
+        <div class="stops-timeline" id="stopsTimeline">
             <!-- Église -->
-            <div class="stop-card" id="cardEglise">
+            <div class="stop-timeline-item" id="stopEglise">
                 <div class="stop-icon">⛪</div>
-                <div class="stop-details">
+                <div class="stop-info">
                     <div class="stop-name">Église Charisma</div>
                     <div class="stop-address">7 Rue Isaac Newton, Blanc-Mesnil</div>
                 </div>
                 <div class="stop-status" id="statusEglise">--</div>
             </div>
 
-            <!-- Brement (Général de Gaulle) -->
-            <div class="stop-card" id="cardBrement">
+            <!-- Brement -->
+            <div class="stop-timeline-item" id="stopBrement">
                 <div class="stop-icon">🏠</div>
-                <div class="stop-details">
+                <div class="stop-info">
                     <div class="stop-name">Brement - Général de Gaulle</div>
                     <div class="stop-address">Arrêt de bus, Noisy-le-Sec</div>
                 </div>
                 <div class="stop-status" id="statusBrement">--</div>
             </div>
 
-            <!-- Noisy-le-Sec -->
-            <div class="stop-card" id="cardNoisy">
+            <!-- Noisy -->
+            <div class="stop-timeline-item" id="stopNoisy">
                 <div class="stop-icon">🚉</div>
-                <div class="stop-details">
+                <div class="stop-info">
                     <div class="stop-name">Noisy-le-Sec</div>
-                    <div class="stop-address">5 Bd de la République, Noisy-le-Sec</div>
+                    <div class="stop-address">5 Bd de la République</div>
                 </div>
                 <div class="stop-status" id="statusNoisy">--</div>
             </div>
 
             <!-- Retour -->
-            <div class="stop-card" id="cardRetour">
+            <div class="stop-timeline-item" id="stopRetour">
                 <div class="stop-icon">⛪</div>
-                <div class="stop-details">
+                <div class="stop-info">
                     <div class="stop-name">Retour Église</div>
                     <div class="stop-address">7 Rue Isaac Newton, Blanc-Mesnil</div>
                 </div>
@@ -426,17 +537,17 @@
         <div class="section-title">
             <span>🔔</span> Dernières nouvelles
         </div>
-        <div class="notif-list" id="notificationsList">
-            <div class="notif-item">
-                <div class="notif-time">--</div>
-                <div class="notif-message">En attente du départ...</div>
+        <div class="notifications-list" id="notificationsList">
+            <div class="notification-item">
+                <div class="notification-time">--:--</div>
+                <div class="notification-message">En attente du départ...</div>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
     <div class="footer">
-        Charisma Bus Tracker • Béni soit ce voyage
+        ✝️ Charisma Bus Tracker • Que la paix soit avec vous
     </div>
 
     <!-- Leaflet -->
@@ -457,141 +568,135 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // ============================================
-        // COORDONNÉES PRÉCISES
-        // ============================================
+        // Coordonnées précises
         const STOP_COORDINATES = {
             eglise: [48.94525, 2.47403],      // 7 Rue Isaac Newton
-            brement: [48.8934, 2.4587],        // Arrêt Général de Gaulle (approximatif)
+            brement: [48.8889, 2.4556],        // Rue de Brément
             noisy: [48.8912, 2.4523],          // 5 Bd de la République
-            retour: [48.94525, 2.47403]        // Retour Église
+            retour: [48.94525, 2.47403]        // Retour
         };
 
-        // ============================================
-        // MESSAGES INSPIRANTS
-        // ============================================
+        // Messages inspirants
         const messages = {
-            depart: {
-                principal: "Église, réjouis-toi, le bus céleste arrive pour t'emmener à la maison de notre Père.",
-                court: "🚌 DÉPART Église"
-            },
-            brement: {
-                principal: "Noisy-LE-FEUX, on arrive ! La joie du Seigneur est notre force.",
-                court: "✅ ARRIVÉE Brement"
-            },
-            noisy: {
-                principal: "Noisy-le-Sec, c'est partie ! Que la paix du Christ vous accompagne.",
-                court: "🟣 ARRIVÉE Noisy"
-            },
-            retour: {
-                principal: "Retour à la maison, le voyage fut béni ! Rendez-vous au prochain trajet.",
-                court: "🔚 RETOUR Église"
-            }
+            depart: "Église, réjouis-toi, le bus céleste arrive pour t'emmener à la maison de notre Père.",
+            brement: "Noisy-LE-FEUX, on arrive ! La joie du Seigneur est notre force.",
+            noisy: "Noisy-le-Sec, c'est partie ! Que la paix du Christ vous accompagne.",
+            retour: "Retour à la maison, le voyage fut béni ! Rendez-vous au prochain trajet."
         };
 
-        // ============================================
-        // INITIALISATION CARTE (avec vue satellite)
-        // ============================================
+        // Initialisation carte avec vue satellite
         const map = L.map('map').setView([48.92, 2.46], 13);
         
-        // Carte satellite ESRI (plus récente et plus claire)
+        // Carte satellite ESRI
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: '© Esri',
+            attribution: '',
             maxZoom: 19
         }).addTo(map);
 
-        // Ajout des noms de rues par-dessus (optionnel)
+        // Labels
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
-            attribution: '©OpenStreetMap',
+            attribution: '',
             transparent: true
         }).addTo(map);
 
-        // ============================================
-        // MARQUEURS STYLISÉS
-        // ============================================
-        
-        // Église
-        L.marker(STOP_COORDINATES.eglise, {
-            icon: L.divIcon({
-                html: '<div style="background:white; width:36px; height:36px; border-radius:36px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 5px 15px rgba(0,0,0,0.2); border:2px solid white;">⛪</div>',
-                className: '',
-                iconSize: [36, 36]
-            })
-        }).addTo(map).bindPopup('<b>Église Charisma</b><br>7 Rue Isaac Newton');
+        // Marqueurs élégants
+        const markers = {
+            eglise: L.marker(STOP_COORDINATES.eglise, {
+                icon: L.divIcon({
+                    html: '<div style="background:white; width:38px; height:38px; border-radius:38px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 8px 20px rgba(0,0,0,0.15); border:3px solid white;">⛪</div>',
+                    className: '',
+                    iconSize: [38, 38]
+                })
+            }).addTo(map).bindPopup('<b>Église Charisma</b><br>7 Rue Isaac Newton'),
 
-        // Brement
-        L.marker(STOP_COORDINATES.brement, {
-            icon: L.divIcon({
-                html: '<div style="background:white; width:36px; height:36px; border-radius:36px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 5px 15px rgba(0,0,0,0.2); border:2px solid white;">🏠</div>',
-                className: '',
-                iconSize: [36, 36]
-            })
-        }).addTo(map).bindPopup('<b>Brement</b><br>Arrêt Général de Gaulle');
+            brement: L.marker(STOP_COORDINATES.brement, {
+                icon: L.divIcon({
+                    html: '<div style="background:white; width:38px; height:38px; border-radius:38px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 8px 20px rgba(0,0,0,0.15); border:3px solid white;">🏠</div>',
+                    className: '',
+                    iconSize: [38, 38]
+                })
+            }).addTo(map).bindPopup('<b>Brement</b><br>Rue de Brément'),
 
-        // Noisy
-        L.marker(STOP_COORDINATES.noisy, {
-            icon: L.divIcon({
-                html: '<div style="background:white; width:36px; height:36px; border-radius:36px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 5px 15px rgba(0,0,0,0.2); border:2px solid white;">🚉</div>',
-                className: '',
-                iconSize: [36, 36]
-            })
-        }).addTo(map).bindPopup('<b>Noisy-le-Sec</b><br>5 Bd de la République');
+            noisy: L.marker(STOP_COORDINATES.noisy, {
+                icon: L.divIcon({
+                    html: '<div style="background:white; width:38px; height:38px; border-radius:38px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 8px 20px rgba(0,0,0,0.15); border:3px solid white;">🚉</div>',
+                    className: '',
+                    iconSize: [38, 38]
+                })
+            }).addTo(map).bindPopup('<b>Noisy-le-Sec</b><br>5 Bd de la République'),
 
-        // Retour
-        L.marker(STOP_COORDINATES.retour, {
-            icon: L.divIcon({
-                html: '<div style="background:white; width:36px; height:36px; border-radius:36px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 5px 15px rgba(0,0,0,0.2); border:2px solid white;">⛪</div>',
-                className: '',
-                iconSize: [36, 36]
-            })
-        }).addTo(map).bindPopup('<b>Retour Église</b>');
+            retour: L.marker(STOP_COORDINATES.retour, {
+                icon: L.divIcon({
+                    html: '<div style="background:white; width:38px; height:38px; border-radius:38px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 8px 20px rgba(0,0,0,0.15); border:3px solid white;">⛪</div>',
+                    className: '',
+                    iconSize: [38, 38]
+                })
+            }).addTo(map).bindPopup('<b>Retour Église</b>')
+        };
 
-        // Ligne du trajet
+        // Ligne de trajet
         L.polyline([
             STOP_COORDINATES.eglise,
             STOP_COORDINATES.brement,
             STOP_COORDINATES.noisy,
             STOP_COORDINATES.retour
         ], { 
-            color: '#3b82f6', 
+            color: '#4f46e5', 
             weight: 5, 
             opacity: 0.8,
             dashArray: '8, 12'
         }).addTo(map);
 
-        // Marqueur du bus
+        // Bus marker
         const busMarker = L.marker(STOP_COORDINATES.eglise, {
             icon: L.divIcon({
-                html: '<div style="background:#3b82f6; width:44px; height:44px; border-radius:44px; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 5px 20px rgba(59,130,246,0.5); border:3px solid white; animation:pulse-blue 1.5s infinite;">🚌</div>',
+                html: '<div style="background:#4f46e5; width:48px; height:48px; border-radius:48px; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 8px 25px rgba(79,70,229,0.5); border:4px solid white;">🚌</div>',
                 className: '',
-                iconSize: [44, 44]
+                iconSize: [48, 48]
             })
         }).addTo(map);
 
-        // ============================================
-        // MISE À JOUR DE L'AFFICHAGE
-        // ============================================
+        // Mise à jour du temps
+        function updateTime() {
+            const now = new Date();
+            const time = now.getHours() + ':' + 
+                        (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+            document.getElementById('currentTime').innerText = time;
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // Mise à jour de l'affichage
         function updateDisplay(data) {
             if (!data) return;
 
             const etape = data.etape;
             const heure = data.time;
 
-            // Réinitialiser toutes les cartes
-            document.querySelectorAll('.stop-card').forEach(el => {
+            // Reset
+            document.querySelectorAll('.stop-timeline-item').forEach(el => {
                 el.classList.remove('completed', 'active');
             });
 
-            // Mise à jour selon l'étape
+            // ETA
+            const etaMap = {
+                depart: '15 min',
+                brement: '10 min',
+                noisy: '15 min',
+                retour: '5 min'
+            };
+            document.getElementById('etaTime').innerText = etaMap[etape] || '-- min';
+
+            // Message inspirant
+            document.getElementById('inspirationalMessage').innerText = messages[etape] || messages.depart;
+
             switch(etape) {
                 case 'depart':
                     busMarker.setLatLng(STOP_COORDINATES.eglise);
                     map.panTo(STOP_COORDINATES.eglise);
                     
-                    document.getElementById('inspirationalMessage').innerText = messages.depart.principal;
-                    
-                    document.getElementById('cardEglise').classList.add('completed');
-                    document.getElementById('cardBrement').classList.add('active');
+                    document.getElementById('stopEglise').classList.add('completed');
+                    document.getElementById('stopBrement').classList.add('active');
                     
                     document.getElementById('statusEglise').innerText = 'DÉPART';
                     document.getElementById('statusBrement').innerText = 'EN COURS';
@@ -603,11 +708,9 @@
                     busMarker.setLatLng(STOP_COORDINATES.brement);
                     map.panTo(STOP_COORDINATES.brement);
                     
-                    document.getElementById('inspirationalMessage').innerText = messages.brement.principal;
-                    
-                    document.getElementById('cardEglise').classList.add('completed');
-                    document.getElementById('cardBrement').classList.add('completed');
-                    document.getElementById('cardNoisy').classList.add('active');
+                    document.getElementById('stopEglise').classList.add('completed');
+                    document.getElementById('stopBrement').classList.add('completed');
+                    document.getElementById('stopNoisy').classList.add('active');
                     
                     document.getElementById('statusEglise').innerText = 'DÉPART';
                     document.getElementById('statusBrement').innerText = 'ARRIVÉ';
@@ -619,12 +722,10 @@
                     busMarker.setLatLng(STOP_COORDINATES.noisy);
                     map.panTo(STOP_COORDINATES.noisy);
                     
-                    document.getElementById('inspirationalMessage').innerText = messages.noisy.principal;
-                    
-                    document.getElementById('cardEglise').classList.add('completed');
-                    document.getElementById('cardBrement').classList.add('completed');
-                    document.getElementById('cardNoisy').classList.add('completed');
-                    document.getElementById('cardRetour').classList.add('active');
+                    document.getElementById('stopEglise').classList.add('completed');
+                    document.getElementById('stopBrement').classList.add('completed');
+                    document.getElementById('stopNoisy').classList.add('completed');
+                    document.getElementById('stopRetour').classList.add('active');
                     
                     document.getElementById('statusEglise').innerText = 'DÉPART';
                     document.getElementById('statusBrement').innerText = 'ARRIVÉ';
@@ -636,9 +737,7 @@
                     busMarker.setLatLng(STOP_COORDINATES.retour);
                     map.panTo(STOP_COORDINATES.retour);
                     
-                    document.getElementById('inspirationalMessage').innerText = messages.retour.principal;
-                    
-                    document.querySelectorAll('.stop-card').forEach(el => {
+                    document.querySelectorAll('.stop-timeline-item').forEach(el => {
                         el.classList.add('completed');
                     });
                     
@@ -650,50 +749,27 @@
             }
 
             // Ajouter notification
-            let notifMessage = "";
-            switch(etape) {
-                case 'depart': notifMessage = messages.depart.principal; break;
-                case 'brement': notifMessage = messages.brement.principal; break;
-                case 'noisy': notifMessage = messages.noisy.principal; break;
-                case 'retour': notifMessage = messages.retour.principal; break;
-            }
-
             const list = document.getElementById('notificationsList');
             const newNotif = document.createElement('div');
-            newNotif.className = 'notif-item';
+            newNotif.className = 'notification-item';
             newNotif.innerHTML = `
-                <div class="notif-time">${heure}</div>
-                <div class="notif-message">${notifMessage}</div>
+                <div class="notification-time">${heure}</div>
+                <div class="notification-message"><i>${messages[etape] || 'Mise à jour'}</i></div>
             `;
             list.insertBefore(newNotif, list.firstChild);
             
             while(list.children.length > 5) {
                 list.removeChild(list.lastChild);
             }
-
-            // Mettre à jour l'heure
-            document.getElementById('currentTime').innerText = heure;
         }
-
-        // Heure actuelle
-        function updateTime() {
-            const now = new Date();
-            const time = now.getHours() + ':' + 
-                        (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
-            document.getElementById('currentTime').innerText = time;
-        }
-        setInterval(updateTime, 1000);
-        updateTime();
 
         // Écouter Firebase
         database.ref('bus-status').on('value', (snapshot) => {
             const data = snapshot.val();
-            if (data) {
-                updateDisplay(data);
-            }
+            if (data) updateDisplay(data);
         });
 
-        console.log('✅ Interface spirituelle chargée');
+        console.log('✅ Interface améliorée chargée');
     </script>
 </body>
 </html>
