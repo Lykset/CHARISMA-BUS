@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>🚌 Charisma Bus • Direct</title>
+    <title>Charisma Bus • Trafic en temps réel</title>
     <!-- Leaflet pour la carte -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Firebase -->
@@ -14,89 +14,150 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background: #0b1120;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f4f6f9;
             min-height: 100vh;
-            color: white;
+            color: #1f2937;
         }
 
-        /* ===== EN-TÊTE TRÈS SIMPLE ===== */
-        .top-bar {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            padding: 25px 20px 35px;
-            border-bottom-left-radius: 35px;
-            border-bottom-right-radius: 35px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .top-bar::after {
-            content: "🚌";
-            position: absolute;
-            right: -10px;
-            bottom: -20px;
-            font-size: 120px;
-            opacity: 0.1;
-            transform: rotate(-10deg);
-        }
-
-        .church-name {
-            font-size: 2.2em;
-            font-weight: 800;
-            margin-bottom: 5px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        .church-location {
-            font-size: 1em;
-            opacity: 0.8;
-            margin-bottom: 15px;
+        /* ===== HEADER STYLE RATP ===== */
+        .app-bar {
+            background: white;
+            padding: 18px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
+            border-bottom: 1px solid #edf2f7;
         }
 
-        .route-icons {
+        .app-title {
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: rgba(255,255,255,0.1);
-            padding: 12px 18px;
-            border-radius: 60px;
-            width: fit-content;
-            backdrop-filter: blur(5px);
+            gap: 10px;
+        }
+
+        .app-title h1 {
             font-size: 1.3em;
+            font-weight: 600;
+            color: #1f2937;
         }
 
-        .route-icons span {
-            background: rgba(255,255,255,0.2);
-            width: 40px;
-            height: 40px;
-            border-radius: 40px;
+        .app-badge {
+            background: #e5e7eb;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.7em;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .live-indicator {
+            background: #fee2e2;
+            padding: 6px 14px;
+            border-radius: 50px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: #dc2626;
         }
 
-        /* ===== CARTE PLEINE PAGE ===== */
-        .map-wrapper {
-            margin-top: -25px;
-            padding: 0 15px;
-            position: relative;
-            z-index: 10;
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #dc2626;
+            border-radius: 50%;
+            animation: pulse-red 1.5s infinite;
         }
 
-        .map-container {
+        @keyframes pulse-red {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* ===== INFOS LIGNE ===== */
+        .line-info {
+            background: white;
+            margin: 15px 15px 0;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid #f0f0f0;
+        }
+
+        .line-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .line-number {
+            background: #1f2937;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+
+        .line-direction {
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+
+        .stops-preview {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5px;
+        }
+
+        .stop-preview-item {
+            flex: 1;
+            text-align: center;
+            font-size: 0.8em;
+            color: #6b7280;
             position: relative;
-            border-radius: 35px;
+        }
+
+        .stop-preview-item.active {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .stop-preview-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            background: #2563eb;
+            border-radius: 50%;
+        }
+
+        .preview-icon {
+            font-size: 1.2em;
+            margin-bottom: 4px;
+        }
+
+        /* ===== CARTE STYLE SNCF ===== */
+        .map-section {
+            margin: 15px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 25px 50px -10px black;
-            border: 4px solid #2d3a4f;
-            height: 380px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+            height: 340px;
+            position: relative;
         }
 
         #map {
@@ -104,346 +165,409 @@
             width: 100%;
         }
 
-        /* Légende visuelle sur la carte */
+        .map-overlay-top {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.8em;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            z-index: 1000;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .map-legend {
             position: absolute;
             bottom: 15px;
             right: 15px;
-            background: #1e293b;
-            padding: 10px 18px;
+            background: white;
+            padding: 10px 16px;
             border-radius: 50px;
             display: flex;
             gap: 20px;
             z-index: 1000;
-            border: 1px solid #3b4a5f;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+            font-size: 0.8em;
         }
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9em;
-        }
-
-        .bus-legend {
-            width: 20px;
-            height: 20px;
-            background: #3b82f6;
-            border-radius: 20px;
-            border: 3px solid white;
-            box-shadow: 0 0 0 2px #3b82f6;
+        .legend-bus {
+            width: 12px;
+            height: 12px;
+            background: #2563eb;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #2563eb;
             animation: pulse-blue 1.5s infinite;
         }
 
-        .stop-legend {
-            width: 16px;
-            height: 16px;
-            background: #f97316;
-            border-radius: 16px;
-            border: 3px solid white;
+        .legend-stop {
+            width: 10px;
+            height: 10px;
+            background: #9ca3af;
+            border-radius: 50%;
+            border: 2px solid white;
         }
 
-        @keyframes pulse-blue {
-            0% { box-shadow: 0 0 0 0 rgba(59,130,246,0.7); }
-            50% { box-shadow: 0 0 0 10px rgba(59,130,246,0); }
-            100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
-        }
-
-        /* ===== GROS ICÔNES POUR LE STATUT ===== */
-        .big-status {
-            background: #1a2634;
-            margin: 20px 15px;
-            padding: 25px;
-            border-radius: 40px;
-            border: 2px solid #2f3e52;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .big-icon {
-            width: 90px;
-            height: 90px;
-            background: #2d3b4c;
-            border-radius: 90px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3.5em;
-            border: 4px solid #3b82f6;
-            box-shadow: 0 0 30px #3b82f6;
-        }
-
-        .big-text {
-            flex: 1;
-        }
-
-        .big-text .label {
-            font-size: 0.9em;
-            color: #94a3b8;
-            margin-bottom: 5px;
-        }
-
-        .big-text .location {
-            font-size: 1.8em;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .big-text .time {
-            color: #3b82f6;
-            font-weight: 600;
-            font-size: 1.1em;
-        }
-
-        /* ===== CARTES ARRÊTS SUPER VISUELLES ===== */
-        .stops-grid {
-            margin: 20px 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .stop-card {
-            background: #1a2634;
-            border-radius: 30px;
+        /* ===== PROCHAINS ARRÊTS STYLE RATP ===== */
+        .next-stops {
+            background: white;
+            margin: 15px;
+            border-radius: 24px;
             padding: 20px;
-            border: 3px solid #2f3e52;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid #f0f0f0;
+        }
+
+        .section-header {
             display: flex;
             align-items: center;
-            gap: 20px;
-            transition: all 0.3s;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        }
-
-        /* Carte quand l'arrêt est fait */
-        .stop-card.completed {
-            border-color: #10b981;
-            background: #14532d;
-            opacity: 0.9;
-        }
-
-        .stop-card.completed .stop-icon {
-            background: #10b981;
-            border-color: white;
-        }
-
-        /* Carte quand c'est l'arrêt en cours */
-        .stop-card.active {
-            border-color: #f97316;
-            background: #422006;
-            transform: scale(1.02);
-            box-shadow: 0 20px 40px rgba(249,115,22,0.3);
-        }
-
-        .stop-card.active .stop-icon {
-            background: #f97316;
-            border-color: white;
-            animation: glow 1.5s infinite;
-        }
-
-        @keyframes glow {
-            0% { box-shadow: 0 0 10px #f97316; }
-            50% { box-shadow: 0 0 30px #f97316; }
-            100% { box-shadow: 0 0 10px #f97316; }
-        }
-
-        .stop-icon {
-            width: 70px;
-            height: 70px;
-            background: #2d3b4c;
-            border-radius: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5em;
-            border: 4px solid #3b82f6;
-        }
-
-        .stop-info {
-            flex: 1;
-        }
-
-        .stop-name {
-            font-size: 1.5em;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .stop-address {
-            color: #94a3b8;
-            font-size: 0.9em;
-            margin-bottom: 8px;
-        }
-
-        .stop-badge {
-            display: inline-block;
-            padding: 6px 18px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 0.9em;
-            background: #2d3b4c;
-        }
-
-        .stop-card.completed .stop-badge {
-            background: #10b981;
-            color: white;
-        }
-
-        .stop-card.active .stop-badge {
-            background: #f97316;
-            color: white;
-        }
-
-        /* ===== NOTIFICATIONS SIMPLES ===== */
-        .notif-section {
-            background: #1a2634;
-            margin: 20px 15px;
-            padding: 25px;
-            border-radius: 40px;
-            border: 2px solid #2f3e52;
-        }
-
-        .notif-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.3em;
-            font-weight: 600;
+            justify-content: space-between;
             margin-bottom: 20px;
         }
 
-        .notif-item {
-            background: #0f172a;
-            border-radius: 25px;
-            padding: 18px;
-            margin-bottom: 12px;
-            border-left: 8px solid #3b82f6;
+        .section-header h3 {
             font-size: 1.1em;
-            line-height: 1.5;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-header span {
+            color: #6b7280;
+            font-size: 0.8em;
+        }
+
+        .stops-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stop-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 16px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .stop-row.completed {
+            opacity: 0.7;
+            background: #f3f4f6;
+        }
+
+        .stop-row.completed .stop-row-icon {
+            background: #e5e7eb;
+        }
+
+        .stop-row.active {
+            background: #eff6ff;
+            border-color: #93c5fd;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.1);
+        }
+
+        .stop-row.active .stop-row-icon {
+            background: #2563eb;
+            color: white;
+        }
+
+        .stop-row-icon {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border-radius: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            border: 1px solid #e5e7eb;
+        }
+
+        .stop-row-info {
+            flex: 1;
+        }
+
+        .stop-row-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .stop-row-address {
+            font-size: 0.8em;
+            color: #6b7280;
+        }
+
+        .stop-row-time {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #2563eb;
+            background: #dbeafe;
+            padding: 4px 12px;
+            border-radius: 50px;
+        }
+
+        .stop-row.completed .stop-row-time {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+
+        .stop-row.active .stop-row-time {
+            background: #2563eb;
+            color: white;
+        }
+
+        /* ===== TRAFIC EN DIRECT ===== */
+        .traffic-info {
+            background: white;
+            margin: 15px;
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .traffic-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .traffic-icon {
+            width: 48px;
+            height: 48px;
+            background: #f3f4f6;
+            border-radius: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+
+        .traffic-text h4 {
+            font-size: 0.9em;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .traffic-text p {
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 1.1em;
+        }
+
+        .traffic-badge {
+            background: #f0fdf4;
+            color: #166534;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9em;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* ===== NOTIFICATIONS ===== */
+        .notifications {
+            background: white;
+            margin: 15px;
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .notif-item {
+            background: #f9fafb;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2563eb;
         }
 
         .notif-time {
-            color: #94a3b8;
-            font-size: 0.9em;
-            margin-bottom: 8px;
+            font-size: 0.8em;
+            color: #6b7280;
+            margin-bottom: 6px;
         }
 
-        /* ===== FOOTER ===== */
+        .notif-message {
+            font-weight: 500;
+            color: #1f2937;
+        }
+
         .footer {
+            margin: 25px 15px 30px;
             text-align: center;
-            margin: 30px 15px;
-            color: #4b5a6e;
-            font-size: 0.9em;
+            color: #9ca3af;
+            font-size: 0.8em;
         }
     </style>
 </head>
 <body>
-    <!-- En-tête simple -->
-    <div class="top-bar">
-        <div class="church-name">⛪ Église Charisma</div>
-        <div class="church-location">
-            <span>📍</span> 7 Rue Isaac Newton, Blanc-Mesnil
+    <!-- App bar style RATP -->
+    <div class="app-bar">
+        <div class="app-title">
+            <h1>⛪ Charisma Bus</h1>
+            <span class="app-badge">Ligne C</span>
         </div>
-        <div class="route-icons">
-            <span>⛪</span> <span>➡️</span> <span>🏠</span> <span>➡️</span> <span>🚉</span> <span>➡️</span> <span>⛪</span>
+        <div class="live-indicator">
+            <span class="live-dot"></span>
+            EN DIRECT
+        </div>
+    </div>
+
+    <!-- Info ligne -->
+    <div class="line-info">
+        <div class="line-header">
+            <span class="line-number">Ligne spirituelle</span>
+            <span class="line-direction">Direction Église</span>
+        </div>
+        <div class="stops-preview">
+            <div class="stop-preview-item active">
+                <div class="preview-icon">⛪</div>
+                <div>Église</div>
+            </div>
+            <div class="stop-preview-item">
+                <div class="preview-icon">➡️</div>
+                <div>20 min</div>
+            </div>
+            <div class="stop-preview-item">
+                <div class="preview-icon">🏠</div>
+                <div>Brement</div>
+            </div>
+            <div class="stop-preview-item">
+                <div class="preview-icon">➡️</div>
+                <div>15 min</div>
+            </div>
+            <div class="stop-preview-item">
+                <div class="preview-icon">🚉</div>
+                <div>Noisy</div>
+            </div>
+            <div class="stop-preview-item">
+                <div class="preview-icon">➡️</div>
+                <div>10 min</div>
+            </div>
+            <div class="stop-preview-item">
+                <div class="preview-icon">⛪</div>
+                <div>Retour</div>
+            </div>
         </div>
     </div>
 
     <!-- Carte -->
-    <div class="map-wrapper">
-        <div class="map-container">
-            <div id="map"></div>
-            <div class="map-legend">
-                <div class="legend-item">
-                    <div class="bus-legend"></div>
-                    <span>Bus 🚌</span>
-                </div>
-                <div class="legend-item">
-                    <div class="stop-legend"></div>
-                    <span>Arrêts ⛪🏠🚉</span>
-                </div>
+    <div class="map-section">
+        <div id="map"></div>
+        <div class="map-overlay-top">
+            <span>🚌</span> Bus en approche
+        </div>
+        <div class="map-legend">
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <span class="legend-bus"></span>
+                <span>Bus</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <span class="legend-stop"></span>
+                <span>Arrêts</span>
             </div>
         </div>
     </div>
 
-    <!-- GROS statut en direct -->
-    <div class="big-status" id="bigStatus">
-        <div class="big-icon" id="bigIcon">⛪</div>
-        <div class="big-text">
-            <div class="label">🚌 EN DIRECT</div>
-            <div class="location" id="bigLocation">Église Charisma</div>
-            <div class="time" id="bigTime">--:--</div>
+    <!-- Prochains arrêts -->
+    <div class="next-stops">
+        <div class="section-header">
+            <h3><span>🚏</span> Prochains arrêts</h3>
+            <span>Mise à jour temps réel</span>
+        </div>
+        <div class="stops-list" id="stopsList">
+            <!-- Église -->
+            <div class="stop-row" id="rowEglise">
+                <div class="stop-row-icon">⛪</div>
+                <div class="stop-row-info">
+                    <div class="stop-row-name">Église Charisma</div>
+                    <div class="stop-row-address">7 Rue Isaac Newton</div>
+                </div>
+                <div class="stop-row-time" id="timeEglise">--</div>
+            </div>
+
+            <!-- Brement -->
+            <div class="stop-row" id="rowBrement">
+                <div class="stop-row-icon">🏠</div>
+                <div class="stop-row-info">
+                    <div class="stop-row-name">Brement</div>
+                    <div class="stop-row-address">Général de Gaulle</div>
+                </div>
+                <div class="stop-row-time" id="timeBrement">--</div>
+            </div>
+
+            <!-- Noisy -->
+            <div class="stop-row" id="rowNoisy">
+                <div class="stop-row-icon">🚉</div>
+                <div class="stop-row-info">
+                    <div class="stop-row-name">Noisy-le-Sec</div>
+                    <div class="stop-row-address">5 Bd de la République</div>
+                </div>
+                <div class="stop-row-time" id="timeNoisy">--</div>
+            </div>
+
+            <!-- Retour -->
+            <div class="stop-row" id="rowRetour">
+                <div class="stop-row-icon">⛪</div>
+                <div class="stop-row-info">
+                    <div class="stop-row-name">Retour Église</div>
+                    <div class="stop-row-address">7 Rue Isaac Newton</div>
+                </div>
+                <div class="stop-row-time" id="timeRetour">--</div>
+            </div>
         </div>
     </div>
 
-    <!-- Arrêts en gros visuels -->
-    <div class="stops-grid" id="stopsGrid">
-        <!-- Église -->
-        <div class="stop-card" id="cardEglise">
-            <div class="stop-icon">⛪</div>
-            <div class="stop-info">
-                <div class="stop-name">Église Charisma</div>
-                <div class="stop-address">7 Rue Isaac Newton</div>
-                <span class="stop-badge" id="badgeEglise">--</span>
+    <!-- Trafic en direct -->
+    <div class="traffic-info">
+        <div class="traffic-left">
+            <div class="traffic-icon">🚌</div>
+            <div class="traffic-text">
+                <h4>Prochain passage</h4>
+                <p id="nextStopText">Départ dans 15 min</p>
             </div>
         </div>
-
-        <!-- Brement -->
-        <div class="stop-card" id="cardBrement">
-            <div class="stop-icon">🏠</div>
-            <div class="stop-info">
-                <div class="stop-name">Brement</div>
-                <div class="stop-address">Général de Gaulle</div>
-                <span class="stop-badge" id="badgeBrement">--</span>
-            </div>
-        </div>
-
-        <!-- Noisy -->
-        <div class="stop-card" id="cardNoisy">
-            <div class="stop-icon">🚉</div>
-            <div class="stop-info">
-                <div class="stop-name">Noisy-le-Sec</div>
-                <div class="stop-address">5 Bd de la République</div>
-                <span class="stop-badge" id="badgeNoisy">--</span>
-            </div>
-        </div>
-
-        <!-- Retour -->
-        <div class="stop-card" id="cardRetour">
-            <div class="stop-icon">⛪</div>
-            <div class="stop-info">
-                <div class="stop-name">Retour Église</div>
-                <div class="stop-address">7 Rue Isaac Newton</div>
-                <span class="stop-badge" id="badgeRetour">--</span>
-            </div>
+        <div class="traffic-badge" id="trafficBadge">
+            À l'heure
         </div>
     </div>
 
     <!-- Notifications -->
-    <div class="notif-section">
-        <div class="notif-title">
-            <span>🔔</span> Dernières nouvelles
+    <div class="notifications">
+        <div class="section-header">
+            <h3><span>🔔</span> Infos trafic</h3>
+            <span>Direct</span>
         </div>
         <div id="notificationsList">
             <div class="notif-item">
                 <div class="notif-time">--</div>
-                <div>En attente du départ...</div>
+                <div class="notif-message">En attente du départ</div>
             </div>
         </div>
     </div>
 
     <div class="footer">
-        Charisma Bus • Béni soit ce voyage
+        Charisma Bus • Application officielle
     </div>
 
-    <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Firebase config
         const firebaseConfig = {
             apiKey: "AIzaSyC4sWMc3fNaMpZ9cD8ahQdMJn6BjRyJDzk",
             authDomain: "charisma-bus.firebaseapp.com",
@@ -457,7 +581,6 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Coordonnées
         const STOPS = {
             eglise: [48.94525, 2.47403],
             brement: [48.8934, 2.4587],
@@ -465,140 +588,118 @@
             retour: [48.94525, 2.47403]
         };
 
-        // ===== INIT CARTE =====
+        // Carte
         const map = L.map('map').setView([48.92, 2.46], 13);
         
-        // Carte satellite
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            maxZoom: 19
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '©OpenStreetMap'
         }).addTo(map);
 
-        // Marqueurs GROS et VISIBLES
-        function createBigMarker(emoji, color, popupText) {
-            return L.marker(color, {
+        // Marqueurs style SNCF
+        function addMarker(coords, emoji, name) {
+            L.marker(coords, {
                 icon: L.divIcon({
-                    html: `<div style="background:white; width:45px; height:45px; border-radius:45px; display:flex; align-items:center; justify-content:center; font-size:28px; border:4px solid #3b82f6; box-shadow:0 5px 20px black;">${emoji}</div>`,
-                    iconSize: [45, 45]
+                    html: `<div style="background:white; width:40px; height:40px; border-radius:40px; display:flex; align-items:center; justify-content:center; font-size:22px; border:2px solid #2563eb; box-shadow:0 2px 10px rgba(0,0,0,0.1);">${emoji}</div>`,
+                    iconSize: [40, 40]
                 })
-            }).addTo(map).bindPopup(popupText);
+            }).addTo(map).bindPopup(name);
         }
 
-        createBigMarker('⛪', STOPS.eglise, 'Église Charisma');
-        createBigMarker('🏠', STOPS.brement, 'Brement');
-        createBigMarker('🚉', STOPS.noisy, 'Noisy-le-Sec');
-        createBigMarker('⛪', STOPS.retour, 'Retour Église');
+        addMarker(STOPS.eglise, '⛪', 'Église Charisma');
+        addMarker(STOPS.brement, '🏠', 'Brement');
+        addMarker(STOPS.noisy, '🚉', 'Noisy-le-Sec');
+        addMarker(STOPS.retour, '⛪', 'Retour Église');
 
-        // Ligne du trajet
+        // Ligne
         L.polyline([STOPS.eglise, STOPS.brement, STOPS.noisy, STOPS.retour], {
-            color: '#f97316',
-            weight: 6,
-            opacity: 0.8,
-            dashArray: '10, 15'
+            color: '#2563eb',
+            weight: 4,
+            opacity: 0.6,
+            dashArray: '5, 10'
         }).addTo(map);
 
-        // GROS BUS VISIBLE
+        // Bus
         const busMarker = L.marker(STOPS.eglise, {
             icon: L.divIcon({
-                html: '<div style="background:#3b82f6; width:55px; height:55px; border-radius:55px; display:flex; align-items:center; justify-content:center; font-size:32px; border:4px solid white; box-shadow:0 0 30px #3b82f6; animation:pulse 1.5s infinite;">🚌</div>',
-                iconSize: [55, 55]
+                html: '<div style="background:#2563eb; width:48px; height:48px; border-radius:48px; display:flex; align-items:center; justify-content:center; font-size:26px; color:white; border:3px solid white; box-shadow:0 0 20px #2563eb;">🚌</div>',
+                iconSize: [48, 48]
             })
         }).addTo(map);
 
-        // ===== MISE À JOUR =====
+        // Mise à jour
         function updateDisplay(data) {
             if (!data) return;
 
             const etape = data.etape;
             const time = data.time;
 
-            // Reset tous les états
-            document.querySelectorAll('.stop-card').forEach(c => {
-                c.classList.remove('completed', 'active');
+            // Reset
+            document.querySelectorAll('.stop-row').forEach(r => {
+                r.classList.remove('completed', 'active');
             });
 
-            // GROS statut en haut
-            const bigIcon = document.getElementById('bigIcon');
-            const bigLocation = document.getElementById('bigLocation');
-            const bigTime = document.getElementById('bigTime');
-            bigTime.innerText = time;
-
-            // Mise à jour selon étape
+            // Mise à jour
             switch(etape) {
                 case 'depart':
                     busMarker.setLatLng(STOPS.eglise);
                     map.panTo(STOPS.eglise);
                     
-                    bigIcon.innerHTML = '⛪';
-                    bigLocation.innerText = 'Départ Église';
+                    document.getElementById('rowEglise').classList.add('completed');
+                    document.getElementById('rowBrement').classList.add('active');
+                    document.getElementById('nextStopText').innerText = 'Prochain arrêt Brement dans 15 min';
                     
-                    document.getElementById('cardEglise').classList.add('completed');
-                    document.getElementById('cardBrement').classList.add('active');
-                    
-                    document.getElementById('badgeEglise').innerText = 'DÉPART';
-                    document.getElementById('badgeBrement').innerText = 'EN COURS';
-                    document.getElementById('badgeNoisy').innerText = '--';
-                    document.getElementById('badgeRetour').innerText = '--';
+                    document.getElementById('timeEglise').innerText = time;
+                    document.getElementById('timeBrement').innerText = '15 min';
+                    document.getElementById('timeNoisy').innerText = '--';
+                    document.getElementById('timeRetour').innerText = '--';
                     break;
 
                 case 'brement':
                     busMarker.setLatLng(STOPS.brement);
                     map.panTo(STOPS.brement);
                     
-                    bigIcon.innerHTML = '🏠';
-                    bigLocation.innerText = 'Arrêt Brement';
+                    document.getElementById('rowEglise').classList.add('completed');
+                    document.getElementById('rowBrement').classList.add('completed');
+                    document.getElementById('rowNoisy').classList.add('active');
+                    document.getElementById('nextStopText').innerText = 'Prochain arrêt Noisy dans 10 min';
                     
-                    document.getElementById('cardEglise').classList.add('completed');
-                    document.getElementById('cardBrement').classList.add('completed');
-                    document.getElementById('cardNoisy').classList.add('active');
-                    
-                    document.getElementById('badgeEglise').innerText = 'DÉPART';
-                    document.getElementById('badgeBrement').innerText = 'ARRIVÉ';
-                    document.getElementById('badgeNoisy').innerText = 'EN COURS';
-                    document.getElementById('badgeRetour').innerText = '--';
+                    document.getElementById('timeBrement').innerText = time;
+                    document.getElementById('timeNoisy').innerText = '10 min';
                     break;
 
                 case 'noisy':
                     busMarker.setLatLng(STOPS.noisy);
                     map.panTo(STOPS.noisy);
                     
-                    bigIcon.innerHTML = '🚉';
-                    bigLocation.innerText = 'Arrêt Noisy';
+                    document.getElementById('rowEglise').classList.add('completed');
+                    document.getElementById('rowBrement').classList.add('completed');
+                    document.getElementById('rowNoisy').classList.add('completed');
+                    document.getElementById('rowRetour').classList.add('active');
+                    document.getElementById('nextStopText').innerText = 'Prochain arrêt Retour dans 15 min';
                     
-                    document.getElementById('cardEglise').classList.add('completed');
-                    document.getElementById('cardBrement').classList.add('completed');
-                    document.getElementById('cardNoisy').classList.add('completed');
-                    document.getElementById('cardRetour').classList.add('active');
-                    
-                    document.getElementById('badgeEglise').innerText = 'DÉPART';
-                    document.getElementById('badgeBrement').innerText = 'ARRIVÉ';
-                    document.getElementById('badgeNoisy').innerText = 'ARRIVÉ';
-                    document.getElementById('badgeRetour').innerText = 'EN COURS';
+                    document.getElementById('timeNoisy').innerText = time;
+                    document.getElementById('timeRetour').innerText = '15 min';
                     break;
 
                 case 'retour':
                     busMarker.setLatLng(STOPS.retour);
                     map.panTo(STOPS.retour);
                     
-                    bigIcon.innerHTML = '⛪';
-                    bigLocation.innerText = 'Retour Église';
-                    
-                    document.querySelectorAll('.stop-card').forEach(c => {
-                        c.classList.add('completed');
+                    document.querySelectorAll('.stop-row').forEach(r => {
+                        r.classList.add('completed');
                     });
+                    document.getElementById('nextStopText').innerText = 'Terminus - Retour Église';
                     
-                    document.getElementById('badgeEglise').innerText = 'DÉPART';
-                    document.getElementById('badgeBrement').innerText = 'ARRIVÉ';
-                    document.getElementById('badgeNoisy').innerText = 'ARRIVÉ';
-                    document.getElementById('badgeRetour').innerText = 'ARRIVÉ';
+                    document.getElementById('timeRetour').innerText = time;
                     break;
             }
 
-            // Ajouter notification
+            // Notifications
             const messages = {
-                depart: "🚌 DÉPART Église - Le bus céleste arrive !",
-                brement: "🏠 ARRIVÉE Brement - Prochain arrêt Noisy",
-                noisy: "🚉 ARRIVÉE Noisy - Retour vers l'église",
-                retour: "⛪ RETOUR Église - Fin du trajet"
+                depart: "🚌 Départ de l'Église Charisma. Prochain arrêt : Brement (15 min)",
+                brement: "🏠 Arrivée à Brement. Correspondance possible.",
+                noisy: "🚉 Dessert Noisy-le-Sec. Terminus dans 15 min.",
+                retour: "⛪ Arrivée à l'Église. Fin de la ligne."
             };
 
             const list = document.getElementById('notificationsList');
@@ -606,7 +707,7 @@
             newNotif.className = 'notif-item';
             newNotif.innerHTML = `
                 <div class="notif-time">${time}</div>
-                <div>${messages[etape]}</div>
+                <div class="notif-message">${messages[etape]}</div>
             `;
             list.insertBefore(newNotif, list.firstChild);
             
@@ -615,19 +716,10 @@
             }
         }
 
-        // Écouter Firebase
         database.ref('bus-status').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) updateDisplay(data);
         });
-
-        // Heure
-        setInterval(() => {
-            const now = new Date();
-            const time = now.getHours() + ':' + 
-                        (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
-            document.getElementById('bigTime').innerText = time;
-        }, 1000);
     </script>
 </body>
 </html>
