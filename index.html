@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>🚌 Charisma Bus • Direct</title>
+    <title>🚌 Le Bus de la Vie • Direct</title>
     <!-- Leaflet pour la carte -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Firebase -->
@@ -24,9 +23,9 @@
             color: white;
         }
 
-        /* ===== EN-TÊTE TRÈS SIMPLE ===== */
+        /* ===== EN-TÊTE ===== */
         .top-bar {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(135deg, #1e3a5f 0%, #0a1a2f 100%);
             padding: 25px 20px 35px;
             border-bottom-left-radius: 35px;
             border-bottom-right-radius: 35px;
@@ -40,50 +39,86 @@
             position: absolute;
             right: -10px;
             bottom: -20px;
-            font-size: 120px;
+            font-size: 140px;
             opacity: 0.1;
-            transform: rotate(-10deg);
+            transform: rotate(-5deg);
         }
 
         .church-name {
-            font-size: 2.2em;
+            font-size: 2.4em;
             font-weight: 800;
             margin-bottom: 5px;
             text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
 
-        .church-location {
-            font-size: 1em;
-            opacity: 0.8;
-            margin-bottom: 15px;
+        .bus-de-la-vie {
+            font-size: 1.3em;
+            color: #fbbf24;
+            font-weight: 600;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+        }
+
+        .bus-de-la-vie span {
+            background: #fbbf24;
+            color: #0b1120;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8em;
+            font-weight: 700;
         }
 
         .route-icons {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             background: rgba(255,255,255,0.1);
-            padding: 12px 18px;
+            padding: 15px 20px;
             border-radius: 60px;
             width: fit-content;
             backdrop-filter: blur(5px);
-            font-size: 1.3em;
+            font-size: 1.4em;
+            margin-top: 10px;
         }
 
         .route-icons span {
             background: rgba(255,255,255,0.2);
-            width: 40px;
-            height: 40px;
-            border-radius: 40px;
+            width: 45px;
+            height: 45px;
+            border-radius: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* ===== CARTE PLEINE PAGE ===== */
+        /* ===== MESSAGE EN ÉVIDENCE ===== */
+        .message-feature {
+            background: #1e2b3c;
+            margin: 20px 15px;
+            padding: 25px;
+            border-radius: 30px;
+            border: 3px solid #fbbf24;
+            box-shadow: 0 0 30px #fbbf2440;
+            text-align: center;
+        }
+
+        .featured-message {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #fbbf24;
+            line-height: 1.4;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .message-author {
+            color: #94a3b8;
+            font-size: 1em;
+        }
+
+        /* ===== CARTE ===== */
         .map-wrapper {
             margin-top: -25px;
             padding: 0 15px;
@@ -105,7 +140,6 @@
             width: 100%;
         }
 
-        /* Légende visuelle sur la carte */
         .map-legend {
             position: absolute;
             bottom: 15px;
@@ -117,8 +151,6 @@
             gap: 20px;
             z-index: 1000;
             border: 1px solid #3b4a5f;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
         }
 
         .legend-item {
@@ -134,7 +166,6 @@
             background: #3b82f6;
             border-radius: 20px;
             border: 3px solid white;
-            box-shadow: 0 0 0 2px #3b82f6;
             animation: pulse-blue 1.5s infinite;
         }
 
@@ -152,14 +183,13 @@
             100% { box-shadow: 0 0 0 0 rgba(59,130,246,0); }
         }
 
-        /* ===== GROS ICÔNES POUR LE STATUT ===== */
+        /* ===== GROS STATUT ===== */
         .big-status {
             background: #1a2634;
             margin: 20px 15px;
             padding: 25px;
             border-radius: 40px;
             border: 2px solid #2f3e52;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
             display: flex;
             align-items: center;
             gap: 20px;
@@ -200,7 +230,7 @@
             font-size: 1.1em;
         }
 
-        /* ===== CARTES ARRÊTS SUPER VISUELLES ===== */
+        /* ===== CARTES ARRÊTS ===== */
         .stops-grid {
             margin: 20px 15px;
             display: flex;
@@ -217,22 +247,13 @@
             align-items: center;
             gap: 20px;
             transition: all 0.3s;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
 
-        /* Carte quand l'arrêt est fait */
         .stop-card.completed {
             border-color: #10b981;
             background: #14532d;
-            opacity: 0.9;
         }
 
-        .stop-card.completed .stop-icon {
-            background: #10b981;
-            border-color: white;
-        }
-
-        /* Carte quand c'est l'arrêt en cours */
         .stop-card.active {
             border-color: #f97316;
             background: #422006;
@@ -242,7 +263,6 @@
 
         .stop-card.active .stop-icon {
             background: #f97316;
-            border-color: white;
             animation: glow 1.5s infinite;
         }
 
@@ -291,15 +311,13 @@
 
         .stop-card.completed .stop-badge {
             background: #10b981;
-            color: white;
         }
 
         .stop-card.active .stop-badge {
             background: #f97316;
-            color: white;
         }
 
-        /* ===== NOTIFICATIONS SIMPLES ===== */
+        /* ===== NOTIFICATIONS ===== */
         .notif-section {
             background: #1a2634;
             margin: 20px 15px;
@@ -320,20 +338,44 @@
         .notif-item {
             background: #0f172a;
             border-radius: 25px;
-            padding: 18px;
+            padding: 20px;
             margin-bottom: 12px;
-            border-left: 8px solid #3b82f6;
-            font-size: 1.1em;
-            line-height: 1.5;
+            border-left: 8px solid #fbbf24;
         }
 
         .notif-time {
             color: #94a3b8;
             font-size: 0.9em;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
-        /* ===== FOOTER ===== */
+        .notif-message {
+            font-size: 1.2em;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .notif-message i {
+            color: #fbbf24;
+            font-style: italic;
+        }
+
+        /* ===== BON CULTE ===== */
+        .culte-banner {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            color: #0b1120;
+            margin: 20px 15px;
+            padding: 20px;
+            border-radius: 30px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 2em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 10px 30px #fbbf2440;
+            border: 3px solid white;
+        }
+
         .footer {
             text-align: center;
             margin: 30px 15px;
@@ -343,15 +385,23 @@
     </style>
 </head>
 <body>
-    <!-- En-tête simple -->
+    <!-- En-tête avec "bus de la vie" -->
     <div class="top-bar">
         <div class="church-name">⛪ Église Charisma</div>
-        <div class="church-location">
-            <span>📍</span> 7 Rue Isaac Newton, Blanc-Mesnil
+        <div class="bus-de-la-vie">
+            🚌 LE BUS DE LA VIE <span>direct</span>
         </div>
         <div class="route-icons">
             <span>⛪</span> <span>➡️</span> <span>🏠</span> <span>➡️</span> <span>🚉</span> <span>➡️</span> <span>⛪</span>
         </div>
+    </div>
+
+    <!-- Message en évidence -->
+    <div class="message-feature" id="featuredMessage">
+        <div class="featured-message" id="inspirationalMessage">
+            Église, réjouis-toi, le bus de la vie arrive !
+        </div>
+        <div class="message-author">🚌 Bus Charisma</div>
     </div>
 
     <!-- Carte -->
@@ -365,13 +415,13 @@
                 </div>
                 <div class="legend-item">
                     <div class="stop-legend"></div>
-                    <span>Arrêts ⛪🏠🚉</span>
+                    <span>Arrêts</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- GROS statut en direct -->
+    <!-- GROS statut -->
     <div class="big-status" id="bigStatus">
         <div class="big-icon" id="bigIcon">⛪</div>
         <div class="big-text">
@@ -381,9 +431,8 @@
         </div>
     </div>
 
-    <!-- Arrêts en gros visuels -->
+    <!-- Arrêts -->
     <div class="stops-grid" id="stopsGrid">
-        <!-- Église -->
         <div class="stop-card" id="cardEglise">
             <div class="stop-icon">⛪</div>
             <div class="stop-info">
@@ -393,7 +442,6 @@
             </div>
         </div>
 
-        <!-- Brement -->
         <div class="stop-card" id="cardBrement">
             <div class="stop-icon">🏠</div>
             <div class="stop-info">
@@ -403,7 +451,6 @@
             </div>
         </div>
 
-        <!-- Noisy -->
         <div class="stop-card" id="cardNoisy">
             <div class="stop-icon">🚉</div>
             <div class="stop-info">
@@ -413,7 +460,6 @@
             </div>
         </div>
 
-        <!-- Retour -->
         <div class="stop-card" id="cardRetour">
             <div class="stop-icon">⛪</div>
             <div class="stop-info">
@@ -424,21 +470,26 @@
         </div>
     </div>
 
+    <!-- Bannière BON CULTE ÉGLISE -->
+    <div class="culte-banner">
+        ⛪ BON CULTE ÉGLISE ⛪
+    </div>
+
     <!-- Notifications -->
     <div class="notif-section">
         <div class="notif-title">
-            <span>🔔</span> Dernières nouvelles
+            <span>🔔</span> Dernières nouvelles du bus de la vie
         </div>
         <div id="notificationsList">
             <div class="notif-item">
                 <div class="notif-time">--</div>
-                <div>En attente du départ...</div>
+                <div class="notif-message">En attente du départ...</div>
             </div>
         </div>
     </div>
 
     <div class="footer">
-        Charisma Bus • Béni soit ce voyage
+        Le Bus de la Vie • Église Charisma
     </div>
 
     <!-- Scripts -->
@@ -466,42 +517,61 @@
             retour: [48.94525, 2.47403]
         };
 
+        // ===== TES MESSAGES PERSONNALISÉS =====
+        const MESSAGES = {
+            depart: {
+                principal: "Église, réjouis-toi, le bus céleste arrive pour t'emmener à la maison de notre Père.",
+                court: "🚌 DÉPART Église"
+            },
+            brement: {
+                principal: "Noisy-LE-FEUX, on arrive ! La joie du Seigneur est notre force.",
+                court: "✅ ARRIVÉE Brement"
+            },
+            noisy: {
+                principal: "Noisy-le-Sec, c'est partie ! Que la paix du Christ vous accompagne.",
+                court: "🟣 ARRIVÉE Noisy"
+            },
+            retour: {
+                principal: "Bon culte église ! Le voyage fut béni, à bientôt dans le bus de la vie.",
+                court: "🔚 RETOUR Église"
+            }
+        };
+
         // ===== INIT CARTE =====
         const map = L.map('map').setView([48.92, 2.46], 13);
         
-        // Carte satellite
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 19
         }).addTo(map);
 
-        // Marqueurs GROS et VISIBLES
-        function createBigMarker(emoji, color, popupText) {
-            return L.marker(color, {
+        // Marqueurs
+        function createMarker(emoji, pos, text) {
+            L.marker(pos, {
                 icon: L.divIcon({
-                    html: `<div style="background:white; width:45px; height:45px; border-radius:45px; display:flex; align-items:center; justify-content:center; font-size:28px; border:4px solid #3b82f6; box-shadow:0 5px 20px black;">${emoji}</div>`,
+                    html: `<div style="background:white; width:45px; height:45px; border-radius:45px; display:flex; align-items:center; justify-content:center; font-size:28px; border:4px solid #3b82f6;">${emoji}</div>`,
                     iconSize: [45, 45]
                 })
-            }).addTo(map).bindPopup(popupText);
+            }).addTo(map).bindPopup(text);
         }
 
-        createBigMarker('⛪', STOPS.eglise, 'Église Charisma');
-        createBigMarker('🏠', STOPS.brement, 'Brement');
-        createBigMarker('🚉', STOPS.noisy, 'Noisy-le-Sec');
-        createBigMarker('⛪', STOPS.retour, 'Retour Église');
+        createMarker('⛪', STOPS.eglise, 'Église Charisma');
+        createMarker('🏠', STOPS.brement, 'Brement');
+        createMarker('🚉', STOPS.noisy, 'Noisy-le-Sec');
+        createMarker('⛪', STOPS.retour, 'Retour Église');
 
-        // Ligne du trajet
+        // Ligne
         L.polyline([STOPS.eglise, STOPS.brement, STOPS.noisy, STOPS.retour], {
-            color: '#f97316',
+            color: '#fbbf24',
             weight: 6,
             opacity: 0.8,
             dashArray: '10, 15'
         }).addTo(map);
 
-        // GROS BUS VISIBLE
+        // GROS BUS
         const busMarker = L.marker(STOPS.eglise, {
             icon: L.divIcon({
-                html: '<div style="background:#3b82f6; width:55px; height:55px; border-radius:55px; display:flex; align-items:center; justify-content:center; font-size:32px; border:4px solid white; box-shadow:0 0 30px #3b82f6; animation:pulse 1.5s infinite;">🚌</div>',
-                iconSize: [55, 55]
+                html: '<div style="background:#3b82f6; width:60px; height:60px; border-radius:60px; display:flex; align-items:center; justify-content:center; font-size:35px; border:4px solid white; box-shadow:0 0 40px #3b82f6;">🚌</div>',
+                iconSize: [60, 60]
             })
         }).addTo(map);
 
@@ -512,23 +582,26 @@
             const etape = data.etape;
             const time = data.time;
 
-            // Reset tous les états
+            // Reset
             document.querySelectorAll('.stop-card').forEach(c => {
                 c.classList.remove('completed', 'active');
             });
 
-            // GROS statut en haut
+            // Message en évidence
+            const msgElement = document.getElementById('inspirationalMessage');
+            
+            // GROS statut
             const bigIcon = document.getElementById('bigIcon');
             const bigLocation = document.getElementById('bigLocation');
             const bigTime = document.getElementById('bigTime');
             bigTime.innerText = time;
 
-            // Mise à jour selon étape
             switch(etape) {
                 case 'depart':
                     busMarker.setLatLng(STOPS.eglise);
                     map.panTo(STOPS.eglise);
                     
+                    msgElement.innerText = MESSAGES.depart.principal;
                     bigIcon.innerHTML = '⛪';
                     bigLocation.innerText = 'Départ Église';
                     
@@ -545,6 +618,7 @@
                     busMarker.setLatLng(STOPS.brement);
                     map.panTo(STOPS.brement);
                     
+                    msgElement.innerText = MESSAGES.brement.principal;
                     bigIcon.innerHTML = '🏠';
                     bigLocation.innerText = 'Arrêt Brement';
                     
@@ -562,6 +636,7 @@
                     busMarker.setLatLng(STOPS.noisy);
                     map.panTo(STOPS.noisy);
                     
+                    msgElement.innerText = MESSAGES.noisy.principal;
                     bigIcon.innerHTML = '🚉';
                     bigLocation.innerText = 'Arrêt Noisy';
                     
@@ -580,6 +655,7 @@
                     busMarker.setLatLng(STOPS.retour);
                     map.panTo(STOPS.retour);
                     
+                    msgElement.innerText = MESSAGES.retour.principal;
                     bigIcon.innerHTML = '⛪';
                     bigLocation.innerText = 'Retour Église';
                     
@@ -595,19 +671,12 @@
             }
 
             // Ajouter notification
-            const messages = {
-                depart: "🚌 DÉPART Église - Le bus céleste arrive !",
-                brement: "🏠 ARRIVÉE Brement - Prochain arrêt Noisy",
-                noisy: "🚉 ARRIVÉE Noisy - Retour vers l'église",
-                retour: "⛪ RETOUR Église - Fin du trajet"
-            };
-
             const list = document.getElementById('notificationsList');
             const newNotif = document.createElement('div');
             newNotif.className = 'notif-item';
             newNotif.innerHTML = `
                 <div class="notif-time">${time}</div>
-                <div>${messages[etape]}</div>
+                <div class="notif-message"><i>${MESSAGES[etape].principal}</i></div>
             `;
             list.insertBefore(newNotif, list.firstChild);
             
