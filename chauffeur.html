@@ -332,21 +332,21 @@
                 </div>
                 
                 <div class="gps-coords-box" id="gpsCoords">
-                    📡 En attente du signal...
+                    📡 En attente du signal GPS...
                 </div>
                 
                 <div class="gps-buttons">
                     <button class="gps-btn start" id="startGpsBtn">
-                        <span>▶️</span> Démarrer
+                        <span>▶️</span> Démarrer GPS
                     </button>
                     <button class="gps-btn stop" id="stopGpsBtn" style="display: none;">
-                        <span>⏹️</span> Arrêter
+                        <span>⏹️</span> Arrêter GPS
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Boutons d'étapes (TRÈS GROS) -->
+        <!-- Boutons d'étapes -->
         <div class="steps-section">
             <div class="steps-title">
                 <span>🎮</span> Contrôle du trajet
@@ -390,7 +390,7 @@
             </div>
         </div>
 
-        <!-- Rappel des arrêts (visuel) -->
+        <!-- Rappel des arrêts -->
         <div class="stops-reminder">
             <div class="reminder-item">
                 <span>⛪</span>
@@ -436,11 +436,11 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // ===== VARIABLES GPS =====
+        // Variables GPS
         let watchId = null;
         let dernierePosition = { lat: 48.94525, lng: 2.47403 }; // Église par défaut
 
-        // ===== FONCTIONS GPS =====
+        // Fonction pour démarrer le GPS
         function demarrerGPS() {
             if (!navigator.geolocation) {
                 alert("📡 GPS non disponible sur cet appareil");
@@ -450,7 +450,7 @@
             document.getElementById('gpsStatus').innerText = 'Recherche...';
             
             watchId = navigator.geolocation.watchPosition(
-                (position) => {
+                function(position) {
                     dernierePosition = {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude
@@ -458,25 +458,23 @@
                     
                     // Mise à jour de l'affichage
                     document.getElementById('gpsCoords').innerHTML = 
-                        `Lat: ${dernierePosition.lat.toFixed(6)}<br>Lng: ${dernierePosition.lng.toFixed(6)}`;
+                        'Lat: ' + dernierePosition.lat.toFixed(6) + '<br>Lng: ' + dernierePosition.lng.toFixed(6);
                     document.getElementById('gpsStatus').innerHTML = '<span style="color:#4CAF50;">● Actif</span>';
                     
                     // Changer les boutons
                     document.getElementById('startGpsBtn').style.display = 'none';
                     document.getElementById('stopGpsBtn').style.display = 'block';
                 },
-                (error) => {
+                function(error) {
                     let message = "Erreur GPS : ";
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            message += "Autorisation refusée";
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            message += "Position indisponible";
-                            break;
-                        case error.TIMEOUT:
-                            message += "Délai dépassé";
-                            break;
+                    if (error.code === error.PERMISSION_DENIED) {
+                        message += "Autorisation refusée";
+                    } else if (error.code === error.POSITION_UNAVAILABLE) {
+                        message += "Position indisponible";
+                    } else if (error.code === error.TIMEOUT) {
+                        message += "Délai dépassé";
+                    } else {
+                        message += error.message;
                     }
                     alert(message);
                 },
@@ -488,6 +486,7 @@
             );
         }
 
+        // Fonction pour arrêter le GPS
         function arreterGPS() {
             if (watchId) {
                 navigator.geolocation.clearWatch(watchId);
@@ -500,87 +499,64 @@
             document.getElementById('stopGpsBtn').style.display = 'none';
         }
 
-        // ===== FONCTION POUR ENVOYER UNE MISE À JOUR =====
-        async function envoyerMAJ(etape, messageCourt, messageLong) {
+        // Fonction pour envoyer une mise à jour
+        function envoyerMAJ(etape, messageCourt) {
             if (!dernierePosition) {
                 alert("📡 Activez d'abord le GPS !");
                 return;
             }
 
-            const now = new Date();
-            const heure = now.getHours() + ':' + 
-                        (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+            var now = new Date();
+            var heure = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
 
             // Préparer les données pour Firebase
-            const data = {
+            var data = {
                 etape: etape,
                 message: messageCourt,
-                messageLong: messageLong,
                 time: heure,
                 lat: dernierePosition.lat,
                 lng: dernierePosition.lng
             };
 
-            try {
-                // Envoyer à Firebase
-                await database.ref('bus-status').set(data);
-                
-                // Afficher le message de confirmation
-                const confirmMsg = document.getElementById('confirmMessage');
-                confirmMsg.style.display = 'block';
-                setTimeout(() => {
-                    confirmMsg.style.display = 'none';
-                }, 2000);
+            // Envoyer à Firebase
+            database.ref('bus-status').set(data)
+                .then(function() {
+                    // Afficher le message de confirmation
+                    document.getElementById('confirmMessage').style.display = 'block';
+                    setTimeout(function() {
+                        document.getElementById('confirmMessage').style.display = 'none';
+                    }, 2000);
 
-                // Mettre à jour la carte "dernière action"
-                document.getElementById('lastUpdateMessage').innerText = messageCourt;
-                document.getElementById('lastUpdateTime').innerText = heure;
+                    // Mettre à jour la carte "dernière action"
+                    document.getElementById('lastUpdateMessage').innerText = messageCourt;
+                    document.getElementById('lastUpdateTime').innerText = heure;
 
-                console.log('✅ Message envoyé:', messageCourt);
-            } catch (error) {
-                console.error('Erreur:', error);
-                alert('❌ Erreur de connexion. Réessaie !');
-            }
+                    console.log('✅ Message envoyé:', messageCourt);
+                })
+                .catch(function(error) {
+                    console.error('Erreur:', error);
+                    alert('❌ Erreur de connexion. Réessaie !');
+                });
         }
 
         // ===== BOUTONS =====
         document.getElementById('startGpsBtn').addEventListener('click', demarrerGPS);
         document.getElementById('stopGpsBtn').addEventListener('click', arreterGPS);
 
-        // Bouton DÉPART Église
-        document.getElementById('btnDepart').addEventListener('click', () => {
-            envoyerMAJ(
-                'depart',
-                '🚌 DÉPART Église',
-                'Église, réjouis-toi, le bus céleste arrive ! 🙏'
-            );
+        document.getElementById('btnDepart').addEventListener('click', function() {
+            envoyerMAJ('depart', '🚌 DÉPART Église');
         });
 
-        // Bouton ARRIVÉE Brement
-        document.getElementById('btnBrement').addEventListener('click', () => {
-            envoyerMAJ(
-                'brement',
-                '✅ ARRIVÉE Brement',
-                'Noisy-LE-FEUX, on arrive ! 🔥'
-            );
+        document.getElementById('btnBrement').addEventListener('click', function() {
+            envoyerMAJ('brement', '✅ ARRIVÉE Brement');
         });
 
-        // Bouton ARRIVÉE Noisy
-        document.getElementById('btnNoisy').addEventListener('click', () => {
-            envoyerMAJ(
-                'noisy',
-                '🟣 ARRIVÉE Noisy',
-                'C'est partie ! 🎉'
-            );
+        document.getElementById('btnNoisy').addEventListener('click', function() {
+            envoyerMAJ('noisy', '🟣 ARRIVÉE Noisy');
         });
 
-        // Bouton RETOUR Église
-        document.getElementById('btnRetour').addEventListener('click', () => {
-            envoyerMAJ(
-                'retour',
-                '🔚 RETOUR Église',
-                'Merci d\'avoir voyagé ! ❤️'
-            );
+        document.getElementById('btnRetour').addEventListener('click', function() {
+            envoyerMAJ('retour', '🔚 RETOUR Église');
         });
 
         console.log('✅ Page conducteur prête !');
