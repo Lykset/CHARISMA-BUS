@@ -4,24 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conducteur - Bus Charisma</title>
-    <!-- Firebase SDK (les 2 fichiers nécessaires) -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <!-- Firebase version 8 (la plus simple pour les pages HTML) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
             font-family: Arial, sans-serif;
             padding: 20px;
+            margin: 0;
         }
-        .container { max-width: 500px; margin: 0 auto; }
-        h1 { text-align: center; }
-        .status {
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status-box {
             background: white;
             color: #333;
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
             margin: 20px 0;
+            font-weight: bold;
         }
         button {
             width: 100%;
@@ -33,29 +41,41 @@
             font-weight: bold;
             cursor: pointer;
             color: white;
+            transition: transform 0.2s;
         }
-        .depart { background: #ff9800; }
-        .brement { background: #2196F3; }
-        .noisy { background: #9C27B0; }
-        .retour { background: #4CAF50; }
+        button:active {
+            transform: scale(0.95);
+        }
+        .btn-depart { background: #ff9800; }
+        .btn-brement { background: #2196F3; }
+        .btn-noisy { background: #9C27B0; }
+        .btn-retour { background: #4CAF50; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚌 Conducteur</h1>
+        <h1>🚌 Conducteur Charisma</h1>
         
-        <div class="status" id="status">
+        <div class="status-box" id="status">
             Prêt à démarrer
         </div>
         
-        <button class="depart" onclick="updateStatus('depart', '🚌 DÉPART Église')">DÉPART Église</button>
-        <button class="brement" onclick="updateStatus('brement', '✅ ARRIVÉE Brement')">ARRIVÉE Brement</button>
-        <button class="noisy" onclick="updateStatus('noisy', '🟣 ARRIVÉE Noisy')">ARRIVÉE Noisy</button>
-        <button class="retour" onclick="updateStatus('retour', '🔚 RETOUR Église')">RETOUR Église</button>
+        <button class="btn-depart" onclick="sendUpdate('depart', '🚌 DÉPART Église')">
+            DÉPART Église
+        </button>
+        <button class="btn-brement" onclick="sendUpdate('brement', '✅ ARRIVÉE Brement')">
+            ARRIVÉE Brement
+        </button>
+        <button class="btn-noisy" onclick="sendUpdate('noisy', '🟣 ARRIVÉE Noisy')">
+            ARRIVÉE Noisy
+        </button>
+        <button class="btn-retour" onclick="sendUpdate('retour', '🔚 RETOUR Église')">
+            RETOUR Église
+        </button>
     </div>
 
     <script>
-        // === TA CONFIGURATION FIREBASE (que tu as copiée) ===
+        // === TA CONFIGURATION FIREBASE ===
         const firebaseConfig = {
             apiKey: "AIzaSyC4sWMc3fNaMpZ9cD8ahQdMJn6BjRyJDzk",
             authDomain: "charisma-bus.firebaseapp.com",
@@ -66,12 +86,11 @@
             appId: "1:630450080183:web:c204b463f63b12a8d30032"
         };
 
-        // === INITIALISER FIREBASE ===
+        // Initialiser Firebase (version 8)
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // === FONCTION POUR METTRE À JOUR LE STATUT ===
-        function updateStatus(etape, message) {
+        function sendUpdate(etape, message) {
             const now = new Date();
             const time = now.getHours() + ':' + 
                         (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
@@ -86,9 +105,11 @@
             // Envoyer à Firebase
             database.ref('bus-status').set(data);
             
-            // Mettre à jour l'affichage local
+            // Mettre à jour l'affichage
             document.getElementById('status').innerHTML = 
                 `✅ ${message}<br><small>${time}</small>`;
+            
+            console.log('Message envoyé:', message);
         }
     </script>
 </body>
