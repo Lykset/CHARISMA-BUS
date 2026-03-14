@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charisma Bus - Contrôle conducteur</title>
+    <title>Charisma Bus - Conducteur</title>
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -13,18 +13,15 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
         body {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
             padding: 20px;
         }
-        
         .container {
             max-width: 500px;
             margin: 0 auto;
         }
-        
         .header {
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
@@ -34,17 +31,11 @@
             color: white;
             text-align: center;
         }
-        
-        .bus-icon {
-            font-size: 4em;
-            animation: bounce 2s infinite;
-        }
-        
+        .bus-icon { font-size: 4em; animation: bounce 2s infinite; }
         @keyframes bounce {
             0%,100%{transform:translateY(0)}
             50%{transform:translateY(-10px)}
         }
-        
         .driver-badge {
             background: #ff9800;
             color: white;
@@ -53,7 +44,6 @@
             display: inline-block;
             margin-top: 10px;
         }
-        
         .info-card {
             background: white;
             border-radius: 30px;
@@ -61,14 +51,12 @@
             margin-bottom: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
-        
         .gps-section {
             background: #f8f9fa;
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
         }
-        
         .gps-status {
             display: flex;
             align-items: center;
@@ -78,16 +66,8 @@
             background: white;
             border-radius: 10px;
         }
-        
-        .gps-active {
-            color: #4CAF50;
-            font-weight: bold;
-        }
-        
-        .gps-inactive {
-            color: #999;
-        }
-        
+        .gps-active { color: #4CAF50; font-weight: bold; }
+        .gps-inactive { color: #999; }
         .gps-coords {
             font-family: monospace;
             background: #333;
@@ -97,7 +77,6 @@
             text-align: center;
             margin: 10px 0;
         }
-        
         .gps-btn {
             width: 100%;
             padding: 15px;
@@ -109,22 +88,13 @@
             cursor: pointer;
             margin: 5px 0;
         }
-        
-        .gps-btn:active {
-            transform: scale(0.98);
-        }
-        
-        .gps-btn.stop {
-            background: #f44336;
-        }
-        
+        .gps-btn.stop { background: #f44336; }
         .control-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin: 20px 0;
         }
-        
         .control-btn {
             padding: 20px;
             border: none;
@@ -137,22 +107,11 @@
             flex-direction: column;
             align-items: center;
             gap: 10px;
-            transition: transform 0.2s;
         }
-        
-        .control-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .control-btn span {
-            font-size: 2em;
-        }
-        
         .btn-depart { background: linear-gradient(135deg, #ff9800, #f57c00); }
         .btn-brement { background: linear-gradient(135deg, #2196F3, #1976D2); }
         .btn-noisy { background: linear-gradient(135deg, #9C27B0, #7B1FA2); }
         .btn-retour { background: linear-gradient(135deg, #4CAF50, #388E3C); }
-        
         .last-update {
             background: #f8f9fa;
             border-radius: 15px;
@@ -161,7 +120,6 @@
             color: #666;
             margin-top: 15px;
         }
-        
         .share-section {
             background: white;
             border-radius: 30px;
@@ -169,7 +127,6 @@
             margin-top: 20px;
             text-align: center;
         }
-        
         .share-link {
             background: #667eea;
             color: white;
@@ -180,230 +137,127 @@
             margin: 15px 0;
             font-weight: bold;
         }
-        
-        @media (max-width: 480px) {
-            .control-grid {
-                grid-template-columns: 1fr;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- En-tête -->
         <div class="header">
             <div class="bus-icon">🚌</div>
             <h1>Espace conducteur GPS</h1>
             <p>Église Charisma • Blanc-Mesnil</p>
             <div class="driver-badge">🔑 Accès privé</div>
         </div>
-        
-        <!-- Section GPS -->
+
         <div class="info-card">
-            <h3 style="margin-bottom: 15px;">📍 Géolocalisation en direct</h3>
-            
+            <h3 style="margin-bottom: 15px;">📍 Géolocalisation</h3>
             <div class="gps-section">
                 <div class="gps-status">
-                    <span>🛰️ État GPS :</span>
-                    <span class="gps-inactive" id="gpsStatus">○ Inactif</span>
+                    <span>🛰️ GPS :</span>
+                    <span class="gps-inactive" id="gpsStatus">Inactif</span>
                 </div>
-                
-                <div class="gps-coords" id="gpsCoords">
-                    Latitude: --<br>
-                    Longitude: --
-                </div>
-                
-                <button class="gps-btn" id="startGpsBtn" onclick="window.handleStartGps()">
-                    📡 Démarrer le suivi GPS
-                </button>
-                <button class="gps-btn stop" id="stopGpsBtn" onclick="window.handleStopGps()" style="display:none;">
-                    ⏹️ Arrêter le suivi
-                </button>
-                
-                <p style="font-size:0.8em; color:#999; margin-top:10px;">
-                    Le bus sera visible en direct sur la carte des membres
-                </p>
+                <div class="gps-coords" id="gpsCoords">Latitude: --<br>Longitude: --</div>
+                <button class="gps-btn" id="startBtn">📡 Démarrer le GPS</button>
+                <button class="gps-btn stop" id="stopBtn" style="display:none;">⏹️ Arrêter le GPS</button>
             </div>
-            
-            <!-- Boutons de contrôle -->
+
             <div class="control-grid">
-                <button class="control-btn btn-depart" onclick="window.handleUpdate('depart')">
-                    <span>⛪</span>
-                    DÉPART Église
-                </button>
-                <button class="control-btn btn-brement" onclick="window.handleUpdate('brement')">
-                    <span>🏠</span>
-                    ARRIVÉE Brement
-                </button>
-                <button class="control-btn btn-noisy" onclick="window.handleUpdate('noisy')">
-                    <span>🏠</span>
-                    ARRIVÉE Noisy
-                </button>
-                <button class="control-btn btn-retour" onclick="window.handleUpdate('retour')">
-                    <span>⛪</span>
-                    RETOUR Église
-                </button>
+                <button class="control-btn btn-depart" id="btnDepart">⛪ DÉPART Église</button>
+                <button class="control-btn btn-brement" id="btnBrement">🏠 ARRIVÉE Brement</button>
+                <button class="control-btn btn-noisy" id="btnNoisy">🏠 ARRIVÉE Noisy</button>
+                <button class="control-btn btn-retour" id="btnRetour">⛪ RETOUR Église</button>
             </div>
-            
-            <div class="last-update" id="lastUpdate">
-                Dernière mise à jour : aucun trajet en cours
-            </div>
+
+            <div class="last-update" id="lastUpdate">Aucun trajet en cours</div>
         </div>
-        
-        <!-- Partage -->
+
         <div class="share-section">
             <h3>📱 Suivi en direct</h3>
-            <p style="color:#666; margin:10px 0;">
-                Les membres voient le bus bouger en temps réel
-            </p>
-            <a href="https://lykset.github.io/CHARISMA-BUS/" class="share-link" target="_blank">
-                🔗 Lien public
-            </a>
+            <a href="https://lykset.github.io/CHARISMA-BUS/" class="share-link" target="_blank">🔗 Lien public</a>
         </div>
     </div>
-    
+
     <script>
-        // ============================================
-        // CONFIGURATION SUPABASE - VOS CLÉS ICI
-        // ============================================
+        // === CONFIGURATION SUPABASE ===
         const SUPABASE_URL = "https://pbxtdkdblpydwzldnipc.supabase.co";
         const SUPABASE_KEY = "sb_publishable_UGGXS_aHeX92VO44kw6DSw_9xK_MRMV";
-        
-        // Initialisation Supabase (une seule fois)
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        // Variables
-        let gpsWatchId = null;
-        let dernierePosition = null;
-        
-        // ============================================
-        // FONCTIONS GPS (accessibles via window)
-        // ============================================
-        window.handleStartGps = function() {
-            if (navigator.geolocation) {
-                document.getElementById('gpsStatus').innerHTML = '● Recherche du signal...';
-                document.getElementById('gpsStatus').className = 'gps-inactive';
-                
-                gpsWatchId = navigator.geolocation.watchPosition(
-                    function(position) {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        
-                        dernierePosition = { lat, lng };
-                        
-                        // Mettre à jour l'affichage
-                        document.getElementById('gpsCoords').innerHTML = 
-                            `Latitude: ${lat.toFixed(6)}<br>Longitude: ${lng.toFixed(6)}`;
-                        document.getElementById('gpsStatus').innerHTML = '● Actif';
-                        document.getElementById('gpsStatus').className = 'gps-active';
-                        
-                        // Afficher les boutons
-                        document.getElementById('startGpsBtn').style.display = 'none';
-                        document.getElementById('stopGpsBtn').style.display = 'block';
-                        
-                        // Sauvegarder la position dans Supabase
-                        supabaseClient
-                            .from('bus_positions')
-                            .insert([{
-                                etape: 'position',
-                                latitude: lat,
-                                longitude: lng,
-                                message: 'Mise à jour position'
-                            }])
-                            .then(response => {
-                                console.log('Position envoyée', response);
-                            })
-                            .catch(error => {
-                                console.error('Erreur envoi position:', error);
-                            });
-                    },
-                    function(error) {
-                        alert('Erreur GPS : ' + error.message);
-                        document.getElementById('gpsStatus').innerHTML = '✗ Erreur';
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        maximumAge: 0,
-                        timeout: 5000
-                    }
-                );
-            } else {
-                alert('GPS non supporté sur cet appareil');
-            }
-        };
-        
-        window.handleStopGps = function() {
-            if (gpsWatchId !== null) {
-                navigator.geolocation.clearWatch(gpsWatchId);
-                gpsWatchId = null;
-                
-                document.getElementById('gpsStatus').innerHTML = '○ Inactif';
-                document.getElementById('gpsStatus').className = 'gps-inactive';
-                document.getElementById('startGpsBtn').style.display = 'block';
-                document.getElementById('stopGpsBtn').style.display = 'none';
-                document.getElementById('gpsCoords').innerHTML = 'Latitude: --<br>Longitude: --';
-            }
-        };
-        
-        // ============================================
-        // FONCTIONS DE MISE À JOUR
-        // ============================================
-        window.handleUpdate = function(etape) {
-            if (!dernierePosition) {
-                alert('Veuillez d\'abord démarrer le GPS');
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // === VARIABLES ===
+        let watchId = null;
+        let lastPos = null;
+
+        // === FONCTIONS ===
+        function demarrerGPS() {
+            if (!navigator.geolocation) {
+                alert("GPS non supporté");
                 return;
             }
-            
+            document.getElementById('gpsStatus').innerText = "Recherche...";
+            watchId = navigator.geolocation.watchPosition(
+                pos => {
+                    lastPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    document.getElementById('gpsCoords').innerHTML = `Lat: ${lastPos.lat.toFixed(6)}<br>Lng: ${lastPos.lng.toFixed(6)}`;
+                    document.getElementById('gpsStatus').innerHTML = '<span class="gps-active">● Actif</span>';
+                    document.getElementById('startBtn').style.display = 'none';
+                    document.getElementById('stopBtn').style.display = 'block';
+
+                    // Envoi position à Supabase
+                    supabase.from('bus_positions').insert([{
+                        etape: 'position',
+                        latitude: lastPos.lat,
+                        longitude: lastPos.lng,
+                        message: 'Mise à jour position'
+                    }]).catch(e => console.warn("Erreur envoi position", e));
+                },
+                err => {
+                    alert("Erreur GPS : " + err.message);
+                },
+                { enableHighAccuracy: true, timeout: 5000 }
+            );
+        }
+
+        function arreterGPS() {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            document.getElementById('gpsStatus').innerHTML = 'Inactif';
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('gpsCoords').innerHTML = 'Latitude: --<br>Longitude: --';
+        }
+
+        async function envoyerEtape(etape, message) {
+            if (!lastPos) {
+                alert("Activez d'abord le GPS");
+                return;
+            }
             const now = new Date();
             const heure = now.getHours() + 'h' + (now.getMinutes()<10?'0':'') + now.getMinutes();
-            
-            let notificationMsg = '';
-            switch(etape) {
-                case 'depart':
-                    notificationMsg = '🚌 DÉPART de l\'église - Arrivée Brement dans 15 min';
-                    break;
-                case 'brement':
-                    notificationMsg = '✅ ARRIVÉE à Brement - Prochain arrêt Noisy-le-Sec';
-                    break;
-                case 'noisy':
-                    notificationMsg = '🟣 ARRIVÉE à Noisy-le-Sec - Retour église dans 15 min';
-                    break;
-                case 'retour':
-                    notificationMsg = '🔚 RETOUR à l\'église Charisma - Fin du trajet';
-                    break;
-            }
-            
-            // Envoyer à Supabase
-            supabaseClient
-                .from('bus_positions')
-                .insert([{
-                    etape: etape,
-                    latitude: dernierePosition.lat,
-                    longitude: dernierePosition.lng,
-                    message: 'Notification:' + notificationMsg
-                }])
-                .then(response => {
-                    console.log('Notification envoyée', response);
-                    
-                    // Mettre à jour l'affichage
-                    document.getElementById('lastUpdate').innerHTML = `
-                        Dernière mise à jour : ${notificationMsg} à ${heure}<br>
-                        Position: ${dernierePosition.lat.toFixed(6)}, ${dernierePosition.lng.toFixed(6)}
-                    `;
-                    
-                    // Ouvrir WhatsApp
-                    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
-                        notificationMsg + '\n\n📍 Suivez le bus en direct : https://lykset.github.io/CHARISMA-BUS/'
-                    )}`;
-                    window.open(whatsappUrl, '_blank');
-                })
-                .catch(error => {
-                    console.error('Erreur envoi notification:', error);
-                    alert('Erreur: ' + error.message);
-                });
-        };
-        
-        console.log('Page chauffeur chargée avec succès !');
+            const notif = `${message} (${heure})`;
+
+            await supabase.from('bus_positions').insert([{
+                etape: etape,
+                latitude: lastPos.lat,
+                longitude: lastPos.lng,
+                message: 'Notification:' + notif
+            }]);
+
+            document.getElementById('lastUpdate').innerHTML = `✅ ${notif}<br>📍 ${lastPos.lat.toFixed(6)}, ${lastPos.lng.toFixed(6)}`;
+
+            // WhatsApp
+            window.open(`https://wa.me/?text=${encodeURIComponent(notif + '\n\nSuivez le bus : https://lykset.github.io/CHARISMA-BUS/')}`, '_blank');
+        }
+
+        // === BOUTONS ===
+        document.getElementById('startBtn').addEventListener('click', demarrerGPS);
+        document.getElementById('stopBtn').addEventListener('click', arreterGPS);
+        document.getElementById('btnDepart').addEventListener('click', () => envoyerEtape('depart', '🚌 DÉPART Église - Arrivée Brement 15min'));
+        document.getElementById('btnBrement').addEventListener('click', () => envoyerEtape('brement', '✅ ARRIVÉE Brement - Prochain arrêt Noisy'));
+        document.getElementById('btnNoisy').addEventListener('click', () => envoyerEtape('noisy', '🟣 ARRIVÉE Noisy - Retour église 15min'));
+        document.getElementById('btnRetour').addEventListener('click', () => envoyerEtape('retour', '🔚 RETOUR Église - Fin du trajet'));
+
+        console.log("✅ Page chauffeur prête");
     </script>
 </body>
 </html>
