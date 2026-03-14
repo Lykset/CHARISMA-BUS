@@ -180,7 +180,8 @@
         // === CONFIGURATION SUPABASE ===
         const SUPABASE_URL = "https://pbxtdkdblpydwzldnipc.supabase.co";
         const SUPABASE_KEY = "sb_publishable_UGGXS_aHeX92VO44kw6DSw_9xK_MRMV";
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // ⚠️ On utilise un nom DIFFÉRENT pour éviter tout conflit
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // === VARIABLES ===
         let watchId = null;
@@ -201,8 +202,8 @@
                     document.getElementById('startBtn').style.display = 'none';
                     document.getElementById('stopBtn').style.display = 'block';
 
-                    // Envoi position à Supabase
-                    supabase.from('bus_positions').insert([{
+                    // Envoi position à Supabase (via supabaseClient)
+                    supabaseClient.from('bus_positions').insert([{
                         etape: 'position',
                         latitude: lastPos.lat,
                         longitude: lastPos.lng,
@@ -236,7 +237,8 @@
             const heure = now.getHours() + 'h' + (now.getMinutes()<10?'0':'') + now.getMinutes();
             const notif = `${message} (${heure})`;
 
-            await supabase.from('bus_positions').insert([{
+            // Insertion via supabaseClient
+            await supabaseClient.from('bus_positions').insert([{
                 etape: etape,
                 latitude: lastPos.lat,
                 longitude: lastPos.lng,
@@ -249,7 +251,7 @@
             window.open(`https://wa.me/?text=${encodeURIComponent(notif + '\n\nSuivez le bus : https://lykset.github.io/CHARISMA-BUS/')}`, '_blank');
         }
 
-        // === BOUTONS ===
+        // === BOUTONS (avec gestionnaires d'événements) ===
         document.getElementById('startBtn').addEventListener('click', demarrerGPS);
         document.getElementById('stopBtn').addEventListener('click', arreterGPS);
         document.getElementById('btnDepart').addEventListener('click', () => envoyerEtape('depart', '🚌 DÉPART Église - Arrivée Brement 15min'));
@@ -257,7 +259,7 @@
         document.getElementById('btnNoisy').addEventListener('click', () => envoyerEtape('noisy', '🟣 ARRIVÉE Noisy - Retour église 15min'));
         document.getElementById('btnRetour').addEventListener('click', () => envoyerEtape('retour', '🔚 RETOUR Église - Fin du trajet'));
 
-        console.log("✅ Page chauffeur prête");
+        console.log("✅ Page chauffeur prête (avec supabaseClient)");
     </script>
 </body>
 </html>
