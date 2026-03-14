@@ -1,106 +1,400 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus Charisma - Suivi</title>
+    <title>Charisma Bus - Suivi GPS</title>
+    <!-- Leaflet pour la carte -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Firebase version 8 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            margin: 0;
+            min-height: 100vh;
+            padding: 15px;
         }
+        
         .container {
             max-width: 500px;
             margin: 0 auto;
         }
-        h1 {
-            text-align: center;
-        }
-        .route {
-            text-align: center;
-            margin: 10px 0 20px 0;
-            opacity: 0.9;
-        }
-        .status-card {
+        
+        /* En-tête */
+        .hero {
             background: white;
-            color: #333;
-            padding: 25px;
-            border-radius: 15px;
-            margin: 20px 0;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 30px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-        .live-badge {
-            background: #4CAF50;
+        
+        .church-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .church-name span {
+            background: #667eea;
             color: white;
-            padding: 5px 15px;
+            font-size: 0.5em;
+            padding: 3px 10px;
             border-radius: 50px;
-            display: inline-block;
+        }
+        
+        .route {
+            color: #666;
+            margin: 10px 0;
+            font-size: 0.95em;
+        }
+        
+        /* Carte */
+        .map-container {
+            background: white;
+            border-radius: 30px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        #map {
+            height: 300px;
+            border-radius: 20px;
+            z-index: 1;
+        }
+        
+        .map-legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+            justify-content: center;
             font-size: 0.9em;
+            color: #666;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .bus-dot {
+            width: 12px;
+            height: 12px;
+            background: #ff4444;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #ff4444;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .stop-dot {
+            width: 10px;
+            height: 10px;
+            background: #4CAF50;
+            border-radius: 50%;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Statut en direct */
+        .live-status {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
             margin-bottom: 15px;
         }
-        .message {
-            font-size: 1.4em;
-            font-weight: bold;
-            margin: 15px 0;
+        
+        .live-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
         }
-        .time {
+        
+        .live-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .bus-position {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .eta {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .eta small {
+            font-size: 0.4em;
+            opacity: 0.8;
+        }
+        
+        /* Timeline des arrêts */
+        .timeline {
+            background: white;
+            border-radius: 30px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .timeline-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .stop-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .stop-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .stop-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 35px;
+            width: 2px;
+            height: calc(100% - 20px);
+            background: #e0e0e0;
+        }
+        
+        .stop-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2em;
+            z-index: 2;
+        }
+        
+        .stop-icon.completed {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .stop-icon.active {
+            background: #ff9800;
+            color: white;
+            animation: glow 1.5s infinite;
+        }
+        
+        .stop-icon.pending {
+            background: #f0f0f0;
+            color: #999;
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 0 0 rgba(255,152,0,0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(255,152,0,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,152,0,0); }
+        }
+        
+        .stop-info {
+            flex: 1;
+        }
+        
+        .stop-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .stop-time {
             color: #999;
             font-size: 0.9em;
         }
+        
+        .stop-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        
+        .stop-badge.orange {
+            background: #ff9800;
+        }
+        
+        /* Notifications */
         .notifications {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
+            background: white;
+            border-radius: 30px;
             padding: 20px;
-            margin-top: 20px;
         }
-        .notif-title {
-            font-size: 1.2em;
+        
+        .notif-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             margin-bottom: 15px;
+            color: #333;
         }
+        
         .notif-item {
-            background: rgba(255,255,255,0.2);
-            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 12px;
             margin: 10px 0;
             border-radius: 10px;
-            border-left: 4px solid #4CAF50;
         }
+        
         .notif-time {
             font-size: 0.8em;
-            opacity: 0.7;
+            color: #999;
             margin-bottom: 5px;
         }
+        
+        .notif-message {
+            color: #333;
+            font-weight: 500;
+        }
+        
         .footer {
             text-align: center;
-            margin-top: 20px;
-            font-size: 0.8em;
-            opacity: 0.7;
+            margin-top: 15px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>⛪ Église Charisma</h1>
-        <div class="route">Blanc-Mesnil → Brement → Noisy-le-Sec → Blanc-Mesnil</div>
-        
-        <div class="status-card" id="statusCard">
-            <span class="live-badge">🔴 EN DIRECT</span>
-            <div class="message" id="liveMessage">En attente du signal...</div>
-            <div class="time" id="liveTime">Dernière mise à jour: --</div>
+        <!-- En-tête -->
+        <div class="hero">
+            <div class="church-name">
+                ⛪ Église Charisma
+                <span>Blanc-Mesnil</span>
+            </div>
+            <div class="route">
+                🚌 Blanc-Mesnil → Brement → Noisy-le-Sec → Blanc-Mesnil
+            </div>
         </div>
         
+        <!-- Carte interactive -->
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="map-legend">
+                <div class="legend-item">
+                    <div class="bus-dot"></div>
+                    <span>Bus en direct</span>
+                </div>
+                <div class="legend-item">
+                    <div class="stop-dot"></div>
+                    <span>Arrêts</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statut en direct -->
+        <div class="live-status" id="liveStatus">
+            <div class="live-header">
+                <div class="live-badge">
+                    <span class="live-dot"></span>
+                    EN DIRECT
+                </div>
+                <div>🚌 Bus Charisma</div>
+            </div>
+            <div class="bus-position" id="busPosition">En attente du signal...</div>
+            <div class="eta" id="eta">-- <small>min</small></div>
+        </div>
+        
+        <!-- Timeline des arrêts -->
+        <div class="timeline">
+            <div class="timeline-title">
+                <h3>📍 Points d'arrêt</h3>
+                <div id="currentDate"></div>
+            </div>
+            
+            <div class="stop-item" id="stopEglise">
+                <div class="stop-icon pending">⛪</div>
+                <div class="stop-info">
+                    <div class="stop-name">Église Charisma</div>
+                    <div class="stop-time" id="timeEglise">En attente</div>
+                </div>
+            </div>
+            
+            <div class="stop-item" id="stopBrement">
+                <div class="stop-icon pending">🏠</div>
+                <div class="stop-info">
+                    <div class="stop-name">Brement</div>
+                    <div class="stop-time" id="timeBrement">En attente</div>
+                </div>
+            </div>
+            
+            <div class="stop-item" id="stopNoisy">
+                <div class="stop-icon pending">🏠</div>
+                <div class="stop-info">
+                    <div class="stop-name">Noisy-le-Sec</div>
+                    <div class="stop-time" id="timeNoisy">En attente</div>
+                </div>
+            </div>
+            
+            <div class="stop-item" id="stopRetour">
+                <div class="stop-icon pending">⛪</div>
+                <div class="stop-info">
+                    <div class="stop-name">Retour Église</div>
+                    <div class="stop-time" id="timeRetour">En attente</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notifications -->
         <div class="notifications">
-            <div class="notif-title">🔔 Dernières notifications</div>
+            <div class="notif-header">
+                <span>🔔</span>
+                <h3>Notifications en direct</h3>
+            </div>
             <div id="notificationsList">
                 <div class="notif-item">
                     <div class="notif-time">--</div>
-                    <div>En attente du départ</div>
+                    <div class="notif-message">En attente du départ</div>
                 </div>
             </div>
         </div>
@@ -109,9 +403,14 @@
             Charisma Bus Tracker • Mise à jour en temps réel
         </div>
     </div>
-
+    
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <script>
-        // === TA CONFIGURATION FIREBASE (la même) ===
+        // ============================================
+        // CONFIGURATION FIREBASE (copie TA configuration)
+        // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyC4sWMc3fNaMpZ9cD8ahQdMJn6BjRyJDzk",
             authDomain: "charisma-bus.firebaseapp.com",
@@ -126,32 +425,234 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Écouter les changements en temps réel
+        // ============================================
+        // COORDONNÉES GÉOGRAPHIQUES
+        // ============================================
+        const STOP_COORDINATES = {
+            eglise: [48.9397, 2.4486],      // Église Charisma (Blanc-Mesnil)
+            brement: [48.9315, 2.4621],      // Brement
+            noisy: [48.8897, 2.4646],        // Noisy-le-Sec
+            retour: [48.9397, 2.4486]        // Retour Église
+        };
+
+        // ============================================
+        // INITIALISATION DE LA CARTE
+        // ============================================
+        const map = L.map('map').setView(STOP_COORDINATES.eglise, 13);
+        
+        // Fond de carte OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // ============================================
+        // MARQUEURS DES ARRÊTS (toujours visibles)
+        // ============================================
+        
+        // Église (départ/retour)
+        L.marker(STOP_COORDINATES.eglise, {
+            icon: L.divIcon({
+                className: 'stop-marker',
+                html: '⛪',
+                iconSize: [30, 30]
+            })
+        }).addTo(map).bindPopup('Église Charisma');
+
+        // Brement
+        L.marker(STOP_COORDINATES.brement, {
+            icon: L.divIcon({
+                className: 'stop-marker',
+                html: '🏠',
+                iconSize: [30, 30]
+            })
+        }).addTo(map).bindPopup('Brement');
+
+        // Noisy-le-Sec
+        L.marker(STOP_COORDINATES.noisy, {
+            icon: L.divIcon({
+                className: 'stop-marker',
+                html: '🏠',
+                iconSize: [30, 30]
+            })
+        }).addTo(map).bindPopup('Noisy-le-Sec');
+
+        // Retour Église (même que départ)
+        L.marker(STOP_COORDINATES.retour, {
+            icon: L.divIcon({
+                className: 'stop-marker',
+                html: '⛪',
+                iconSize: [30, 30]
+            })
+        }).addTo(map).bindPopup('Retour Église');
+
+        // ============================================
+        // LIGNE DU TRAJET (pour visualiser le parcours)
+        // ============================================
+        L.polyline([
+            STOP_COORDINATES.eglise,
+            STOP_COORDINATES.brement,
+            STOP_COORDINATES.noisy,
+            STOP_COORDINATES.retour
+        ], {
+            color: '#667eea',
+            weight: 4,
+            opacity: 0.6,
+            dashArray: '5, 8'
+        }).addTo(map);
+
+        // ============================================
+        // MARQUEUR DU BUS (qui va bouger)
+        // ============================================
+        const busMarker = L.marker(STOP_COORDINATES.eglise, {
+            icon: L.divIcon({
+                className: 'bus-marker',
+                html: '🚌',
+                iconSize: [40, 40]
+            }),
+            zIndexOffset: 1000
+        }).addTo(map);
+        
+        busMarker.bindPopup('🚌 Bus en direct');
+
+        // ============================================
+        // FONCTION DE MISE À JOUR DE L'AFFICHAGE
+        // ============================================
+        function updateDisplay(data) {
+            if (!data) return;
+            
+            const etape = data.etape;
+            const message = data.message;
+            const time = data.time;
+            
+            // ===== 1. MISE À JOUR DE LA POSITION DU BUS =====
+            if (etape === 'depart') {
+                // Bus à l'église (départ)
+                busMarker.setLatLng(STOP_COORDINATES.eglise);
+                map.panTo(STOP_COORDINATES.eglise);
+                
+                document.getElementById('busPosition').innerText = 'Départ de l\'église';
+                document.getElementById('eta').innerHTML = '15 <small>min</small>';
+                
+                // Mise à jour de la timeline
+                document.getElementById('stopEglise').innerHTML = `
+                    <div class="stop-icon completed">⛪</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Église Charisma</div>
+                        <div class="stop-time">${time} <span class="stop-badge">DÉPART</span></div>
+                    </div>
+                `;
+                
+                document.getElementById('stopBrement').innerHTML = `
+                    <div class="stop-icon active">🏠</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Brement</div>
+                        <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
+                    </div>
+                `;
+            }
+            
+            else if (etape === 'brement') {
+                // Bus à Brement
+                busMarker.setLatLng(STOP_COORDINATES.brement);
+                map.panTo(STOP_COORDINATES.brement);
+                
+                document.getElementById('busPosition').innerText = 'Arrêt à Brement';
+                document.getElementById('eta').innerHTML = '10 <small>min</small>';
+                
+                document.getElementById('stopBrement').innerHTML = `
+                    <div class="stop-icon completed">🏠</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Brement</div>
+                        <div class="stop-time">${time} <span class="stop-badge">ARRIVÉ</span></div>
+                    </div>
+                `;
+                
+                document.getElementById('stopNoisy').innerHTML = `
+                    <div class="stop-icon active">🏠</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Noisy-le-Sec</div>
+                        <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
+                    </div>
+                `;
+            }
+            
+            else if (etape === 'noisy') {
+                // Bus à Noisy-le-Sec
+                busMarker.setLatLng(STOP_COORDINATES.noisy);
+                map.panTo(STOP_COORDINATES.noisy);
+                
+                document.getElementById('busPosition').innerText = 'Arrêt à Noisy-le-Sec';
+                document.getElementById('eta').innerHTML = '15 <small>min</small>';
+                
+                document.getElementById('stopNoisy').innerHTML = `
+                    <div class="stop-icon completed">🏠</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Noisy-le-Sec</div>
+                        <div class="stop-time">${time} <span class="stop-badge">ARRIVÉ</span></div>
+                    </div>
+                `;
+                
+                document.getElementById('stopRetour').innerHTML = `
+                    <div class="stop-icon active">⛪</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Retour Église</div>
+                        <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
+                    </div>
+                `;
+            }
+            
+            else if (etape === 'retour') {
+                // Bus de retour à l'église
+                busMarker.setLatLng(STOP_COORDINATES.retour);
+                map.panTo(STOP_COORDINATES.retour);
+                
+                document.getElementById('busPosition').innerText = 'Retour à l\'église';
+                document.getElementById('eta').innerHTML = '5 <small>min</small>';
+                
+                document.getElementById('stopRetour').innerHTML = `
+                    <div class="stop-icon completed">⛪</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Retour Église</div>
+                        <div class="stop-time">${time} <span class="stop-badge">ARRIVÉ</span></div>
+                    </div>
+                `;
+            }
+            
+            // ===== 2. AJOUTER UNE NOTIFICATION =====
+            const list = document.getElementById('notificationsList');
+            const newNotif = document.createElement('div');
+            newNotif.className = 'notif-item';
+            newNotif.innerHTML = `
+                <div class="notif-time">${time}</div>
+                <div class="notif-message">${message}</div>
+            `;
+            list.insertBefore(newNotif, list.firstChild);
+            
+            // Garder seulement les 5 dernières notifications
+            while(list.children.length > 5) {
+                list.removeChild(list.lastChild);
+            }
+        }
+
+        // ============================================
+        // ÉCOUTER LES CHANGEMENTS EN TEMPS RÉEL
+        // ============================================
         database.ref('bus-status').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                // Mettre à jour le message principal
-                document.getElementById('liveMessage').innerText = data.message;
-                document.getElementById('liveTime').innerHTML = `Dernière mise à jour: ${data.time}`;
-                
-                // Ajouter une notification
-                const list = document.getElementById('notificationsList');
-                const newNotif = document.createElement('div');
-                newNotif.className = 'notif-item';
-                newNotif.innerHTML = `
-                    <div class="notif-time">${data.time}</div>
-                    <div>${data.message}</div>
-                `;
-                list.insertBefore(newNotif, list.firstChild);
-                
-                // Garder seulement les 5 dernières notifications
-                while(list.children.length > 5) {
-                    list.removeChild(list.lastChild);
-                }
+                updateDisplay(data);
             }
         });
 
-        console.log('✅ Page membre prête - écoute Firebase active');
+        // ============================================
+        // DATE DU JOUR
+        // ============================================
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long'
+        });
+
+        console.log('✅ Page membre prête avec carte interactive');
     </script>
 </body>
 </html>
