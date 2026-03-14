@@ -568,14 +568,12 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // ============================================
-        // COORDONNÉES PRÉCISES CORRIGÉES
-        // ============================================
+        // Coordonnées précises
         const STOP_COORDINATES = {
             eglise: [48.94525, 2.47403],      // 7 Rue Isaac Newton
             brement: [48.8889, 2.4556],        // Rue de Brément
-            noisy: [48.89591, 2.46138],        // 5 Bd de la République (CORRIGÉ)
-            retour: [48.88717, 2.46824]        // Retour (CORRIGÉ)
+            noisy: [48.8912, 2.4523],          // 5 Bd de la République
+            retour: [48.94525, 2.47403]        // Retour
         };
 
         // Messages inspirants
@@ -771,7 +769,7 @@
             if (data) updateDisplay(data);
         });
 
-        console.log('✅ Interface améliorée chargée avec coordonnées corrigées');
+        console.log('✅ Interface améliorée chargée');
     </script>
 </body>
 </html>
