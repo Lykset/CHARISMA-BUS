@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Charisma Bus - Contrôle conducteur GPS</title>
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -58,6 +60,17 @@
             padding: 25px;
             margin-bottom: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .online-counter {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
         }
         
         .gps-section {
@@ -135,6 +148,7 @@
             flex-direction: column;
             align-items: center;
             gap: 10px;
+            transition: transform 0.2s;
         }
         
         .control-btn:active {
@@ -195,19 +209,22 @@
             <div class="driver-badge">🔑 Accès privé</div>
         </div>
         
-        <!-- Section GPS -->
+        <!-- Compteur de personnes connectées -->
         <div class="info-card">
-            <h3 style="margin-bottom: 15px;">📍 Géolocalisation en direct</h3>
+            <div class="online-counter" id="onlineCounter">
+                👥 Recherche des membres...
+            </div>
             
+            <!-- Section GPS -->
             <div class="gps-section">
                 <div class="gps-status">
                     <span>🛰️ État GPS :</span>
-                    <span class="gps-active" id="gpsStatus">● Actif</span>
+                    <span class="gps-inactive" id="gpsStatus">○ Inactif</span>
                 </div>
                 
                 <div class="gps-coords" id="gpsCoords">
-                    Latitude: 48.9397<br>
-                    Longitude: 2.4486
+                    Latitude: --<br>
+                    Longitude: --
                 </div>
                 
                 <button class="gps-btn" id="startGps" onclick="startGps()">
@@ -222,6 +239,7 @@
                 </p>
             </div>
             
+            <!-- Boutons de contrôle -->
             <div class="control-grid">
                 <button class="control-btn btn-depart" onclick="updateStatus('depart')">
                     <span>⛪</span>
@@ -252,148 +270,18 @@
             <p style="color:#666; margin:10px 0;">
                 Les membres voient le bus bouger en temps réel
             </p>
-            <a href="index.html" class="share-link" target="_blank">
-                🔗 Lien public avec carte
+            <a href="https://lykset.github.io/CHARISMA-BUS/" class="share-link" target="_blank">
+                🔗 Lien public
             </a>
             <p style="margin-top: 10px; font-size:0.9em; color:#999;">
-                Copiez ce lien dans le groupe WhatsApp
+                Partagé à <span id="memberCountDisplay">0</span> personne(s)
             </p>
         </div>
     </div>
     
     <script>
-        let watchId = null;
-        let lastPosition = { lat: 48.9397, lng: 2.4486 };
-        
-        // Démarrer le suivi GPS
-        function startGps() {
-            if (navigator.geolocation) {
-                document.getElementById('gpsStatus').innerHTML = '● Recherche du signal...';
-                document.getElementById('gpsStatus').className = 'gps-inactive';
-                
-                watchId = navigator.geolocation.watchPosition(
-                    position => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        
-                        lastPosition = { lat, lng };
-                        
-                        // Mettre à jour l'affichage
-                        document.getElementById('gpsCoords').innerHTML = 
-                            `Latitude: ${lat.toFixed(6)}<br>Longitude: ${lng.toFixed(6)}`;
-                        document.getElementById('gpsStatus').innerHTML = '● Actif';
-                        document.getElementById('gpsStatus').className = 'gps-active';
-                        
-                        // Sauvegarder la position
-                        const state = JSON.parse(localStorage.getItem('busState') || '{}');
-                        state.position = { lat, lng };
-                        localStorage.setItem('busState', JSON.stringify(state));
-                        
-                        // Afficher les boutons
-                        document.getElementById('startGps').style.display = 'none';
-                        document.getElementById('stopGps').style.display = 'block';
-                    },
-                    error => {
-                        alert('Erreur GPS : ' + error.message);
-                        document.getElementById('gpsStatus').innerHTML = '✗ Erreur';
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        maximumAge: 0,
-                        timeout: 5000
-                    }
-                );
-            } else {
-                alert('GPS non supporté sur cet appareil');
-            }
-        }
-        
-        // Arrêter le suivi GPS
-        function stopGps() {
-            if (watchId !== null) {
-                navigator.geolocation.clearWatch(watchId);
-                watchId = null;
-                
-                document.getElementById('gpsStatus').innerHTML = '○ Inactif';
-                document.getElementById('gpsStatus').className = 'gps-inactive';
-                document.getElementById('startGps').style.display = 'block';
-                document.getElementById('stopGps').style.display = 'none';
-            }
-        }
-        
-        // Mettre à jour le statut à chaque étape
-        function updateStatus(etape) {
-            const now = new Date();
-            const heure = now.getHours() + 'h' + (now.getMinutes()<10?'0':'') + now.getMinutes();
-            
-            let message = '';
-            let notificationMsg = '';
-            
-            // Coordonnées approximatives pour chaque étape
-            const positions = {
-                'depart': { lat: 48.9397, lng: 2.4486 },
-                'brement': { lat: 48.9315, lng: 2.4621 },
-                'noisy': { lat: 48.8897, lng: 2.4646 },
-                'retour': { lat: 48.9397, lng: 2.4486 }
-            };
-            
-            switch(etape) {
-                case 'depart':
-                    message = 'Départ de l\'église';
-                    notificationMsg = `🚌 DÉPART de l'église - Arrivée Brement dans 15 min (${heure})`;
-                    break;
-                case 'brement':
-                    message = 'Arrivée à Brement';
-                    notificationMsg = `✅ ARRIVÉE à Brement - Prochain arrêt Noisy-le-Sec (${heure})`;
-                    break;
-                case 'noisy':
-                    message = 'Arrivée à Noisy-le-Sec';
-                    notificationMsg = `🟣 ARRIVÉE à Noisy-le-Sec - Retour église dans 15 min (${heure})`;
-                    break;
-                case 'retour':
-                    message = 'Retour à l\'église';
-                    notificationMsg = `🔚 RETOUR à l'église Charisma - Fin du trajet (${heure})`;
-                    break;
-            }
-            
-            // Sauvegarder l'état avec la position actuelle
-            const state = {
-                etape: etape,
-                time: heure,
-                position: lastPosition,
-                notification: {
-                    time: heure,
-                    message: notificationMsg
-                }
-            };
-            localStorage.setItem('busState', JSON.stringify(state));
-            
-            // Mettre à jour l'affichage
-            document.getElementById('lastUpdate').innerHTML = `
-                Dernière mise à jour : ${message} à ${heure}<br>
-                Position: ${lastPosition.lat.toFixed(6)}, ${lastPosition.lng.toFixed(6)}
-            `;
-            
-            // Ouvrir WhatsApp pour le partage
-            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
-                notificationMsg + '\n\n📍 Suivez le bus en direct sur la carte : ' + 
-                window.location.origin + '/bus-charisma/index.html'
-            )}`;
-            window.open(whatsappUrl, '_blank');
-        }
-        
-        // Vérifier si un suivi était actif
-        window.onload = function() {
-            const saved = localStorage.getItem('busState');
-            if(saved) {
-                const state = JSON.parse(saved);
-                if(state.position) {
-                    lastPosition = state.position;
-                    document.getElementById('gpsCoords').innerHTML = 
-                        `Latitude: ${state.position.lat.toFixed(6)}<br>Longitude: ${state.position.lng.toFixed(6)}`;
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+        // ============================================
+        // CONFIGURATION SUPABASE - À MODIFIER !
+        // ============================================
+        const SUPABASE_URL = "https://votre-projet.supabase.co";  // REMPLACEZ ICI
+        const SUPABASE_KEY = "votre-clé-anon";                    // REMPL
