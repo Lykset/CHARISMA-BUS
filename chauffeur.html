@@ -3,20 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conducteur - Bus</title>
+    <title>Conducteur - Bus Charisma</title>
+    <!-- Firebase SDK (les 2 fichiers nécessaires) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
-            margin: 0;
+            font-family: Arial, sans-serif;
             padding: 20px;
         }
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
+        .container { max-width: 500px; margin: 0 auto; }
         h1 { text-align: center; }
+        .status {
+            background: white;
+            color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
         button {
             width: 100%;
             padding: 20px;
@@ -27,50 +33,60 @@
             font-weight: bold;
             cursor: pointer;
             color: white;
-            transition: transform 0.2s;
-        }
-        button:active {
-            transform: scale(0.95);
         }
         .depart { background: #ff9800; }
         .brement { background: #2196F3; }
         .noisy { background: #9C27B0; }
         .retour { background: #4CAF50; }
-        .info {
-            background: white;
-            color: #333;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚌 Contrôle conducteur</h1>
+        <h1>🚌 Conducteur</h1>
         
-        <div class="info" id="status">
+        <div class="status" id="status">
             Prêt à démarrer
         </div>
         
-        <button class="depart" onclick="updateStatus('DÉPART Église')">⛪ DÉPART Église</button>
-        <button class="brement" onclick="updateStatus('ARRIVÉE Brement')">🏠 ARRIVÉE Brement</button>
-        <button class="noisy" onclick="updateStatus('ARRIVÉE Noisy')">🏠 ARRIVÉE Noisy</button>
-        <button class="retour" onclick="updateStatus('RETOUR Église')">⛪ RETOUR Église</button>
+        <button class="depart" onclick="updateStatus('depart', '🚌 DÉPART Église')">DÉPART Église</button>
+        <button class="brement" onclick="updateStatus('brement', '✅ ARRIVÉE Brement')">ARRIVÉE Brement</button>
+        <button class="noisy" onclick="updateStatus('noisy', '🟣 ARRIVÉE Noisy')">ARRIVÉE Noisy</button>
+        <button class="retour" onclick="updateStatus('retour', '🔚 RETOUR Église')">RETOUR Église</button>
     </div>
 
     <script>
-        function updateStatus(message) {
+        // === TA CONFIGURATION FIREBASE (que tu as copiée) ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4sWMc3fNaMpZ9cD8ahQdMJn6BjRyJDzk",
+            authDomain: "charisma-bus.firebaseapp.com",
+            databaseURL: "https://charisma-bus-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "charisma-bus",
+            storageBucket: "charisma-bus.firebasestorage.app",
+            messagingSenderId: "630450080183",
+            appId: "1:630450080183:web:c204b463f63b12a8d30032"
+        };
+
+        // === INITIALISER FIREBASE ===
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // === FONCTION POUR METTRE À JOUR LE STATUT ===
+        function updateStatus(etape, message) {
             const now = new Date();
             const time = now.getHours() + ':' + 
                         (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
             
+            // Créer l'objet à envoyer
             const data = {
+                etape: etape,
                 message: message,
                 time: time
             };
             
-            localStorage.setItem('busUpdate', JSON.stringify(data));
+            // Envoyer à Firebase
+            database.ref('bus-status').set(data);
+            
+            // Mettre à jour l'affichage local
             document.getElementById('status').innerHTML = 
                 `✅ ${message}<br><small>${time}</small>`;
         }
