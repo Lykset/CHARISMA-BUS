@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charisma Bus - Suivi GPS en direct</title>
-    <!-- Leaflet CSS -->
+    <title>Charisma Bus - Suivi</title>
+    <!-- Leaflet pour la carte -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -15,26 +13,22 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 15px;
         }
-        
         .container {
             max-width: 480px;
             margin: 0 auto;
         }
-        
         .hero {
-            background: rgba(255,255,255,0.95);
+            background: white;
             border-radius: 30px;
             padding: 20px;
             margin-bottom: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-        
         .church-name {
             font-size: 1.5em;
             font-weight: bold;
@@ -43,7 +37,6 @@
             align-items: center;
             gap: 10px;
         }
-        
         .church-name span {
             background: #667eea;
             color: white;
@@ -51,83 +44,38 @@
             padding: 3px 10px;
             border-radius: 50px;
         }
-        
         .route {
             color: #666;
             margin: 10px 0;
-            font-size: 0.95em;
         }
-        
-        .map-container {
-            background: white;
-            border-radius: 30px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        
         #map {
             height: 250px;
             border-radius: 20px;
+            margin-bottom: 15px;
             z-index: 1;
         }
-        
-        .map-legend {
-            display: flex;
-            gap: 20px;
-            margin-top: 10px;
-            justify-content: center;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.8em;
-            color: #666;
-        }
-        
-        .bus-dot {
-            width: 12px;
-            height: 12px;
-            background: #ff4444;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 0 0 2px #ff4444;
-            animation: pulse 1.5s infinite;
-        }
-        
-        .stop-dot {
-            width: 10px;
-            height: 10px;
-            background: #4CAF50;
-            border-radius: 50%;
-        }
-        
-        .live-status {
+        .status-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 20px;
-            padding: 15px;
+            padding: 20px;
             color: white;
             margin-bottom: 15px;
         }
-        
-        .live-header {
+        .status-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
-        
         .live-badge {
             background: rgba(255,255,255,0.2);
             padding: 5px 12px;
             border-radius: 50px;
-            font-size: 0.8em;
+            font-size: 0.9em;
             display: flex;
             align-items: center;
             gap: 5px;
         }
-        
         .live-dot {
             width: 8px;
             height: 8px;
@@ -135,44 +83,23 @@
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
-        
-        .bus-position {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin: 10px 0;
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
         }
-        
-        .eta {
-            font-size: 1.8em;
-            font-weight: bold;
-        }
-        
-        .eta small {
-            font-size: 0.4em;
-        }
-        
         .timeline {
             background: white;
             border-radius: 30px;
             padding: 20px;
             margin-bottom: 15px;
         }
-        
-        .timeline-title {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
         .stop-item {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
+            margin: 15px 0;
             position: relative;
         }
-        
         .stop-item:not(:last-child)::before {
             content: '';
             position: absolute;
@@ -182,7 +109,6 @@
             height: calc(100% - 20px);
             background: #e0e0e0;
         }
-        
         .stop-icon {
             width: 40px;
             height: 40px;
@@ -190,120 +116,75 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 12px;
+            margin-right: 15px;
             font-size: 1.2em;
             z-index: 2;
         }
-        
         .stop-icon.completed {
             background: #4CAF50;
             color: white;
         }
-        
         .stop-icon.active {
             background: #ff9800;
             color: white;
             animation: glow 1.5s infinite;
         }
-        
         .stop-icon.pending {
             background: #f0f0f0;
             color: #999;
         }
-        
+        @keyframes glow {
+            0% { box-shadow: 0 0 0 0 rgba(255,152,0,0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(255,152,0,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,152,0,0); }
+        }
         .stop-info {
             flex: 1;
         }
-        
         .stop-name {
             font-weight: bold;
             color: #333;
         }
-        
         .stop-time {
             color: #999;
-            font-size: 0.8em;
+            font-size: 0.9em;
         }
-        
         .stop-badge {
             background: #4CAF50;
             color: white;
             padding: 2px 8px;
             border-radius: 50px;
-            font-size: 0.7em;
+            font-size: 0.8em;
             margin-left: 10px;
         }
-        
         .stop-badge.orange {
             background: #ff9800;
         }
-        
         .notifications {
             background: white;
             border-radius: 30px;
             padding: 20px;
         }
-        
-        .notif-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
         .notif-item {
             background: #f8f9fa;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 8px;
             border-left: 4px solid #667eea;
-            font-size: 0.9em;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
         }
-        
         .notif-time {
-            font-size: 0.7em;
+            font-size: 0.8em;
             color: #999;
-            margin-bottom: 3px;
         }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.3); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes glow {
-            0% { box-shadow: 0 0 0 0 rgba(255,152,0,0.7); }
-            50% { box-shadow: 0 0 0 8px rgba(255,152,0,0); }
-            100% { box-shadow: 0 0 0 0 rgba(255,152,0,0); }
-        }
-        
         .footer {
             text-align: center;
             margin-top: 15px;
             color: rgba(255,255,255,0.8);
-            font-size: 0.8em;
-        }
-        
-        .member-count {
-            background: white;
-            border-radius: 50px;
-            padding: 8px 15px;
-            display: inline-block;
-            font-size: 0.9em;
-            color: #333;
-            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Compteur de membres -->
-        <div class="member-count" id="memberCount">
-            👥 0 personne connectée
-        </div>
-        
         <!-- En-tête -->
         <div class="hero">
             <div class="church-name">
@@ -314,41 +195,30 @@
                 🚌 Blanc-Mesnil → Brement → Noisy-le-Sec → Blanc-Mesnil
             </div>
         </div>
-        
+
         <!-- Carte -->
-        <div class="map-container">
-            <div id="map"></div>
-            <div class="map-legend">
-                <div class="legend-item">
-                    <div class="bus-dot"></div>
-                    <span>Bus en direct</span>
-                </div>
-                <div class="legend-item">
-                    <div class="stop-dot"></div>
-                    <span>Points d'arrêt</span>
-                </div>
-            </div>
-        </div>
-        
+        <div id="map"></div>
+
         <!-- Statut en direct -->
-        <div class="live-status" id="liveStatus">
-            <div class="live-header">
+        <div class="status-card" id="statusCard">
+            <div class="status-header">
                 <div class="live-badge">
                     <span class="live-dot"></span>
                     EN DIRECT
                 </div>
-                <div>🚌 Bus en circulation</div>
+                <span id="busIcon">🚌</span>
             </div>
-            <div class="bus-position" id="busPosition">En attente du signal...</div>
-            <div class="eta" id="eta">-- <small>min</small></div>
+            <div style="font-size: 1.3em; font-weight: bold; margin: 10px 0;" id="busStatus">
+                En attente du signal...
+            </div>
+            <div style="font-size: 0.9em; opacity: 0.9;" id="busTime">
+                Dernière mise à jour: --
+            </div>
         </div>
-        
-        <!-- Timeline -->
+
+        <!-- Timeline des arrêts -->
         <div class="timeline">
-            <div class="timeline-title">
-                <h3>📍 Points d'arrêt</h3>
-                <div id="currentDate"></div>
-            </div>
+            <h3 style="margin-bottom: 15px;">📍 Points d'arrêt</h3>
             
             <div class="stop-item" id="stopEglise">
                 <div class="stop-icon pending">⛪</div>
@@ -382,284 +252,183 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Notifications -->
         <div class="notifications">
-            <div class="notif-header">
-                <span>🔔</span>
-                <h3>Notifications en direct</h3>
-            </div>
+            <h3 style="margin-bottom: 15px;">🔔 Dernières notifications</h3>
             <div id="notificationsList">
                 <div class="notif-item">
-                    <div class="notif-time">En attente</div>
-                    <div>Le bus n'est pas encore en service</div>
+                    <div class="notif-time">--</div>
+                    <div>En attente du départ</div>
                 </div>
             </div>
         </div>
-        
+
         <div class="footer">
-            Charisma Bus Tracker • Mise à jour en temps réel
+            Charisma Bus Tracker
         </div>
     </div>
-    
-    <!-- Leaflet JavaScript -->
+
+    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <script>
-        // ============================================
-        // CONFIGURATION SUPABASE
-        // ============================================
-        const SUPABASE_URL = "https://pbxtdkdblpydwzldnipc.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_UGGXS_aHeX92VO44kw6DSw_9xK_MRMV";
-        
-        // ⚠️ On utilise supabaseClient pour éviter les conflits
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        // Coordonnées des points d'arrêt
+        // === CONFIGURATION ===
         const STOP_COORDINATES = {
             eglise: [48.9397, 2.4486],
             brement: [48.9315, 2.4621],
             noisy: [48.8897, 2.4646],
             retour: [48.9397, 2.4486]
         };
-        
-        // Initialisation de la carte
+
+        // === INITIALISATION CARTE ===
         const map = L.map('map').setView(STOP_COORDINATES.eglise, 13);
-        
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
+            attribution: 'OpenStreetMap'
         }).addTo(map);
-        
-        // Marqueurs des arrêts
+
+        // Marqueurs d'arrêts
         L.marker(STOP_COORDINATES.eglise, {
             icon: L.divIcon({ html: '⛪', iconSize: [30, 30] })
-        }).addTo(map).bindPopup('Église Charisma');
+        }).addTo(map);
         
         L.marker(STOP_COORDINATES.brement, {
             icon: L.divIcon({ html: '🏠', iconSize: [30, 30] })
-        }).addTo(map).bindPopup('Brement');
+        }).addTo(map);
         
         L.marker(STOP_COORDINATES.noisy, {
             icon: L.divIcon({ html: '🏠', iconSize: [30, 30] })
-        }).addTo(map).bindPopup('Noisy-le-Sec');
+        }).addTo(map);
         
         L.marker(STOP_COORDINATES.retour, {
             icon: L.divIcon({ html: '⛪', iconSize: [30, 30] })
-        }).addTo(map).bindPopup('Retour Église');
-        
+        }).addTo(map);
+
         // Ligne du trajet
         L.polyline([
             STOP_COORDINATES.eglise,
             STOP_COORDINATES.brement,
             STOP_COORDINATES.noisy,
             STOP_COORDINATES.retour
-        ], { color: '#667eea', weight: 4, opacity: 0.6, dashArray: '5, 8' }).addTo(map);
-        
+        ], { color: '#667eea', weight: 4, dashArray: '5, 8' }).addTo(map);
+
         // Marqueur du bus
-        const busIcon = L.divIcon({ html: '🚌', iconSize: [40, 40] });
-        const busMarker = L.marker(STOP_COORDINATES.eglise, { icon: busIcon }).addTo(map);
-        
-        // ============================================
-        // COMPTEUR DE MEMBRES CONNECTÉS
-        // ============================================
-        let memberCount = 0;
-        
-        async function initRealtime() {
-            // Générer un ID unique pour cette session
-            const sessionId = Math.random().toString(36).substring(2, 15);
-            
-            // Envoyer un signal que quelqu'un est connecté (via supabaseClient)
-            await supabaseClient.from('bus_positions').insert([{
-                etape: 'connected',
-                latitude: 0,
-                longitude: 0,
-                message: `member_${sessionId}`
-            }]);
-            
-            // Nettoyer les anciennes connexions (plus de 10 secondes)
-            setInterval(async () => {
-                const tenSecondsAgo = new Date(Date.now() - 10000).toISOString();
-                await supabaseClient
-                    .from('bus_positions')
-                    .delete()
-                    .lt('timestamp', tenSecondsAgo)
-                    .eq('etape', 'connected');
-            }, 5000);
-            
-            // Écouter les connexions
-            supabaseClient
-                .channel('members')
-                .on('postgres_changes', 
-                    { event: 'INSERT', schema: 'public', table: 'bus_positions', filter: 'etape=eq.connected' },
-                    () => {
-                        countMembers();
-                    }
-                )
-                .subscribe();
-            
-            // Écouter les déconnexions
-            supabaseClient
-                .channel('members_delete')
-                .on('postgres_changes', 
-                    { event: 'DELETE', schema: 'public', table: 'bus_positions' },
-                    () => {
-                        countMembers();
-                    }
-                )
-                .subscribe();
-        }
-        
-        async function countMembers() {
-            const { count } = await supabaseClient
-                .from('bus_positions')
-                .select('*', { count: 'exact', head: true })
-                .eq('etape', 'connected');
-            
-            memberCount = count || 0;
-            document.getElementById('memberCount').innerHTML = 
-                `👥 ${memberCount} personne${memberCount > 1 ? 's' : ''} connectée${memberCount > 1 ? 's' : ''}`;
-        }
-        
-        // ============================================
-        // ÉCOUTER LES MISES À JOUR DU BUS
-        // ============================================
-        function listenToBusUpdates() {
-            supabaseClient
-                .channel('bus_updates')
-                .on('postgres_changes', 
-                    { event: 'INSERT', schema: 'public', table: 'bus_positions', filter: 'etape=neq.connected' },
-                    (payload) => {
-                        const data = payload.new;
-                        
-                        // Mettre à jour la position du bus
-                        if (data.latitude && data.longitude) {
-                            busMarker.setLatLng([data.latitude, data.longitude]);
-                            map.panTo([data.latitude, data.longitude]);
-                        }
-                        
-                        // Mettre à jour le statut
-                        updateUI(data);
-                        
-                        // Ajouter la notification
-                        if (data.message && data.message.includes('Notification:')) {
-                            addNotification(
-                                new Date(data.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-                                data.message.replace('Notification:', '')
-                            );
-                        }
-                    }
-                )
-                .subscribe();
-        }
-        
-        function updateUI(data) {
-            const heure = new Date(data.timestamp).toLocaleTimeString('fr-FR', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-            
-            switch(data.etape) {
-                case 'depart':
-                    document.getElementById('busPosition').innerText = 'En direction de Brement';
-                    document.getElementById('eta').innerHTML = '15 <small>min</small>';
-                    
-                    document.getElementById('stopEglise').innerHTML = `
-                        <div class="stop-icon completed">⛪</div>
-                        <div class="stop-info">
-                            <div class="stop-name">Église Charisma</div>
-                            <div class="stop-time">${heure} <span class="stop-badge">DÉPART</span></div>
-                        </div>
-                    `;
-                    
-                    document.getElementById('stopBrement').innerHTML = `
-                        <div class="stop-icon active">🏠</div>
-                        <div class="stop-info">
-                            <div class="stop-name">Brement</div>
-                            <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'brement':
-                    document.getElementById('busPosition').innerText = 'Arrêt à Brement';
-                    document.getElementById('eta').innerHTML = '10 <small>min</small>';
-                    
-                    document.getElementById('stopBrement').innerHTML = `
-                        <div class="stop-icon completed">🏠</div>
-                        <div class="stop-info">
-                            <div class="stop-name">Brement</div>
-                            <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
-                        </div>
-                    `;
-                    
-                    document.getElementById('stopNoisy').innerHTML = `
-                        <div class="stop-icon active">🏠</div>
-                        <div class="stop-info">
-                            <div class="stop-name">Noisy-le-Sec</div>
-                            <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'noisy':
-                    document.getElementById('busPosition').innerText = 'Arrêt à Noisy-le-Sec';
-                    document.getElementById('eta').innerHTML = '15 <small>min</small>';
-                    
-                    document.getElementById('stopNoisy').innerHTML = `
-                        <div class="stop-icon completed">🏠</div>
-                        <div class="stop-info">
-                            <div class="stop-name">Noisy-le-Sec</div>
-                            <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
-                        </div>
-                    `;
-                    
-                    document.getElementById('stopRetour').innerHTML = `
-                        <div class="stop-icon active">⛪</div>
-                        <div class="stop-info">
-                            <div class="stop-name">Retour Église</div>
-                            <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'retour':
-                    document.getElementById('busPosition').innerText = 'Retour à l\'église';
-                    document.getElementById('eta').innerHTML = '5 <small>min</small>';
-                    
-                    document.getElementById('stopRetour').innerHTML = `
-                        <div class="stop-icon completed">⛪</div>
-                        <div class="stop-info">
-                            <div class="stop-name">Retour Église</div>
-                            <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
-                        </div>
-                    `;
-                    break;
+        const busMarker = L.marker(STOP_COORDINATES.eglise, {
+            icon: L.divIcon({ html: '🚌', iconSize: [40, 40] })
+        }).addTo(map);
+
+        // === DONNÉES DE TEST LOCAL (simulation sans Supabase) ===
+        let derniereNotification = null;
+
+        // Fonction pour mettre à jour l'affichage
+        function mettreAJour(etape, message, heure) {
+            // Mise à jour du statut
+            document.getElementById('busStatus').innerText = message;
+            document.getElementById('busTime').innerHTML = `Dernière mise à jour: ${heure}`;
+
+            // Mise à jour des points d'arrêt
+            if (etape === 'depart') {
+                document.getElementById('stopEglise').innerHTML = `
+                    <div class="stop-icon completed">⛪</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Église Charisma</div>
+                        <div class="stop-time">${heure} <span class="stop-badge">DÉPART</span></div>
+                    </div>
+                `;
+                document.getElementById('stopBrement').innerHTML = `
+                    <div class="stop-icon active">🏠</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Brement</div>
+                        <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
+                    </div>
+                `;
+            }
+            else if (etape === 'brement') {
+                document.getElementById('stopBrement').innerHTML = `
+                    <div class="stop-icon completed">🏠</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Brement</div>
+                        <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
+                    </div>
+                `;
+                document.getElementById('stopNoisy').innerHTML = `
+                    <div class="stop-icon active">🏠</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Noisy-le-Sec</div>
+                        <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
+                    </div>
+                `;
+            }
+            else if (etape === 'noisy') {
+                document.getElementById('stopNoisy').innerHTML = `
+                    <div class="stop-icon completed">🏠</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Noisy-le-Sec</div>
+                        <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
+                    </div>
+                `;
+                document.getElementById('stopRetour').innerHTML = `
+                    <div class="stop-icon active">⛪</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Retour Église</div>
+                        <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
+                    </div>
+                `;
+            }
+            else if (etape === 'retour') {
+                document.getElementById('stopRetour').innerHTML = `
+                    <div class="stop-icon completed">⛪</div>
+                    <div class="stop-info">
+                        <div class="stop-name">Retour Église</div>
+                        <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
+                    </div>
+                `;
+            }
+
+            // Ajouter une notification
+            if (message !== derniereNotification) {
+                const list = document.getElementById('notificationsList');
+                const newNotif = document.createElement('div');
+                newNotif.className = 'notif-item';
+                newNotif.innerHTML = `
+                    <div class="notif-time">${heure}</div>
+                    <div>${message}</div>
+                `;
+                list.insertBefore(newNotif, list.firstChild);
+                if (list.children.length > 5) {
+                    list.removeChild(list.lastChild);
+                }
+                derniereNotification = message;
             }
         }
-        
-        function addNotification(time, message) {
-            const list = document.getElementById('notificationsList');
-            const newNotif = document.createElement('div');
-            newNotif.className = 'notif-item';
-            newNotif.innerHTML = `
-                <div class="notif-time">${time}</div>
-                <div>${message}</div>
-            `;
-            list.insertBefore(newNotif, list.firstChild);
-            
-            while(list.children.length > 5) {
-                list.removeChild(list.lastChild);
+
+        // === SIMULATION (à remplacer par Supabase plus tard) ===
+        // Pour tester, on utilise localStorage comme pont
+        function verifierMiseAJour() {
+            const saved = localStorage.getItem('busData');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.etape && data.message) {
+                        mettreAJour(data.etape, data.message, data.heure || '--');
+                        
+                        // Déplacer le bus sur la carte
+                        if (data.lat && data.lng) {
+                            busMarker.setLatLng([data.lat, data.lng]);
+                            map.panTo([data.lat, data.lng]);
+                        }
+                    }
+                } catch(e) {
+                    console.log('Erreur parsing', e);
+                }
             }
         }
-        
-        // Date du jour
-        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('fr-FR', {
-            day: 'numeric', month: 'long'
-        });
-        
-        // Initialisation
-        initRealtime();
-        listenToBusUpdates();
-        countMembers();
+
+        // Vérifier toutes les 2 secondes
+        setInterval(verifierMiseAJour, 2000);
+        verifierMiseAJour();
+
+        console.log('✅ Page membre prête');
     </script>
 </body>
 </html>
