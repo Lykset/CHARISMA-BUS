@@ -3,46 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charisma Bus - Suivi</title>
-    <!-- Leaflet pour la carte -->
+    <title>Charisma Bus - Membres</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        /* Même CSS que précédemment - gardez-le */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 15px; }
-        .container { max-width: 480px; margin: 0 auto; }
-        .hero { background: white; border-radius: 30px; padding: 20px; margin-bottom: 15px; }
-        .church-name { font-size: 1.5em; font-weight: bold; color: #333; display: flex; align-items: center; gap: 10px; }
-        .church-name span { background: #667eea; color: white; font-size: 0.5em; padding: 3px 10px; border-radius: 50px; }
-        .route { color: #666; margin: 10px 0; }
-        #map { height: 250px; border-radius: 20px; margin-bottom: 15px; }
-        .status-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 20px; color: white; margin-bottom: 15px; }
-        .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .live-badge { background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 50px; font-size: 0.9em; display: flex; align-items: center; gap: 5px; }
-        .live-dot { width: 8px; height: 8px; background: #4CAF50; border-radius: 50%; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1); } }
-        .timeline { background: white; border-radius: 30px; padding: 20px; margin-bottom: 15px; }
-        .stop-item { display: flex; align-items: center; margin: 15px 0; position: relative; }
-        .stop-item:not(:last-child)::before { content: ''; position: absolute; left: 20px; top: 35px; width: 2px; height: calc(100% - 20px); background: #e0e0e0; }
-        .stop-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 1.2em; z-index: 2; }
-        .stop-icon.completed { background: #4CAF50; color: white; }
-        .stop-icon.active { background: #ff9800; color: white; animation: glow 1.5s infinite; }
-        .stop-icon.pending { background: #f0f0f0; color: #999; }
-        @keyframes glow { 0% { box-shadow: 0 0 0 0 rgba(255,152,0,0.7); } 50% { box-shadow: 0 0 0 10px rgba(255,152,0,0); } 100% { box-shadow: 0 0 0 0 rgba(255,152,0,0); } }
-        .stop-info { flex: 1; }
-        .stop-name { font-weight: bold; color: #333; }
-        .stop-time { color: #999; font-size: 0.9em; }
-        .stop-badge { background: #4CAF50; color: white; padding: 2px 8px; border-radius: 50px; font-size: 0.8em; margin-left: 10px; }
-        .stop-badge.orange { background: #ff9800; }
-        .notifications { background: white; border-radius: 30px; padding: 20px; }
-        .notif-item { background: #f8f9fa; border-left: 4px solid #667eea; padding: 12px; margin: 10px 0; border-radius: 10px; }
-        .notif-time { font-size: 0.8em; color: #999; }
-        .footer { text-align: center; margin-top: 15px; color: rgba(255,255,255,0.8); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .hero {
+            background: white;
+            border-radius: 30px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .church-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .church-name span {
+            background: #667eea;
+            color: white;
+            font-size: 0.5em;
+            padding: 3px 10px;
+            border-radius: 50px;
+        }
+        .route {
+            color: #666;
+            margin: 10px 0;
+        }
+        #map {
+            height: 250px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+        }
+        .status-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 15px;
+        }
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .live-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+        .timeline {
+            background: white;
+            border-radius: 30px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .stop-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            position: relative;
+        }
+        .stop-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 35px;
+            width: 2px;
+            height: calc(100% - 20px);
+            background: #e0e0e0;
+        }
+        .stop-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2em;
+            z-index: 2;
+        }
+        .stop-icon.completed {
+            background: #4CAF50;
+            color: white;
+        }
+        .stop-icon.active {
+            background: #ff9800;
+            color: white;
+            animation: glow 1.5s infinite;
+        }
+        .stop-icon.pending {
+            background: #f0f0f0;
+            color: #999;
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 0 0 rgba(255,152,0,0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(255,152,0,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,152,0,0); }
+        }
+        .stop-info {
+            flex: 1;
+        }
+        .stop-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .stop-time {
+            color: #999;
+            font-size: 0.9em;
+        }
+        .stop-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 50px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        .stop-badge.orange {
+            background: #ff9800;
+        }
+        .notifications {
+            background: white;
+            border-radius: 30px;
+            padding: 20px;
+        }
+        .notif-item {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+        }
+        .notif-time {
+            font-size: 0.8em;
+            color: #999;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            color: rgba(255,255,255,0.8);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- En-tête -->
         <div class="hero">
             <div class="church-name">
                 ⛪ Église Charisma
@@ -53,17 +191,15 @@
             </div>
         </div>
 
-        <!-- Carte -->
         <div id="map"></div>
 
-        <!-- Statut en direct -->
         <div class="status-card" id="statusCard">
             <div class="status-header">
                 <div class="live-badge">
                     <span class="live-dot"></span>
                     EN DIRECT
                 </div>
-                <span id="busIcon">🚌</span>
+                <span>🚌</span>
             </div>
             <div style="font-size: 1.3em; font-weight: bold; margin: 10px 0;" id="busStatus">
                 En attente du signal...
@@ -73,10 +209,8 @@
             </div>
         </div>
 
-        <!-- Timeline des arrêts -->
         <div class="timeline">
             <h3 style="margin-bottom: 15px;">📍 Points d'arrêt</h3>
-            
             <div class="stop-item" id="stopEglise">
                 <div class="stop-icon pending">⛪</div>
                 <div class="stop-info">
@@ -84,7 +218,6 @@
                     <div class="stop-time" id="timeEglise">En attente</div>
                 </div>
             </div>
-            
             <div class="stop-item" id="stopBrement">
                 <div class="stop-icon pending">🏠</div>
                 <div class="stop-info">
@@ -92,7 +225,6 @@
                     <div class="stop-time" id="timeBrement">En attente</div>
                 </div>
             </div>
-            
             <div class="stop-item" id="stopNoisy">
                 <div class="stop-icon pending">🏠</div>
                 <div class="stop-info">
@@ -100,7 +232,6 @@
                     <div class="stop-time" id="timeNoisy">En attente</div>
                 </div>
             </div>
-            
             <div class="stop-item" id="stopRetour">
                 <div class="stop-icon pending">⛪</div>
                 <div class="stop-info">
@@ -110,7 +241,6 @@
             </div>
         </div>
 
-        <!-- Notifications -->
         <div class="notifications">
             <h3 style="margin-bottom: 15px;">🔔 Dernières notifications</h3>
             <div id="notificationsList">
@@ -126,11 +256,9 @@
         </div>
     </div>
 
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
     <script>
-        // === CONFIGURATION ===
+        // === COORDONNÉES DES ARRÊTS ===
         const STOP_COORDINATES = {
             eglise: [48.9397, 2.4486],
             brement: [48.9315, 2.4621],
@@ -144,22 +272,11 @@
             attribution: 'OpenStreetMap'
         }).addTo(map);
 
-        // Marqueurs d'arrêts
-        L.marker(STOP_COORDINATES.eglise, {
-            icon: L.divIcon({ html: '⛪', iconSize: [30, 30] })
-        }).addTo(map);
-        
-        L.marker(STOP_COORDINATES.brement, {
-            icon: L.divIcon({ html: '🏠', iconSize: [30, 30] })
-        }).addTo(map);
-        
-        L.marker(STOP_COORDINATES.noisy, {
-            icon: L.divIcon({ html: '🏠', iconSize: [30, 30] })
-        }).addTo(map);
-        
-        L.marker(STOP_COORDINATES.retour, {
-            icon: L.divIcon({ html: '⛪', iconSize: [30, 30] })
-        }).addTo(map);
+        // Marqueurs des arrêts
+        L.marker(STOP_COORDINATES.eglise, { icon: L.divIcon({ html: '⛪', iconSize: [30, 30] }) }).addTo(map);
+        L.marker(STOP_COORDINATES.brement, { icon: L.divIcon({ html: '🏠', iconSize: [30, 30] }) }).addTo(map);
+        L.marker(STOP_COORDINATES.noisy, { icon: L.divIcon({ html: '🏠', iconSize: [30, 30] }) }).addTo(map);
+        L.marker(STOP_COORDINATES.retour, { icon: L.divIcon({ html: '⛪', iconSize: [30, 30] }) }).addTo(map);
 
         // Ligne du trajet
         L.polyline([
@@ -174,116 +291,119 @@
             icon: L.divIcon({ html: '🚌', iconSize: [40, 40] })
         }).addTo(map);
 
-        // === FONCTIONS DE MISE À JOUR ===
-        let derniereNotification = null;
+        // === FONCTION DE MISE À JOUR ===
+        function mettreAJour() {
+            const saved = localStorage.getItem('busData');
+            if (!saved) return;
 
-        function mettreAJour(etape, message, heure, lat, lng) {
-            // Mise à jour du statut
-            document.getElementById('busStatus').innerText = message;
-            document.getElementById('busTime').innerHTML = `Dernière mise à jour: ${heure}`;
+            try {
+                const data = JSON.parse(saved);
+                if (!data.etape) return;
 
-            // Déplacer le bus
-            if (lat && lng) {
-                busMarker.setLatLng([lat, lng]);
-                map.panTo([lat, lng]);
-            }
+                // Mise à jour du statut
+                document.getElementById('busStatus').innerText = data.message || 'En route';
+                document.getElementById('busTime').innerHTML = `Dernière mise à jour: ${data.heure || '--'}`;
 
-            // Mise à jour des points d'arrêt
-            if (etape === 'depart') {
-                document.getElementById('stopEglise').innerHTML = `
-                    <div class="stop-icon completed">⛪</div>
-                    <div class="stop-info">
-                        <div class="stop-name">Église Charisma</div>
-                        <div class="stop-time">${heure} <span class="stop-badge">DÉPART</span></div>
-                    </div>
-                `;
-                document.getElementById('stopBrement').innerHTML = `
-                    <div class="stop-icon active">🏠</div>
-                    <div class="stop-info">
-                        <div class="stop-name">Brement</div>
-                        <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
-                    </div>
-                `;
-            }
-            else if (etape === 'brement') {
-                document.getElementById('stopBrement').innerHTML = `
-                    <div class="stop-icon completed">🏠</div>
-                    <div class="stop-info">
-                        <div class="stop-name">Brement</div>
-                        <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
-                    </div>
-                `;
-                document.getElementById('stopNoisy').innerHTML = `
-                    <div class="stop-icon active">🏠</div>
-                    <div class="stop-info">
-                        <div class="stop-name">Noisy-le-Sec</div>
-                        <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
-                    </div>
-                `;
-            }
-            else if (etape === 'noisy') {
-                document.getElementById('stopNoisy').innerHTML = `
-                    <div class="stop-icon completed">🏠</div>
-                    <div class="stop-info">
-                        <div class="stop-name">Noisy-le-Sec</div>
-                        <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
-                    </div>
-                `;
-                document.getElementById('stopRetour').innerHTML = `
-                    <div class="stop-icon active">⛪</div>
-                    <div class="stop-info">
-                        <div class="stop-name">Retour Église</div>
-                        <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
-                    </div>
-                `;
-            }
-            else if (etape === 'retour') {
-                document.getElementById('stopRetour').innerHTML = `
-                    <div class="stop-icon completed">⛪</div>
-                    <div class="stop-info">
-                        <div class="stop-name">Retour Église</div>
-                        <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
-                    </div>
-                `;
-            }
+                // Mise à jour de la position du bus
+                if (data.lat && data.lng) {
+                    busMarker.setLatLng([data.lat, data.lng]);
+                    map.panTo([data.lat, data.lng]);
+                }
 
-            // Ajouter une notification
-            if (message !== derniereNotification) {
+                // Mise à jour des points d'arrêt
+                const heure = data.heure || '--';
+                
+                if (data.etape === 'depart') {
+                    document.getElementById('stopEglise').innerHTML = `
+                        <div class="stop-icon completed">⛪</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Église Charisma</div>
+                            <div class="stop-time">${heure} <span class="stop-badge">DÉPART</span></div>
+                        </div>
+                    `;
+                    document.getElementById('stopBrement').innerHTML = `
+                        <div class="stop-icon active">🏠</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Brement</div>
+                            <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
+                        </div>
+                    `;
+                }
+                else if (data.etape === 'brement') {
+                    document.getElementById('stopBrement').innerHTML = `
+                        <div class="stop-icon completed">🏠</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Brement</div>
+                            <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
+                        </div>
+                    `;
+                    document.getElementById('stopNoisy').innerHTML = `
+                        <div class="stop-icon active">🏠</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Noisy-le-Sec</div>
+                            <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
+                        </div>
+                    `;
+                }
+                else if (data.etape === 'noisy') {
+                    document.getElementById('stopNoisy').innerHTML = `
+                        <div class="stop-icon completed">🏠</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Noisy-le-Sec</div>
+                            <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
+                        </div>
+                    `;
+                    document.getElementById('stopRetour').innerHTML = `
+                        <div class="stop-icon active">⛪</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Retour Église</div>
+                            <div class="stop-time">Estimé bientôt <span class="stop-badge orange">EN COURS</span></div>
+                        </div>
+                    `;
+                }
+                else if (data.etape === 'retour') {
+                    document.getElementById('stopRetour').innerHTML = `
+                        <div class="stop-icon completed">⛪</div>
+                        <div class="stop-info">
+                            <div class="stop-name">Retour Église</div>
+                            <div class="stop-time">${heure} <span class="stop-badge">ARRIVÉ</span></div>
+                        </div>
+                    `;
+                }
+
+                // Ajouter une notification
                 const list = document.getElementById('notificationsList');
                 const newNotif = document.createElement('div');
                 newNotif.className = 'notif-item';
                 newNotif.innerHTML = `
                     <div class="notif-time">${heure}</div>
-                    <div>${message}</div>
+                    <div>${data.message || 'Mise à jour'}</div>
                 `;
                 list.insertBefore(newNotif, list.firstChild);
-                if (list.children.length > 5) {
+                while (list.children.length > 5) {
                     list.removeChild(list.lastChild);
                 }
-                derniereNotification = message;
+
+            } catch (e) {
+                console.log("Erreur de lecture", e);
             }
         }
 
-        // === ÉCOUTE DES MISES À JOUR ===
-        function verifierMiseAJour() {
-            const saved = localStorage.getItem('busData');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    if (data.etape && data.message) {
-                        mettreAJour(data.etape, data.message, data.heure || '--', data.lat, data.lng);
-                    }
-                } catch(e) {
-                    console.log('Erreur parsing', e);
-                }
-            }
+        // === ÉCOUTE ACTIVE DU LOCALSTORAGE ===
+        function ecouterChangements() {
+            // Vérification immédiate
+            mettreAJour();
+
+            // Vérification toutes les 1 seconde
+            setInterval(mettreAJour, 1000);
+
+            // Écoute événement storage (si plusieurs onglets)
+            window.addEventListener('storage', mettreAJour);
         }
 
-        // Vérifier toutes les 2 secondes
-        setInterval(verifierMiseAJour, 2000);
-        verifierMiseAJour();
-
-        console.log('✅ Page membre prête');
+        // Lancement
+        ecouterChangements();
+        console.log("✅ Page membre prête");
     </script>
 </body>
 </html>
