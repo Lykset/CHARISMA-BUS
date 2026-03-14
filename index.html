@@ -3,22 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suivi du Bus</title>
+    <title>Bus Charisma - Membres</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            margin: 0;
+            font-family: Arial, sans-serif;
             padding: 20px;
         }
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 20px;
-        }
+        .container { max-width: 500px; margin: 0 auto; }
         h1 { text-align: center; }
         .status {
             background: white;
@@ -26,59 +22,72 @@
             padding: 20px;
             border-radius: 10px;
             margin: 20px 0;
-            font-size: 1.2em;
+            font-size: 1.3em;
             font-weight: bold;
         }
         .notification {
             background: rgba(255,255,255,0.2);
-            padding: 10px;
+            padding: 15px;
             margin: 10px 0;
             border-radius: 10px;
             border-left: 4px solid #4CAF50;
         }
         .time {
             font-size: 0.8em;
-            color: #ddd;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚌 Bus Charisma</h1>
-        <p style="text-align: center;">Église → Brement → Noisy → Église</p>
+        <h1>⛪ Église Charisma</h1>
+        <p style="text-align: center;">Blanc-Mesnil → Brement → Noisy → Blanc-Mesnil</p>
         
         <div class="status" id="liveStatus">
-            En attente du signal...
+            En attente du conducteur...
         </div>
         
-        <h3>🔔 Notifications</h3>
+        <h3>🔔 Dernières notifications</h3>
         <div id="notifications"></div>
     </div>
 
     <script>
-        function updateDisplay() {
-            const saved = localStorage.getItem('busUpdate');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    document.getElementById('liveStatus').innerHTML = 
-                        `${data.message}<br><small style="color:#999;">${data.time}</small>`;
-                    
-                    const notif = document.getElementById('notifications');
-                    const newNotif = document.createElement('div');
-                    newNotif.className = 'notification';
-                    newNotif.innerHTML = `<div class="time">${data.time}</div>${data.message}`;
-                    notif.insertBefore(newNotif, notif.firstChild);
-                    
-                    while(notif.children.length > 5) {
-                        notif.removeChild(notif.lastChild);
-                    }
-                } catch(e) {}
+        // === TA CONFIGURATION FIREBASE (la MÊME que pour le conducteur) ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4sWMc3fNaMpZ9cD8ahQdMJn6BjRyJDzk",
+            authDomain: "charisma-bus.firebaseapp.com",
+            databaseURL: "https://charisma-bus-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "charisma-bus",
+            storageBucket: "charisma-bus.firebasestorage.app",
+            messagingSenderId: "630450080183",
+            appId: "1:630450080183:web:c204b463f63b12a8d30032"
+        };
+
+        // === INITIALISER FIREBASE ===
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // === ÉCOUTER LES CHANGEMENTS EN TEMPS RÉEL ===
+        database.ref('bus-status').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // Mettre à jour le statut
+                document.getElementById('liveStatus').innerHTML = 
+                    `${data.message}<br><small style="color:#999;">${data.time}</small>`;
+                
+                // Ajouter une notification
+                const notif = document.getElementById('notifications');
+                const newNotif = document.createElement('div');
+                newNotif.className = 'notification';
+                newNotif.innerHTML = `<div class="time">${data.time}</div>${data.message}`;
+                notif.insertBefore(newNotif, notif.firstChild);
+                
+                // Garder seulement les 5 dernières notifications
+                while(notif.children.length > 5) {
+                    notif.removeChild(notif.lastChild);
+                }
             }
-        }
-        
-        setInterval(updateDisplay, 1000);
-        updateDisplay();
+        });
     </script>
 </body>
 </html>
