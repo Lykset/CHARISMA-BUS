@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Charisma - Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e3c72;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .bus-icon {
+            font-size: 4em;
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%,100%{transform:translateY(0)}
+            50%{transform:translateY(-10px)}
+        }
+        .checkpoints {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .checkpoint {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .dot.completed { background: #4CAF50; color: white; }
+        .dot.active { background: #ff9800; color: white; animation: pulse 1s infinite; }
+        .dot.pending { background: #f0f0f0; color: #999; }
+        @keyframes pulse {
+            0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}
+        }
+        .status {
+            margin-left: auto;
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .status.vert { background: #d4edda; color: #155724; }
+        .control-btn {
+            width: 100%;
+            padding: 15px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-depart { background: #ff9800; color: white; }
+        .btn-brement { background: #2196F3; color: white; }
+        .btn-noisy { background: #9C27B0; color: white; }
+        .btn-retour { background: #4CAF50; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="bus-icon">🚌</div>
+            <h1>BUS CHARISMA</h1>
+            <p>Départ Église → Brement → Noisy → Retour</p>
+        </div>
+
+        <!-- CHECKPOINTS VISUELS -->
+        <div class="checkpoints" id="checkpoints">
+            <div class="checkpoint" id="point-eglise">
+                <div class="dot completed">⛪</div>
+                <div>Église Charisma</div>
+                <div class="status vert">✓ DÉPART 09h30</div>
+            </div>
+            <div class="checkpoint" id="point-brement">
+                <div class="dot active">🏠</div>
+                <div>Brement</div>
+                <div class="status" style="background:#ff9800;color:white">EN COURS</div>
+            </div>
+            <div class="checkpoint" id="point-noisy">
+                <div class="dot pending">🏠</div>
+                <div>Noisy-le-Sec</div>
+            </div>
+            <div class="checkpoint" id="point-retour">
+                <div class="dot pending">⛪</div>
+                <div>Retour Église</div>
+            </div>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div style="background:white; border-radius:20px; padding:20px; margin-bottom:20px; color:#333">
+            <h3>🔔 Dernières notifications</h3>
+            <div id="notifications">
+                <div style="background:#e3f2fd; padding:10px; margin:5px 0; border-radius:5px">
+                    09h30 - DÉPART Église (arrivée Brement 09h45)
+                </div>
+            </div>
+        </div>
+
+        <!-- BOUTONS CONDUCTEUR -->
+        <div style="background:white; border-radius:20px; padding:20px; color:#333">
+            <h3>🚦 Contrôle conducteur</h3>
+            <button class="control-btn btn-depart" onclick="updateStatus('depart')">DÉPART Église</button>
+            <button class="control-btn btn-brement" onclick="updateStatus('brement')">ARRIVÉE Brement</button>
+            <button class="control-btn btn-noisy" onclick="updateStatus('noisy')">ARRIVÉE Noisy</button>
+            <button class="control-btn btn-retour" onclick="updateStatus('retour')">RETOUR Église</button>
+        </div>
+    </div>
+
+    <script>
+        function updateStatus(etape) {
+            const now = new Date();
+            const heure = now.getHours() + 'h' + (now.getMinutes()<10?'0':'') + now.getMinutes();
+            
+            if(etape === 'depart') {
+                document.getElementById('point-eglise').innerHTML = '<div class="dot completed">⛪</div><div>Église Charisma</div><div class="status vert">✓ DÉPART ' + heure + '</div>';
+                document.getElementById('point-brement').innerHTML = '<div class="dot active">🏠</div><div>Brement</div><div class="status" style="background:#ff9800;color:white">EN COURS</div>';
+                addNotif(heure, '🚌 DÉPART Église - Arrivée Brement estimée 15min');
+            }
+            if(etape === 'brement') {
+                document.getElementById('point-brement').innerHTML = '<div class="dot completed">🏠</div><div>Brement</div><div class="status vert">✓ ARRIVÉ ' + heure + '</div>';
+                document.getElementById('point-noisy').innerHTML = '<div class="dot active">🏠</div><div>Noisy-le-Sec</div><div class="status" style="background:#ff9800;color:white">EN COURS</div>';
+                addNotif(heure, '✅ ARRIVÉE Brement - Prochain arrêt Noisy');
+            }
+            if(etape === 'noisy') {
+                document.getElementById('point-noisy').innerHTML = '<div class="dot completed">🏠</div><div>Noisy-le-Sec</div><div class="status vert">✓ ARRIVÉ ' + heure + '</div>';
+                document.getElementById('point-retour').innerHTML = '<div class="dot active">⛪</div><div>Retour Église</div><div class="status" style="background:#ff9800;color:white">EN COURS</div>';
+                addNotif(heure, '🟣 ARRIVÉE Noisy - Retour église dans 15min');
+            }
+            if(etape === 'retour') {
+                document.getElementById('point-retour').innerHTML = '<div class="dot completed">⛪</div><div>Retour Église</div><div class="status vert">✓ ARRIVÉ ' + heure + '</div>';
+                addNotif(heure, '🔚 RETOUR à l\'église Charisma');
+            }
+            alert('✅ Notification envoyée !');
+        }
+        
+        function addNotif(heure, message) {
+            const div = document.getElementById('notifications');
+            const newNotif = document.createElement('div');
+            newNotif.style = 'background:#e3f2fd; padding:10px; margin:5px 0; border-radius:5px';
+            newNotif.innerText = heure + ' - ' + message;
+            div.insertBefore(newNotif, div.firstChild);
+        }
+    </script>
+</body>
+</html>
