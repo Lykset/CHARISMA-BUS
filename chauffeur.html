@@ -233,4 +233,392 @@
         .total-passengers {
             font-size: 1.5em;
             font-weight: bold;
-           
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .reset-btn {
+            background: #ff9800;
+            margin-top: 15px;
+        }
+
+        .history-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .history-item {
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            margin-top: 20px;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚌 Conducteur Charisma</h1>
+        
+        <div class="status-box" id="status">
+            📍 Prêt à démarrer
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-depart" id="btnDepart" onclick="askPassengers('depart', 'Départ Église')">
+                🚌 DÉPART Église
+            </button>
+            <button class="btn-brement" id="btnBrement" onclick="askPassengers('brement', 'Arrivée Brement')" disabled>
+                🏠 ARRIVÉE Brement
+            </button>
+            <button class="btn-noisy" id="btnNoisy" onclick="askPassengers('noisy', 'Arrivée Noisy')" disabled>
+                🚉 ARRIVÉE Noisy
+            </button>
+            <button class="btn-retour" id="btnRetour" onclick="finishJourney()" disabled>
+                ⛪ RETOUR Église
+            </button>
+        </div>
+
+        <!-- Section messages de trafic -->
+        <div class="traffic-section">
+            <div class="traffic-title">⚠️ INFORMER LES PASSAGERS</div>
+            <div class="traffic-buttons">
+                <button class="traffic-btn" onclick="sendTrafficAlert('retard 5 minutes', '🚌 Retard de 5 minutes sur le trajet')">⏰ +5 min</button>
+                <button class="traffic-btn" onclick="sendTrafficAlert('retard 10 minutes', '🚌 Retard de 10 minutes - Circulation dense')">⏰ +10 min</button>
+                <button class="traffic-btn" onclick="sendTrafficAlert('retard 15 minutes', '🚌 Retard de 15 minutes - Incident sur la route')">⏰ +15 min</button>
+                <button class="traffic-btn" onclick="sendTrafficAlert('à proximité', '🚌 Le bus approche de votre arrêt !')">📍 À proximité</button>
+            </div>
+            <div class="custom-traffic">
+                <input type="text" id="customTrafficMessage" placeholder="Message personnalisé..." autocomplete="off">
+                <button onclick="sendCustomTraffic()">Envoyer</button>
+            </div>
+        </div>
+
+        <!-- Zone de compte rendu -->
+        <div id="reportArea" style="display: none;"></div>
+
+        <div class="history-section">
+            <h3 style="color:white; margin-bottom:10px;">📋 Historique des arrêts</h3>
+            <div id="historyList"></div>
+        </div>
+
+        <div class="footer">
+            N'oubliez pas de compter les passagers à chaque arrêt (sauf retour)
+        </div>
+    </div>
+
+    <!-- Modal de comptage des passagers -->
+    <div id="passengerModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Comptage des passagers</h2>
+            <div class="counter">
+                <button class="counter-btn" onclick="decrementCount()">-</button>
+                <span class="counter-value" id="passengerCount">0</span>
+                <button class="counter-btn" onclick="incrementCount()">+</button>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-confirm" onclick="confirmPassengers()">✓ Valider</button>
+                <button class="btn-cancel" onclick="closeModal()">✗ Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4sWMc3fNaMpZ9cD8ahQdMJn6BjRyJDzk",
+            authDomain: "charisma-bus.firebaseapp.com",
+            databaseURL: "https://charisma-bus-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "charisma-bus",
+            storageBucket: "charisma-bus.firebasestorage.app",
+            messagingSenderId: "630450080183",
+            appId: "1:630450080183:web:c204b463f63b12a8d30032"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let currentStep = null;
+        let currentPassengerCount = 0;
+        let pendingEtape = null;
+        let pendingMessage = null;
+        
+        let passengersData = {
+            eglise: 0,
+            brement: 0,
+            noisy: 0,
+            retour: 0
+        };
+        
+        let history = [];
+
+        database.ref('bus-status').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.etape) {
+                currentStep = data.etape;
+                updateButtonsState();
+            }
+        });
+
+        database.ref('passengers').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                passengersData = { ...passengersData, ...data };
+                if (currentStep === 'retour') {
+                    showFullReport();
+                }
+            }
+        });
+
+        function updateButtonsState() {
+            const btnDepart = document.getElementById('btnDepart');
+            const btnBrement = document.getElementById('btnBrement');
+            const btnNoisy = document.getElementById('btnNoisy');
+            const btnRetour = document.getElementById('btnRetour');
+
+            switch(currentStep) {
+                case null:
+                case undefined:
+                    btnDepart.disabled = false;
+                    btnBrement.disabled = true;
+                    btnNoisy.disabled = true;
+                    btnRetour.disabled = true;
+                    document.getElementById('status').innerHTML = '📍 Prêt à démarrer<br><small>Appuyez sur "DÉPART Église"</small>';
+                    break;
+                case 'depart':
+                    btnDepart.disabled = true;
+                    btnBrement.disabled = false;
+                    btnNoisy.disabled = true;
+                    btnRetour.disabled = true;
+                    document.getElementById('status').innerHTML = '🚌 En route vers Brement<br><small>Prochain arrêt : Brement</small>';
+                    break;
+                case 'brement':
+                    btnDepart.disabled = true;
+                    btnBrement.disabled = true;
+                    btnNoisy.disabled = false;
+                    btnRetour.disabled = true;
+                    document.getElementById('status').innerHTML = '🏠 Arrivé à Brement<br><small>Prochain arrêt : Noisy-le-Sec</small>';
+                    break;
+                case 'noisy':
+                    btnDepart.disabled = true;
+                    btnBrement.disabled = true;
+                    btnNoisy.disabled = true;
+                    btnRetour.disabled = false;
+                    document.getElementById('status').innerHTML = '🚉 Arrivé à Noisy<br><small>Prochain arrêt : Retour Église</small>';
+                    break;
+                case 'retour':
+                    btnDepart.disabled = true;
+                    btnBrement.disabled = true;
+                    btnNoisy.disabled = true;
+                    btnRetour.disabled = true;
+                    document.getElementById('status').innerHTML = '✅ Voyage terminé !<br><small>Merci d\'avoir conduit</small>';
+                    break;
+            }
+        }
+
+        function askPassengers(etape, message) {
+            if (etape === 'retour') {
+                finishJourney();
+                return;
+            }
+            
+            pendingEtape = etape;
+            pendingMessage = message;
+            currentPassengerCount = 0;
+            document.getElementById('passengerCount').innerText = '0';
+            document.getElementById('modalTitle').innerHTML = `🧑‍🤝‍🧑 ${message}<br><small>Combien de personnes montent ?</small>`;
+            document.getElementById('passengerModal').style.display = 'flex';
+        }
+
+        function finishJourney() {
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            
+            // Ne pas demander le nombre de passagers pour le retour
+            const data = {
+                etape: 'retour',
+                message: 'Retour Église',
+                time: time
+            };
+            
+            database.ref('bus-status').set(data);
+            
+            document.getElementById('status').innerHTML = `✅ Retour Église<br><small>${time}</small>`;
+            
+            // Afficher directement le compte rendu
+            setTimeout(() => {
+                showFullReport();
+            }, 500);
+        }
+
+        function sendTrafficAlert(title, message) {
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            
+            const trafficData = {
+                title: title,
+                message: message,
+                time: time
+            };
+            
+            // Envoyer l'alerte aux passagers
+            database.ref('bus-status/trafficAlert').set(trafficData);
+            
+            // Sauvegarder dans l'historique
+            history.unshift({
+                stop: 'INFO TRAFIC',
+                passengers: message,
+                time: time,
+                isTraffic: true
+            });
+            updateHistoryDisplay();
+            
+            // Afficher confirmation
+            const statusDiv = document.getElementById('status');
+            const originalText = statusDiv.innerHTML;
+            statusDiv.innerHTML = `⚠️ Message envoyé: ${message}<br><small>${time}</small>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = originalText;
+            }, 3000);
+            
+            // Effacer l'alerte après 10 secondes
+            setTimeout(() => {
+                database.ref('bus-status/trafficAlert').remove();
+            }, 10000);
+        }
+
+        function sendCustomTraffic() {
+            const input = document.getElementById('customTrafficMessage');
+            const message = input.value.trim();
+            if (message) {
+                sendTrafficAlert('Message conducteur', message);
+                input.value = '';
+            }
+        }
+
+        function incrementCount() {
+            currentPassengerCount++;
+            document.getElementById('passengerCount').innerText = currentPassengerCount;
+        }
+
+        function decrementCount() {
+            if (currentPassengerCount > 0) {
+                currentPassengerCount--;
+                document.getElementById('passengerCount').innerText = currentPassengerCount;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('passengerModal').style.display = 'none';
+            pendingEtape = null;
+            pendingMessage = null;
+        }
+
+        function confirmPassengers() {
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            
+            passengersData[pendingEtape] = currentPassengerCount;
+            database.ref('passengers').set(passengersData);
+            
+            history.unshift({
+                stop: pendingMessage,
+                passengers: currentPassengerCount,
+                time: time
+            });
+            updateHistoryDisplay();
+            
+            const data = {
+                etape: pendingEtape,
+                message: pendingMessage,
+                time: time,
+                passengers: currentPassengerCount
+            };
+            
+            database.ref('bus-status').set(data);
+            
+            document.getElementById('status').innerHTML = `✅ ${pendingMessage}<br><small>${time} - ${currentPassengerCount} passager(s) monté(s)</small>`;
+            
+            closeModal();
+        }
+
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            history.slice(0, 10).forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                if (item.isTraffic) {
+                    div.style.background = 'rgba(245,158,11,0.3)';
+                    div.innerHTML = `
+                        <strong>⚠️ ${item.stop}</strong><br>
+                        📢 ${item.passengers}<br>
+                        ⏰ ${item.time}
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <strong>${item.stop}</strong><br>
+                        👥 ${item.passengers} passager(s) • ⏰ ${item.time}
+                    `;
+                }
+                historyList.appendChild(div);
+            });
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="history-item" style="opacity:0.7;">Aucun arrêt enregistré</div>';
+            }
+        }
+
+        function showFullReport() {
+            const total = (passengersData.eglise || 0) + (passengersData.brement || 0) + 
+                         (passengersData.noisy || 0) + (passengersData.retour || 0);
+            
+            const reportArea = document.getElementById('reportArea');
+            reportArea.style.display = 'block';
+            reportArea.innerHTML = `
+                <div class="report-card">
+                    <h3>📊 COMPTE RENDU DU VOYAGE</h3>
+                    <div class="report-stats">
+                        <p>⛪ Départ Église: <strong>${passengersData.eglise || 0}</strong> passagers</p>
+                        <p>🏠 Arrêt Brement: <strong>${passengersData.brement || 0}</strong> passagers</p>
+                        <p>🚉 Arrêt Noisy: <strong>${passengersData.noisy || 0}</strong> passagers</p>
+                        <p>⛪ Retour Église: <strong>${passengersData.retour || 0}</strong> passagers</p>
+                        <div class="total-passengers">
+                            🎯 TOTAL: ${total} PASSAGERS TRANSPORTÉS
+                        </div>
+                    </div>
+                    <button class="reset-btn" onclick="resetJourney()">🔄 Nouveau trajet</button>
+                </div>
+            `;
+        }
+
+        function resetJourney() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser le trajet ? Toutes les données seront effacées.')) {
+                passengersData = { eglise: 0, brement: 0, noisy: 0, retour: 0 };
+                history = [];
+                currentStep = null;
+                
+                database.ref('bus-status').set(null);
+                database.ref('passengers').set(null);
+                
+                document.getElementById('reportArea').style.display = 'none';
+                updateHistoryDisplay();
+                updateButtonsState();
+                document.getElementById('status').innerHTML = '📍 Prêt à démarrer<br><small>Appuyez sur "DÉPART Église"</small>';
+            }
+        }
+
+        updateButtonsState();
+        updateHistoryDisplay();
+    </script>
+</body>
+</html>
