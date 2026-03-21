@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>🚐 Navieo • Passager</title>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0f4c5c 0%, #1e6b5e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            color: #f8fafc;
+            padding: 20px;
+        }
+        .container { max-width: 550px; margin: 0 auto; }
+        .top-bar {
+            background: linear-gradient(135deg, #0a3b44 0%, #0a2f3a 100%);
+            padding: 25px 20px 35px;
+            border-bottom-left-radius: 40px;
+            border-bottom-right-radius: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .top-bar::after { content: "🚐"; position: absolute; right: -10px; bottom: -30px; font-size: 150px; opacity: 0.1; }
+        .church-name { font-size: 1.5em; font-weight: 800; }
+        .bus-name { font-size: 1.8em; font-weight: 800; color: #fbbf24; margin: 10px 0; }
+        .reservation { background: #fbbf24; color: #0f4c5c; padding: 8px 15px; border-radius: 50px; display: inline-block; font-weight: bold; }
+        .waiting-state {
+            background: rgba(255,255,255,0.1);
+            border-radius: 40px;
+            padding: 50px 30px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px dashed #fbbf24;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .waiting-icon { font-size: 4em; margin-bottom: 20px; }
+        .waiting-title { font-size: 1.5em; font-weight: 700; margin-bottom: 15px; color: #fbbf24; }
+        .waiting-text { color: #cbd5e1; line-height: 1.6; }
+        .message-feature {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 35px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .featured-message { font-size: 1.2em; font-weight: 600; color: #fbbf24; font-style: italic; }
+        .traffic-info {
+            background: #f59e0b;
+            border-radius: 20px;
+            padding: 12px 20px;
+            margin: 10px 0;
+            text-align: center;
+            animation: slideDown 0.5s;
+            color: #1e3c72;
+            font-weight: bold;
+        }
+        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .big-status {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin: 20px 0;
+        }
+        .big-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            border: 2px solid #fbbf24;
+        }
+        .big-text { flex: 1; }
+        .big-text .label { font-size: 0.8em; opacity: 0.7; text-transform: uppercase; }
+        .big-text .location { font-size: 1.2em; font-weight: 700; margin: 5px 0; }
+        .big-text .time { color: #fbbf24; font-weight: 600; }
+        .progress-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .progress-bar-container {
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            height: 10px;
+            margin: 15px 0;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            width: 0%;
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.5s;
+        }
+        .next-stop { text-align: center; font-size: 0.9em; margin-top: 10px; }
+        .stops-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .stop-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 25px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+        .stop-card.completed { background: rgba(16,185,129,0.3); opacity: 0.7; }
+        .stop-card.active { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); transform: scale(1.02); }
+        .stop-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+        .stop-info { flex: 1; }
+        .stop-name { font-weight: 700; margin-bottom: 4px; }
+        .stop-time { font-size: 0.7em; opacity: 0.7; }
+        .stop-badge { font-size: 0.7em; background: rgba(0,0,0,0.3); padding: 3px 10px; border-radius: 20px; display: inline-block; margin-top: 5px; }
+        .passengers-count { font-size: 0.7em; color: #fbbf24; margin-top: 5px; }
+        .notif-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .notif-title { font-weight: 600; margin-bottom: 15px; color: #fbbf24; }
+        .notif-item {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid #fbbf24;
+        }
+        .notif-time { font-size: 0.7em; opacity: 0.7; margin-bottom: 5px; }
+        .notif-message { font-size: 0.9em; }
+        .culte-banner {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #0f4c5c;
+            padding: 15px;
+            border-radius: 40px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 1.2em;
+            margin: 20px 0;
+            animation: pulse-gold 2s infinite;
+        }
+        @keyframes pulse-gold { 0%,100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+        .footer { text-align: center; font-size: 0.7em; opacity: 0.7; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <div class="church-name">Église Charisma</div>
+            <div class="bus-name">🚐 Navieo</div>
+            <div class="reservation">📞 Réservation: 07 45 44 60 15</div>
+            <div style="font-size:0.8em; margin-top:8px;">La navette qui transporte la VIE</div>
+        </div>
+
+        <div id="waitingState" class="waiting-state">
+            <div class="waiting-icon">⏳</div>
+            <div class="waiting-title">En attente du départ...</div>
+            <div class="waiting-text">La navette Navieo n'a pas encore commencé son trajet.<br>Restez connecté, le départ sera annoncé ici.</div>
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            <div class="message-feature">
+                <div class="featured-message" id="inspirationalMessage">✨ Navieo - La navette qui transporte la VIE ✨</div>
+            </div>
+
+            <div id="trafficAlert" style="display: none;" class="traffic-info"></div>
+
+            <div class="big-status">
+                <div class="big-icon" id="bigIcon">🚐</div>
+                <div class="big-text">
+                    <div class="label">🚐 POSITION ACTUELLE</div>
+                    <div class="location" id="bigLocation">En attente</div>
+                    <div class="time" id="bigTime">--:--</div>
+                </div>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="next-stop" id="nextStopInfo"></div>
+            </div>
+
+            <div class="stops-grid" id="stopsGrid"></div>
+
+            <div class="culte-banner">
+                🎉 BON CULTE ! 🎉
+            </div>
+
+            <div class="notif-section">
+                <div class="notif-title">🔔 DERNIÈRES INFORMATIONS</div>
+                <div id="notificationsList"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Navieo - Service navette Église Charisma • Suivi en direct
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4sWMc3fNaMpZ9cD8ahQdMJn6BjRyJDzk",
+            authDomain: "charisma-bus.firebaseapp.com",
+            databaseURL: "https://charisma-bus-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "charisma-bus",
+            storageBucket: "charisma-bus.firebasestorage.app",
+            messagingSenderId: "630450080183",
+            appId: "1:630450080183:web:c204b463f63b12a8d30032"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        const STOPS = [
+            { id: "chelles", name: "Chelles ZAC de Tuilerie", time: "7:55", emoji: "🏭", order: 0 },
+            { id: "mairie", name: "Mairie", time: "8:00", emoji: "🏛️", order: 1 },
+            { id: "gare", name: "Gare", time: "8:03", emoji: "🚉", order: 2 },
+            { id: "neuilly", name: "Neuilly/Marne", time: "8:13", emoji: "🌊", order: 3 },
+            { id: "lamare", name: "La Mare", time: "8:19", emoji: "🌾", order: 4 },
+            { id: "gagnyarena", name: "Gagny Arena", time: "8:21", emoji: "🏟️", order: 5 },
+            { id: "jeanmoulin", name: "Jean Moulin", time: "8:24", emoji: "👤", order: 6 },
+            { id: "henribarbusse", name: "Henri Barbusse", time: "8:27", emoji: "📚", order: 7 },
+            { id: "garegagny", name: "Gare de Gagny", time: "8:30", emoji: "🚉", order: 8 },
+            { id: "chateau", name: "Château de Villemomble", time: "8:33", emoji: "🏰", order: 9 },
+            { id: "rosny", name: "Rosny Perrier Sud", time: "8:36", emoji: "🌹", order: 10 },
+            { id: "van", name: "Van derheyden", time: "8:39", emoji: "🏠", order: 11 },
+            { id: "ruffins", name: "Montreuil Ruffins", time: "8:49", emoji: "🏘️", order: 12 },
+            { id: "mairiemontreuil", name: "Montreuil Mairie", time: "8:59", emoji: "🏛️", order: 13 },
+            { id: "croixchavaux", name: "Montreuil Croix de Chavaux", time: "9:05", emoji: "✝️", order: 14 },
+            { id: "gaulle", name: "Montreuil Général de Gaulle", time: "9:08", emoji: "👨‍✈️", order: 15 },
+            { id: "eglise", name: "Église CHARISMA", time: "9:30", emoji: "⛪", order: 16 }
+        ];
+
+        let currentStopIndex = -1;
+        let passengersData = {};
+
+        function renderStops() {
+            const container = document.getElementById('stopsGrid');
+            container.innerHTML = '';
+            
+            STOPS.forEach((stop, idx) => {
+                const div = document.createElement('div');
+                div.className = 'stop-card';
+                if (idx < currentStopIndex) div.classList.add('completed');
+                if (idx === currentStopIndex) div.classList.add('active');
+                
+                div.innerHTML = `
+                    <div class="stop-icon">${stop.emoji}</div>
+                    <div class="stop-info">
+                        <div class="stop-name">${stop.name}</div>
+                        <div class="stop-time">⏰ ${stop.time}</div>
+                        <span class="stop-badge">${idx < currentStopIndex ? '✓ Effectué' : idx === currentStopIndex ? '▶ En cours' : '⏱ À venir'}</span>
+                        ${passengersData[stop.id] ? `<div class="passengers-count">👥 ${passengersData[stop.id]} passager(s) monté(s)</div>` : ''}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateProgress() {
+            if (currentStopIndex >= 0) {
+                const progress = (currentStopIndex / (STOPS.length - 1)) * 100;
+                document.getElementById('progressBar').style.width = `${progress}%`;
+            }
+            
+            const nextStop = currentStopIndex < STOPS.length - 1 ? STOPS[currentStopIndex + 1] : null;
+            const nextStopInfo = document.getElementById('nextStopInfo');
+            if (nextStop) {
+                nextStopInfo.innerHTML = `⏩ Prochain arrêt: ${nextStop.emoji} ${nextStop.name} (prévu vers ${nextStop.time})`;
+            } else if (currentStopIndex === STOPS.length - 1) {
+                nextStopInfo.innerHTML = `🎉 Arrivée à destination - Église CHARISMA ! Bon culte ! 🎉`;
+            }
+        }
+
+        function showTrafficAlert(alert) {
+            if (alert && alert.message) {
+                const alertDiv = document.getElementById('trafficAlert');
+                alertDiv.style.display = 'block';
+                alertDiv.innerHTML = `⚠️ ${alert.message}`;
+                setTimeout(() => {
+                    alertDiv.style.opacity = '0';
+                    setTimeout(() => {
+                        alertDiv.style.display = 'none';
+                        alertDiv.style.opacity = '1';
+                    }, 500);
+                }, 8000);
+            }
+        }
+
+        function addNotification(message, time) {
+            const list = document.getElementById('notificationsList');
+            const newNotif = document.createElement('div');
+            newNotif.className = 'notif-item';
+            newNotif.innerHTML = `
+                <div class="notif-time">${time}</div>
+                <div class="notif-message">${message}</div>
+            `;
+            list.insertBefore(newNotif, list.firstChild);
+            while(list.children.length > 15) list.removeChild(list.lastChild);
+        }
+
+        function updateDisplay(data) {
+            if (!data || data.route !== 'navieo') return;
+            
+            const stopId = data.etape;
+            const time = data.time || new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            
+            if (currentStopIndex === -1 && stopId) {
+                document.getElementById('waitingState').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+            }
+            
+            const stopIndex = STOPS.findIndex(s => s.id === stopId);
+            if (stopIndex !== -1) {
+                currentStopIndex = stopIndex;
+                const currentStop = STOPS[stopIndex];
+                document.getElementById('bigIcon').innerHTML = currentStop.emoji;
+                document.getElementById('bigLocation').innerHTML = currentStop.name;
+                document.getElementById('bigTime').innerHTML = time;
+                document.getElementById('inspirationalMessage').innerHTML = `🚐 ${data.message} à ${currentStop.name}`;
+                
+                renderStops();
+                updateProgress();
+            }
+            
+            if (data.passengers) {
+                passengersData[stopId] = data.passengers;
+                renderStops();
+            }
+            
+            if (data.trafficAlert) {
+                showTrafficAlert(data.trafficAlert);
+                addNotification(`⚠️ ${data.trafficAlert.message}`, time);
+            } else if (stopId) {
+                const stop = STOPS.find(s => s.id === stopId);
+                if (stop) {
+                    addNotification(`📍 ${stop.name} - ${data.message || 'Arrivée'}`, time);
+                }
+            }
+        }
+
+        database.ref('bus-status').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) updateDisplay(data);
+        });
+
+        database.ref('passengers').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                passengersData = { ...passengersData, ...data };
+                renderStops();
+            }
+        });
+
+        database.ref('bus-status/trafficAlert').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                showTrafficAlert(data);
+                addNotification(`⚠️ ${data.message}`, data.time);
+            }
+        });
+
+        function updateTime() {
+            const now = new Date();
+            const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            const bigTime = document.getElementById('bigTime');
+            if (bigTime && document.getElementById('mainContent').style.display === 'block') {
+                bigTime.innerText = time;
+            }
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        renderStops();
+    </script>
+</body>
+</html>
