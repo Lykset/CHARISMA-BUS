@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Gestionnaire de ligne - Bus Charisma</title>
+    <title>Conducteur · Service Navettes</title>
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,348 +16,414 @@
         }
 
         body {
-            background: #f5f7fa;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f4f8;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             color: #1a2c3e;
             line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Bandeau d'accueil chaleureux */
+        .hero-band {
+            background: linear-gradient(135deg, #1e4b6e 0%, #2c5f8a 100%);
+            padding: 32px 24px 48px;
+            margin-bottom: -24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-band::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path fill="white" d="M20,50 L30,40 L40,50 L50,30 L60,50 L70,40 L80,50 L90,30 L85,70 L15,70 L10,30 L20,50Z"/></svg>') repeat;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.3px;
+            margin-bottom: 8px;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.85);
+            font-weight: 400;
+        }
+
+        .hero-quote {
+            margin-top: 20px;
+            font-style: italic;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.9);
+            border-left: 3px solid #f9b43a;
+            padding-left: 16px;
+            background: rgba(0,0,0,0.1);
+            display: inline-block;
+            border-radius: 0 12px 12px 0;
+            padding: 10px 20px;
         }
 
         /* Container principal */
-        .app-container {
+        .dashboard {
             max-width: 1280px;
             margin: 0 auto;
             padding: 24px;
         }
 
-        /* En-tête */
-        .header {
-            margin-bottom: 32px;
-        }
-
-        .header h1 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: #0a2942;
-            letter-spacing: -0.3px;
-        }
-
-        .header p {
-            color: #5a6e7c;
-            font-size: 0.875rem;
-            margin-top: 4px;
-        }
-
         /* Cartes */
         .card {
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
-            border: 1px solid #e9ecef;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
             overflow: hidden;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
         }
 
         .card-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid #eef2f6;
-            background: #ffffff;
+            padding: 20px 28px;
+            border-bottom: 1px solid #ecf3f9;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .card-header h2 {
-            font-size: 1.125rem;
+            font-size: 1.25rem;
             font-weight: 600;
-            color: #1a2c3e;
+            color: #1a4c6e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .card-header p {
-            font-size: 0.75rem;
-            color: #7c8b9c;
-            margin-top: 4px;
+        .badge {
+            background: #eef3fc;
+            color: #2c5f8a;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 500;
         }
 
         .card-content {
-            padding: 24px;
+            padding: 24px 28px;
         }
 
-        /* Sélection d'itinéraire */
-        .route-grid {
+        /* Sélection itinéraire */
+        .route-selector {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 24px;
+            gap: 24px;
+            margin-bottom: 28px;
         }
 
-        @media (max-width: 640px) {
-            .route-grid {
+        @media (max-width: 700px) {
+            .route-selector {
                 grid-template-columns: 1fr;
             }
         }
 
-        .route-option {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .route-option:hover {
-            border-color: #3b7cbf;
+        .route-card {
             background: #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e4edf5;
+            border-radius: 20px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
         }
 
-        .route-option.selected {
-            border-color: #2c5a8c;
-            background: #f0f6ff;
-            box-shadow: 0 2px 8px rgba(44, 90, 140, 0.1);
+        .route-card:hover {
+            border-color: #cbdde9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         }
 
-        .route-title {
+        .route-card.selected {
+            border-color: #f9b43a;
+            background: linear-gradient(135deg, #fffaf2 0%, #fff7ed 100%);
+            box-shadow: 0 8px 25px rgba(249, 180, 58, 0.15);
+        }
+
+        .route-icon {
+            font-size: 2.2rem;
+            margin-bottom: 16px;
+        }
+
+        .route-name {
+            font-size: 1.3rem;
             font-weight: 700;
-            font-size: 1.125rem;
-            color: #1a2c3e;
+            color: #1e4b6e;
             margin-bottom: 8px;
         }
 
-        .route-description {
-            font-size: 0.8rem;
-            color: #5a6e7c;
-            margin-bottom: 12px;
+        .route-desc {
+            font-size: 0.85rem;
+            color: #5f7d9c;
+            margin-bottom: 16px;
             line-height: 1.4;
         }
 
-        .route-meta {
+        .route-stats {
             display: flex;
             gap: 16px;
-            font-size: 0.7rem;
-            color: #7c8b9c;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 12px;
+            font-size: 0.75rem;
+            color: #6f8fae;
+            border-top: 1px solid #ecf3f9;
+            padding-top: 16px;
             margin-top: 8px;
         }
 
-        .btn-primary {
+        .btn-start {
             width: 100%;
-            background: #2c5a8c;
-            color: white;
+            background: linear-gradient(135deg, #f9b43a 0%, #e69f2c 100%);
             border: none;
-            padding: 14px 20px;
-            border-radius: 12px;
+            padding: 14px 24px;
+            border-radius: 40px;
             font-weight: 600;
-            font-size: 0.875rem;
+            font-size: 0.95rem;
+            color: #1e3a4d;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(249, 180, 58, 0.3);
         }
 
-        .btn-primary:hover {
-            background: #1f4468;
+        .btn-start:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(249, 180, 58, 0.4);
         }
 
-        .btn-primary:disabled {
-            background: #b9c4ce;
+        .btn-start:disabled {
+            opacity: 0.5;
+            transform: none;
             cursor: not-allowed;
         }
 
-        /* Informations trajet */
-        .journey-info {
+        /* Infos trajet */
+        .journey-panel {
+            background: linear-gradient(135deg, #f8fafd 0%, #ffffff 100%);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid #ecf3f9;
+        }
+
+        .stats-row {
             display: flex;
             flex-wrap: wrap;
             gap: 24px;
             margin-bottom: 24px;
-            padding: 16px 0;
-            border-bottom: 1px solid #eef2f6;
         }
 
-        .info-item {
+        .stat-block {
             flex: 1;
             min-width: 120px;
+            text-align: center;
+            padding: 12px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
         }
 
-        .info-label {
+        .stat-label {
             font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #7c8b9c;
+            letter-spacing: 0.8px;
+            color: #8aa4c0;
             font-weight: 500;
         }
 
-        .info-value {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #1a2c3e;
-            margin-top: 4px;
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e4b6e;
+            margin-top: 6px;
         }
 
-        /* Barre de progression */
-        .progress-container {
-            margin: 20px 0 16px;
+        .stat-sub {
+            font-size: 0.7rem;
+            color: #f9b43a;
+            font-weight: 500;
+        }
+
+        /* Progression */
+        .progress-area {
+            margin: 20px 0;
         }
 
         .progress-bar-bg {
-            background: #e9ecef;
-            border-radius: 100px;
-            height: 8px;
+            background: #e4edf5;
+            border-radius: 40px;
+            height: 12px;
             overflow: hidden;
         }
 
         .progress-fill {
-            background: #2c5a8c;
+            background: linear-gradient(90deg, #f9b43a, #e69f2c);
             height: 100%;
             width: 0%;
-            border-radius: 100px;
-            transition: width 0.3s ease;
+            border-radius: 40px;
+            transition: width 0.4s ease;
         }
 
-        .progress-stats {
+        .progress-labels {
             display: flex;
             justify-content: space-between;
-            margin-top: 8px;
+            margin-top: 10px;
             font-size: 0.7rem;
-            color: #7c8b9c;
+            color: #7c9abc;
         }
 
-        /* Grille des arrêts */
-        .stops-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 320px;
+        /* Liste des arrêts */
+        .stops-container {
+            max-height: 360px;
             overflow-y: auto;
-            margin: 16px 0;
+            margin: 20px 0;
+            border-radius: 16px;
         }
 
-        .stop-row {
+        .stop-card-item {
+            background: #ffffff;
+            border: 1px solid #ecf3f9;
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            padding: 12px 16px;
-            background: #fafcfd;
-            border-radius: 12px;
-            border: 1px solid #eef2f6;
+            gap: 16px;
             transition: all 0.2s;
         }
 
-        .stop-row.completed {
-            background: #f5f7fa;
-            border-color: #e2e8f0;
+        .stop-card-item.completed {
+            background: #f8fafc;
+            border-color: #e0eaf2;
             opacity: 0.7;
         }
 
-        .stop-row.active {
-            background: #f0f6ff;
-            border-color: #2c5a8c;
-            box-shadow: 0 2px 6px rgba(44, 90, 140, 0.08);
+        .stop-card-item.active {
+            background: linear-gradient(135deg, #fff9ef 0%, #fff5e8 100%);
+            border-color: #f9b43a;
+            box-shadow: 0 4px 12px rgba(249, 180, 58, 0.15);
         }
 
-        .stop-order {
-            width: 32px;
-            height: 32px;
-            background: #eef2f6;
-            border-radius: 32px;
+        .stop-number {
+            width: 36px;
+            height: 36px;
+            background: #ecf3f9;
+            border-radius: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #4a627a;
-            margin-right: 16px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #2c5f8a;
         }
 
-        .stop-row.active .stop-order {
-            background: #2c5a8c;
+        .stop-card-item.active .stop-number {
+            background: #f9b43a;
             color: white;
         }
 
-        .stop-row.completed .stop-order {
-            background: #d4e2f0;
-            color: #5a6e7c;
-        }
-
-        .stop-info {
+        .stop-details {
             flex: 1;
         }
 
         .stop-name {
             font-weight: 600;
-            font-size: 0.875rem;
-            color: #1a2c3e;
+            color: #1e4b6e;
         }
 
         .stop-time {
             font-size: 0.7rem;
-            color: #7c8b9c;
+            color: #8aa4c0;
             margin-top: 2px;
         }
 
-        .stop-passengers {
+        .stop-count {
+            background: #eef3fc;
+            padding: 6px 14px;
+            border-radius: 30px;
             font-size: 0.8rem;
-            font-weight: 500;
-            color: #2c5a8c;
-            background: #eef2f6;
-            padding: 4px 10px;
-            border-radius: 20px;
+            font-weight: 600;
+            color: #2c5f8a;
         }
 
         /* Actions */
-        .action-buttons {
+        .actions-bar {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
             margin: 20px 0;
         }
 
-        .btn-secondary {
-            background: #f1f3f5;
-            border: 1px solid #e2e8f0;
+        .btn-action {
+            background: #f8fafd;
+            border: 1px solid #e0eaf2;
             padding: 10px 18px;
-            border-radius: 10px;
+            border-radius: 40px;
             font-size: 0.8rem;
             font-weight: 500;
-            color: #2c5a8c;
+            color: #2c5f8a;
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .btn-secondary:hover {
-            background: #e9ecef;
+        .btn-action:hover {
+            background: #f0f5fa;
+            border-color: #cbdde9;
         }
 
         .btn-warning {
-            background: #fff4e6;
-            border: 1px solid #ffd966;
-            color: #b45f06;
+            background: #fff7ed;
+            border-color: #f9e0b0;
+            color: #b87c2e;
         }
 
-        .btn-warning:hover {
-            background: #ffe6cc;
-        }
-
-        .input-group {
+        .input-custom {
             display: flex;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 10px;
+            margin-top: 8px;
         }
 
-        .input-group input {
+        .input-custom input {
             flex: 1;
-            padding: 10px 14px;
-            border: 1px solid #dce3e9;
-            border-radius: 10px;
-            font-size: 0.8rem;
+            padding: 10px 16px;
+            border: 1px solid #e0eaf2;
+            border-radius: 40px;
             font-family: inherit;
+            font-size: 0.85rem;
         }
 
-        .input-group input:focus {
+        .input-custom input:focus {
             outline: none;
-            border-color: #2c5a8c;
+            border-color: #f9b43a;
         }
 
         /* Rapport */
-        .report-card {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border-radius: 14px;
+        .report-box {
+            background: linear-gradient(135deg, #f0f6fc 0%, #eaf1f8 100%);
+            border-radius: 20px;
             padding: 20px;
             margin-top: 24px;
         }
@@ -364,78 +431,98 @@
         .report-title {
             font-weight: 700;
             font-size: 0.9rem;
-            color: #1a2c3e;
+            color: #1e4b6e;
             margin-bottom: 16px;
         }
 
-        .report-stats {
+        .report-numbers {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 16px;
             margin-bottom: 16px;
         }
 
-        .stat-item {
-            text-align: center;
-            padding: 12px;
+        .report-number-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
         }
 
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #2c5a8c;
+        .report-big-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #f9b43a;
         }
 
-        .stat-label {
+        .report-label {
             font-size: 0.7rem;
-            color: #7c8b9c;
-            margin-top: 4px;
-        }
-
-        .btn-reset {
-            background: #ffffff;
-            border: 1px solid #dce3e9;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #5a6e7c;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .btn-reset:hover {
-            background: #f8fafc;
+            color: #7c9abc;
+            margin-top: 6px;
         }
 
         /* Historique */
+        .history-area {
+            margin-top: 24px;
+            border-top: 1px solid #ecf3f9;
+            padding-top: 20px;
+        }
+
+        .history-title {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #7c9abc;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
         .history-list {
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
         }
 
-        .history-item {
-            padding: 12px;
-            border-bottom: 1px solid #eef2f6;
+        .history-entry {
+            padding: 10px 0;
+            border-bottom: 1px solid #ecf3f9;
             font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-stop {
+            font-weight: 500;
+            color: #1e4b6e;
         }
 
         .history-time {
+            color: #8aa4c0;
             font-size: 0.7rem;
-            color: #7c8b9c;
-            margin-bottom: 4px;
         }
 
-        .history-message {
-            font-weight: 500;
-            color: #2c3e50;
+        .history-pass {
+            color: #f9b43a;
+            font-weight: 600;
         }
 
-        .history-passengers {
-            color: #2c5a8c;
+        .btn-reset {
+            width: 100%;
+            background: white;
+            border: 1px solid #e0eaf2;
+            padding: 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
             font-weight: 500;
+            color: #7c9abc;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #8aa4c0;
+            padding: 24px 0 16px;
         }
 
         /* Modal */
@@ -455,131 +542,112 @@
 
         .modal {
             background: white;
-            border-radius: 24px;
-            max-width: 400px;
+            border-radius: 32px;
+            max-width: 380px;
             width: 90%;
-            padding: 28px;
-            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
+            padding: 32px;
+            text-align: center;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
         }
 
         .modal h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1e4b6e;
             margin-bottom: 8px;
         }
 
         .modal p {
-            color: #5a6e7c;
-            font-size: 0.875rem;
-            margin-bottom: 20px;
+            color: #7c9abc;
+            font-size: 0.85rem;
         }
 
         .counter {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 24px;
-            margin: 24px 0;
+            gap: 28px;
+            margin: 28px 0;
         }
 
         .counter-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 48px;
-            border: 1px solid #dce3e9;
-            background: white;
-            font-size: 1.5rem;
+            width: 52px;
+            height: 52px;
+            border-radius: 52px;
+            background: #f0f5fa;
+            border: none;
+            font-size: 1.8rem;
             font-weight: 600;
+            color: #2c5f8a;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .counter-btn:hover {
-            background: #f1f3f5;
-            border-color: #2c5a8c;
+            background: #f9b43a;
+            color: white;
         }
 
         .counter-value {
-            font-size: 2rem;
-            font-weight: 700;
-            min-width: 60px;
-            text-align: center;
-            color: #1a2c3e;
+            font-size: 2.2rem;
+            font-weight: 800;
+            min-width: 70px;
+            color: #1e4b6e;
         }
 
         .modal-actions {
             display: flex;
             gap: 12px;
-            margin-top: 20px;
+            margin-top: 16px;
         }
 
         .modal-actions button {
             flex: 1;
             padding: 12px;
-            border-radius: 12px;
-            font-weight: 500;
+            border-radius: 40px;
+            font-weight: 600;
             cursor: pointer;
-        }
-
-        .btn-confirm {
-            background: #2c5a8c;
-            color: white;
-            border: none;
-        }
-
-        .btn-cancel {
-            background: white;
-            border: 1px solid #dce3e9;
-            color: #5a6e7c;
-        }
-
-        /* Pied de page */
-        .footer {
-            text-align: center;
-            font-size: 0.7rem;
-            color: #9aaebf;
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid #e9ecef;
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="header">
-            <h1>Gestionnaire de ligne</h1>
-            <p>Interface conducteur - Suivi des navettes</p>
+    <div class="hero-band">
+        <div class="hero-content">
+            <div class="hero-title">Service Navettes</div>
+            <div class="hero-subtitle">Conducteur · Au service de la communauté</div>
+            <div class="hero-quote">"Chaque trajet est une rencontre, chaque passager compte."</div>
         </div>
+    </div>
 
+    <div class="dashboard">
         <!-- Écran de sélection -->
         <div id="selectionScreen">
             <div class="card">
                 <div class="card-header">
-                    <h2>Sélection de l'itinéraire</h2>
-                    <p>Choisissez la ligne que vous allez desservir</p>
+                    <h2>📋 Sélection de la ligne</h2>
+                    <span class="badge">Nouvelle journée</span>
                 </div>
                 <div class="card-content">
-                    <div class="route-grid">
-                        <div id="routeCharisma" class="route-option" onclick="selectRoute('charisma')">
-                            <div class="route-title">Ligne Express Charisma</div>
-                            <div class="route-description">Trajet rapide · 4 arrêts · Durée estimée 45 min</div>
-                            <div class="route-meta">
-                                <span>Départ: Église</span>
-                                <span>Arrêts: Brement, Noisy</span>
-                                <span>Retour: Église</span>
+                    <div class="route-selector">
+                        <div id="routeCharisma" class="route-card" onclick="selectRoute('charisma')">
+                            <div class="route-icon">🚌</div>
+                            <div class="route-name">Ligne Express</div>
+                            <div class="route-desc">Trajet rapide · 4 arrêts · 45 minutes</div>
+                            <div class="route-stats">
+                                <span>Église → Brement → Noisy → Retour</span>
                             </div>
                         </div>
-                        <div id="routeNavieo" class="route-option" onclick="selectRoute('navieo')">
-                            <div class="route-title">Navette Navieo</div>
-                            <div class="route-description">Ligne complète · 17 arrêts · Durée estimée 1h35</div>
-                            <div class="route-meta">
-                                <span>Départ: Chelles</span>
-                                <span>Arrivée: Église Charisma</span>
-                                <span>Réservation: 07 45 44 60 15</span>
+                        <div id="routeNavieo" class="route-card" onclick="selectRoute('navieo')">
+                            <div class="route-icon">🚐</div>
+                            <div class="route-name">Navette Navieo</div>
+                            <div class="route-desc">Ligne complète · 17 arrêts · 1h35</div>
+                            <div class="route-stats">
+                                <span>Chelles → Église Charisma</span>
+                                <span>📞 07 45 44 60 15</span>
                             </div>
                         </div>
                     </div>
-                    <button id="startBtn" class="btn-primary" onclick="startRoute()" disabled>Démarrer l'itinéraire</button>
+                    <button id="startBtn" class="btn-start" onclick="startRoute()" disabled>Démarrer la journée</button>
                 </div>
             </div>
         </div>
@@ -588,89 +656,93 @@
         <div id="driverInterface" style="display: none;">
             <div class="card">
                 <div class="card-header">
-                    <h2 id="routeTitle">Ligne Express Charisma</h2>
-                    <p id="routeSubtitle">Trajet en cours</p>
+                    <h2 id="routeTitle">Ligne Express</h2>
+                    <span class="badge" id="statusBadge">En attente</span>
                 </div>
                 <div class="card-content">
-                    <!-- Informations trajet -->
-                    <div class="journey-info">
-                        <div class="info-item">
-                            <div class="info-label">Statut</div>
-                            <div class="info-value" id="statusText">En attente</div>
+                    <!-- Stats -->
+                    <div class="journey-panel">
+                        <div class="stats-row">
+                            <div class="stat-block">
+                                <div class="stat-label">POSITION</div>
+                                <div class="stat-value" id="currentLocation">-</div>
+                                <div class="stat-sub" id="nextHint"></div>
+                            </div>
+                            <div class="stat-block">
+                                <div class="stat-label">HEURE</div>
+                                <div class="stat-value" id="currentTime">--:--</div>
+                            </div>
+                            <div class="stat-block">
+                                <div class="stat-label">PASSAGERS</div>
+                                <div class="stat-value" id="totalPassengersDisplay">0</div>
+                                <div class="stat-sub">à bord</div>
+                            </div>
                         </div>
-                        <div class="info-item">
-                            <div class="info-label">Position actuelle</div>
-                            <div class="info-value" id="currentLocation">-</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">Heure</div>
-                            <div class="info-value" id="currentTime">--:--</div>
-                        </div>
-                    </div>
 
-                    <!-- Progression -->
-                    <div class="progress-container">
-                        <div class="progress-bar-bg">
-                            <div class="progress-fill" id="progressFill"></div>
-                        </div>
-                        <div class="progress-stats">
-                            <span id="progressPercent">0%</span>
-                            <span id="nextStopInfo">Prochain arrêt en attente</span>
-                        </div>
-                    </div>
-
-                    <!-- Liste des arrêts -->
-                    <div class="stops-grid" id="stopsList"></div>
-
-                    <!-- Actions -->
-                    <div class="action-buttons">
-                        <button class="btn-secondary" onclick="sendTrafficAlert('retard_5', 'Retard de 5 minutes sur le trajet')">+5 min</button>
-                        <button class="btn-secondary" onclick="sendTrafficAlert('retard_10', 'Retard de 10 minutes')">+10 min</button>
-                        <button class="btn-secondary" onclick="sendTrafficAlert('retard_15', 'Retard de 15 minutes')">+15 min</button>
-                        <button class="btn-secondary" onclick="sendTrafficAlert('approche', 'La navette approche de votre arrêt')">À proximité</button>
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="customMessage" placeholder="Message personnalisé (ex: circulation dense, incident...)" autocomplete="off">
-                        <button class="btn-secondary" onclick="sendCustomTraffic()">Envoyer</button>
-                    </div>
-
-                    <!-- Zone de rapport -->
-                    <div id="reportArea" style="display: none;"></div>
-
-                    <!-- Historique -->
-                    <div style="margin-top: 24px;">
-                        <div style="font-weight: 600; font-size: 0.8rem; margin-bottom: 12px; color: #4a627a;">HISTORIQUE DES ARRÊTS</div>
-                        <div id="historyList" class="history-list">
-                            <div class="history-item">
-                                <div class="history-time">--:--</div>
-                                <div class="history-message">Aucun arrêt enregistré</div>
+                        <div class="progress-area">
+                            <div class="progress-bar-bg">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress-labels">
+                                <span>Départ</span>
+                                <span id="progressPercent">0%</span>
+                                <span>Arrivée</span>
                             </div>
                         </div>
                     </div>
 
-                    <button class="btn-reset" onclick="resetJourney()" style="margin-top: 20px;">Réinitialiser le trajet</button>
+                    <!-- Liste des arrêts -->
+                    <div style="margin-bottom: 8px;">
+                        <span style="font-weight: 600; font-size: 0.8rem; color: #1e4b6e;">ARRÊTS DU PARCOURS</span>
+                    </div>
+                    <div class="stops-container" id="stopsList"></div>
+
+                    <!-- Actions rapides -->
+                    <div class="actions-bar">
+                        <button class="btn-action" onclick="sendTrafficAlert('retard_5', 'Retard de 5 minutes')">⏱ +5 min</button>
+                        <button class="btn-action" onclick="sendTrafficAlert('retard_10', 'Retard de 10 minutes')">⏱ +10 min</button>
+                        <button class="btn-action" onclick="sendTrafficAlert('retard_15', 'Retard de 15 minutes')">⏱ +15 min</button>
+                        <button class="btn-action btn-warning" onclick="sendTrafficAlert('approche', 'La navette approche de votre arrêt')">📍 À proximité</button>
+                    </div>
+                    <div class="input-custom">
+                        <input type="text" id="customMessage" placeholder="Message personnalisé (circulation, incident, encouragement...)" autocomplete="off">
+                        <button class="btn-action" onclick="sendCustomTraffic()">Envoyer</button>
+                    </div>
+
+                    <!-- Rapport -->
+                    <div id="reportArea"></div>
+
+                    <!-- Historique -->
+                    <div class="history-area">
+                        <div class="history-title">📋 DERNIERS ÉVÉNEMENTS</div>
+                        <div id="historyList" class="history-list">
+                            <div class="history-entry"><span>Prêt à démarrer</span><span class="history-time">-</span></div>
+                        </div>
+                    </div>
+
+                    <button class="btn-reset" onclick="resetJourney()">⟳ Nouvelle journée / Réinitialiser</button>
                 </div>
             </div>
         </div>
 
-        <div class="footer">
-            Système de gestion de ligne · Données synchronisées en temps réel
+        <div class="footer-note">
+            Données synchronisées en temps réel · Service Navettes Charisma
         </div>
     </div>
 
     <!-- Modal comptage -->
     <div id="passengerModal" class="modal-overlay">
         <div class="modal">
-            <h3 id="modalTitle">Comptage des passagers</h3>
-            <p id="modalSubtitle">Indiquez le nombre de personnes montées à cet arrêt</p>
+            <h3 id="modalTitle">Arrivée</h3>
+            <p id="modalSubtitle">Combien de personnes montent à bord ?</p>
             <div class="counter">
-                <button class="counter-btn" onclick="decrementCount()">-</button>
+                <button class="counter-btn" onclick="decrementCount()">−</button>
                 <span class="counter-value" id="passengerCount">0</span>
                 <button class="counter-btn" onclick="incrementCount()">+</button>
             </div>
             <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeModal()">Annuler</button>
-                <button class="btn-confirm" onclick="confirmPassengers()">Valider</button>
+                <button class="btn-action" onclick="closeModal()" style="background:#f0f5fa;">Annuler</button>
+                <button class="btn-start" onclick="confirmPassengers()" style="background:#f9b43a; color:#1e3a4d;">Valider</button>
             </div>
         </div>
     </div>
@@ -699,9 +771,9 @@
 
         const ROUTES = {
             charisma: {
-                name: "Ligne Express Charisma",
+                name: "Ligne Express",
                 stops: [
-                    { id: "depart", name: "Départ Église", time: "Départ" },
+                    { id: "depart", name: "Église Charisma", time: "Départ" },
                     { id: "brement", name: "Brement", time: "Arrêt 1" },
                     { id: "noisy", name: "Noisy-le-Sec", time: "Arrêt 2" },
                     { id: "retour", name: "Retour Église", time: "Arrivée" }
@@ -710,7 +782,7 @@
             navieo: {
                 name: "Navette Navieo",
                 stops: [
-                    { id: "chelles", name: "Chelles ZAC de Tuilerie", time: "07:55" },
+                    { id: "chelles", name: "Chelles ZAC Tuilerie", time: "07:55" },
                     { id: "mairie", name: "Mairie", time: "08:00" },
                     { id: "gare", name: "Gare", time: "08:03" },
                     { id: "neuilly", name: "Neuilly/Marne", time: "08:13" },
@@ -741,7 +813,6 @@
 
         function startRoute() {
             if (!selectedRoute) return;
-            
             stopsList = ROUTES[selectedRoute].stops;
             currentStopIndex = -1;
             passengersData = {};
@@ -749,12 +820,11 @@
             
             document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('driverInterface').style.display = 'block';
-            
             document.getElementById('routeTitle').innerHTML = ROUTES[selectedRoute].name;
-            document.getElementById('routeSubtitle').innerHTML = selectedRoute === 'charisma' ? 'Trajet: Église → Brement → Noisy → Retour' : 'Trajet: Chelles → Église Charisma (17 arrêts)';
+            document.getElementById('statusBadge').innerHTML = 'Prêt';
             
-            renderStopsList();
-            updateButtonsState();
+            renderStops();
+            updateUI();
             
             database.ref('current-route').set({
                 route: selectedRoute,
@@ -763,74 +833,65 @@
             });
         }
 
-        function renderStopsList() {
+        function renderStops() {
             const container = document.getElementById('stopsList');
             container.innerHTML = '';
             
             stopsList.forEach((stop, idx) => {
                 const div = document.createElement('div');
-                div.className = 'stop-row';
+                div.className = 'stop-card-item';
                 if (idx < currentStopIndex) div.classList.add('completed');
                 if (idx === currentStopIndex) div.classList.add('active');
                 
-                const passengerCount = passengersData[stop.id] || 0;
-                
+                const count = passengersData[stop.id] || 0;
                 div.innerHTML = `
-                    <div class="stop-order">${idx + 1}</div>
-                    <div class="stop-info">
+                    <div class="stop-number">${idx + 1}</div>
+                    <div class="stop-details">
                         <div class="stop-name">${stop.name}</div>
                         <div class="stop-time">${stop.time}</div>
                     </div>
-                    ${passengerCount > 0 ? `<div class="stop-passengers">+${passengerCount}</div>` : ''}
+                    ${count > 0 ? `<div class="stop-count">+${count}</div>` : ''}
                 `;
                 container.appendChild(div);
             });
         }
 
-        function updateButtonsState() {
+        function updateUI() {
+            const progress = currentStopIndex >= 0 ? Math.round((currentStopIndex / (stopsList.length - 1)) * 100) : 0;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressPercent').innerHTML = `${progress}%`;
+            
+            const currentStop = currentStopIndex >= 0 ? stopsList[currentStopIndex] : null;
+            document.getElementById('currentLocation').innerHTML = currentStop ? currentStop.name : stopsList[0].name;
+            
             const nextStop = currentStopIndex + 1 < stopsList.length ? stopsList[currentStopIndex + 1] : null;
-            const statusText = document.getElementById('statusText');
-            const currentLocation = document.getElementById('currentLocation');
+            document.getElementById('nextHint').innerHTML = nextStop ? `Prochain: ${nextStop.name}` : 'Arrivée';
             
-            if (currentStopIndex === -1) {
-                statusText.innerHTML = 'Prêt au départ';
-                currentLocation.innerHTML = stopsList[0].name;
-            } else if (currentStopIndex < stopsList.length - 1) {
-                statusText.innerHTML = 'En circulation';
-                currentLocation.innerHTML = stopsList[currentStopIndex].name;
-            } else if (currentStopIndex === stopsList.length - 1) {
-                statusText.innerHTML = 'Trajet terminé';
-                currentLocation.innerHTML = stopsList[currentStopIndex].name;
-            }
+            const total = Object.values(passengersData).reduce((a,b) => a+b, 0);
+            document.getElementById('totalPassengersDisplay').innerHTML = total;
             
-            const progressPercent = currentStopIndex >= 0 ? Math.round((currentStopIndex / (stopsList.length - 1)) * 100) : 0;
-            document.getElementById('progressFill').style.width = `${progressPercent}%`;
-            document.getElementById('progressPercent').innerHTML = `${progressPercent}%`;
-            
-            if (nextStop) {
-                document.getElementById('nextStopInfo').innerHTML = `Prochain arrêt: ${nextStop.name} (${nextStop.time})`;
-            } else if (currentStopIndex === stopsList.length - 1) {
-                document.getElementById('nextStopInfo').innerHTML = 'Arrivée à destination';
+            if (currentStopIndex === stopsList.length - 1) {
+                document.getElementById('statusBadge').innerHTML = 'Trajet terminé';
+                showReport();
+            } else if (currentStopIndex >= 0) {
+                document.getElementById('statusBadge').innerHTML = 'En service';
             }
         }
 
-        function nextStop() {
+        function nextStopTrigger() {
             if (currentStopIndex === -1) {
                 currentStopIndex = 0;
-                const stop = stopsList[0];
-                askPassengers(stop.id, stop.name, 0);
+                askPassengers(stopsList[0].id, stopsList[0].name, 0);
             } else if (currentStopIndex < stopsList.length - 1) {
                 currentStopIndex++;
-                const stop = stopsList[currentStopIndex];
-                askPassengers(stop.id, stop.name, currentStopIndex);
+                askPassengers(stopsList[currentStopIndex].id, stopsList[currentStopIndex].name, currentStopIndex);
             }
         }
 
         function askPassengers(stopId, stopName, index) {
-            const isLastStop = index === stopsList.length - 1;
-            
-            if (isLastStop && selectedRoute === 'charisma') {
-                finishJourney(stopId, stopName);
+            const isLast = index === stopsList.length - 1;
+            if (isLast && selectedRoute === 'charisma') {
+                finishStop(stopId, stopName);
                 return;
             }
             
@@ -838,31 +899,28 @@
             currentPassengerCount = 0;
             document.getElementById('passengerCount').innerText = '0';
             document.getElementById('modalTitle').innerHTML = stopName;
-            document.getElementById('modalSubtitle').innerHTML = 'Indiquez le nombre de personnes montées à cet arrêt';
+            document.getElementById('modalSubtitle').innerHTML = 'Combien de personnes montent ?';
             document.getElementById('passengerModal').style.display = 'flex';
         }
 
-        function finishJourney(stopId, stopName) {
+        function finishStop(stopId, stopName) {
             const now = new Date();
             const time = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             
-            const data = {
+            database.ref('bus-status').set({
                 etape: stopId,
                 message: `Arrivée - ${stopName}`,
                 time: time,
                 route: selectedRoute
-            };
+            });
             
-            database.ref('bus-status').set(data);
-            updateButtonsState();
-            renderStopsList();
-            
-            showFullReport();
+            renderStops();
+            updateUI();
+            showReport();
         }
 
         function confirmPassengers() {
             if (!pendingStop) return;
-            
             const now = new Date();
             const time = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             
@@ -874,144 +932,82 @@
                 passengers: currentPassengerCount,
                 time: time
             });
-            updateHistoryDisplay();
+            updateHistory();
             
-            const data = {
+            database.ref('bus-status').set({
                 etape: pendingStop.id,
                 message: `Arrivée - ${pendingStop.name}`,
                 time: time,
                 passengers: currentPassengerCount,
                 route: selectedRoute
-            };
+            });
             
-            database.ref('bus-status').set(data);
-            
-            updateButtonsState();
-            renderStopsList();
+            renderStops();
+            updateUI();
             closeModal();
             pendingStop = null;
             
-            if (pendingStop.index === stopsList.length - 1) {
-                showFullReport();
-            }
+            if (pendingStop && pendingStop.index === stopsList.length - 1) showReport();
         }
 
         function sendTrafficAlert(title, message) {
             const now = new Date();
             const time = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            
-            database.ref('bus-status/trafficAlert').set({
-                title: title,
-                message: message,
-                time: time
-            });
-            
-            history.unshift({
-                stop: 'Information trafic',
-                passengers: message,
-                time: time,
-                isTraffic: true
-            });
-            updateHistoryDisplay();
-            
-            setTimeout(() => {
-                database.ref('bus-status/trafficAlert').remove();
-            }, 10000);
+            database.ref('bus-status/trafficAlert').set({ title, message, time });
+            history.unshift({ stop: 'Info trafic', passengers: message, time, isTraffic: true });
+            updateHistory();
+            setTimeout(() => database.ref('bus-status/trafficAlert').remove(), 10000);
         }
 
         function sendCustomTraffic() {
             const input = document.getElementById('customMessage');
-            const message = input.value.trim();
-            if (message) {
-                sendTrafficAlert('Message conducteur', message);
-                input.value = '';
-            }
+            const msg = input.value.trim();
+            if (msg) { sendTrafficAlert('Message', msg); input.value = ''; }
         }
 
-        function incrementCount() {
-            currentPassengerCount++;
-            document.getElementById('passengerCount').innerText = currentPassengerCount;
-        }
+        function incrementCount() { currentPassengerCount++; document.getElementById('passengerCount').innerText = currentPassengerCount; }
+        function decrementCount() { if (currentPassengerCount > 0) { currentPassengerCount--; document.getElementById('passengerCount').innerText = currentPassengerCount; } }
+        function closeModal() { document.getElementById('passengerModal').style.display = 'none'; }
 
-        function decrementCount() {
-            if (currentPassengerCount > 0) {
-                currentPassengerCount--;
-                document.getElementById('passengerCount').innerText = currentPassengerCount;
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('passengerModal').style.display = 'none';
-        }
-
-        function updateHistoryDisplay() {
+        function updateHistory() {
             const container = document.getElementById('historyList');
             container.innerHTML = '';
-            
-            if (history.length === 0) {
-                container.innerHTML = '<div class="history-item"><div class="history-time">--:--</div><div class="history-message">Aucun arrêt enregistré</div></div>';
-                return;
-            }
-            
-            history.slice(0, 10).forEach(item => {
+            if (history.length === 0) { container.innerHTML = '<div class="history-entry"><span>Aucun événement</span><span class="history-time">-</span></div>'; return; }
+            history.slice(0, 8).forEach(item => {
                 const div = document.createElement('div');
-                div.className = 'history-item';
+                div.className = 'history-entry';
                 if (item.isTraffic) {
-                    div.style.borderLeft = '3px solid #f39c12';
-                    div.style.paddingLeft = '12px';
-                    div.innerHTML = `
-                        <div class="history-time">${item.time}</div>
-                        <div class="history-message">⚠️ ${item.passengers}</div>
-                    `;
+                    div.innerHTML = `<span>⚠️ ${item.passengers}</span><span class="history-time">${item.time}</span>`;
                 } else {
-                    div.innerHTML = `
-                        <div class="history-time">${item.time}</div>
-                        <div class="history-message">${item.stop} <span class="history-passengers">• ${item.passengers} passager(s)</span></div>
-                    `;
+                    div.innerHTML = `<span class="history-stop">${item.stop}</span><span><span class="history-pass">+${item.passengers}</span> <span class="history-time">${item.time}</span></span>`;
                 }
                 container.appendChild(div);
             });
         }
 
-        function showFullReport() {
-            const total = Object.values(passengersData).reduce((a, b) => a + b, 0);
-            const reportArea = document.getElementById('reportArea');
-            reportArea.style.display = 'block';
-            reportArea.innerHTML = `
-                <div class="report-card">
-                    <div class="report-title">RAPPORT DE LIGNE</div>
-                    <div class="report-stats">
-                        <div class="stat-item">
-                            <div class="stat-number">${total}</div>
-                            <div class="stat-label">Total passagers</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">${stopsList.length}</div>
-                            <div class="stat-label">Arrêts desservis</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">${Object.keys(passengersData).filter(k => passengersData[k] > 0).length}</div>
-                            <div class="stat-label">Arrêts avec montées</div>
-                        </div>
+        function showReport() {
+            const total = Object.values(passengersData).reduce((a,b) => a+b, 0);
+            const reportDiv = document.getElementById('reportArea');
+            reportDiv.innerHTML = `
+                <div class="report-box">
+                    <div class="report-title">📊 Bilan de la journée</div>
+                    <div class="report-numbers">
+                        <div class="report-number-card"><div class="report-big-number">${total}</div><div class="report-label">Passagers transportés</div></div>
+                        <div class="report-number-card"><div class="report-big-number">${stopsList.length}</div><div class="report-label">Arrêts desservis</div></div>
+                        <div class="report-number-card"><div class="report-big-number">${Object.keys(passengersData).filter(k => passengersData[k] > 0).length}</div><div class="report-label">Arrêts avec montées</div></div>
                     </div>
-                    <div style="font-size: 0.75rem; color: #5a6e7c; text-align: center; margin-top: 12px;">
-                        Rapport généré le ${new Date().toLocaleString()}
-                    </div>
+                    <div style="font-size:0.7rem; text-align:center; color:#8aa4c0;">Merci pour votre service 🙌</div>
                 </div>
             `;
         }
 
         function resetJourney() {
-            if (confirm('Réinitialiser le trajet ? Toutes les données seront effacées.')) {
-                passengersData = {};
-                history = [];
-                currentStopIndex = -1;
-                
+            if (confirm('Réinitialiser la journée ? Toutes les données seront effacées.')) {
+                passengersData = {}; history = []; currentStopIndex = -1;
                 database.ref('bus-status').remove();
                 database.ref('passengers').remove();
                 database.ref('current-route').remove();
-                
-                document.getElementById('reportArea').style.display = 'none';
+                document.getElementById('reportArea').innerHTML = '';
                 document.getElementById('selectionScreen').style.display = 'block';
                 document.getElementById('driverInterface').style.display = 'none';
                 document.getElementById('routeCharisma').classList.remove('selected');
@@ -1023,15 +1019,31 @@
 
         function updateTime() {
             const now = new Date();
-            const time = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            const timeElement = document.getElementById('currentTime');
-            if (timeElement) timeElement.innerText = time;
+            document.getElementById('currentTime').innerHTML = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         }
+        updateTime(); setInterval(updateTime, 1000);
         
-        updateTime();
-        setInterval(updateTime, 1000);
+        // Écouteur pour récupérer les données existantes
+        database.ref('bus-status').on('value', (snap) => {
+            const data = snap.val();
+            if (data && data.route === selectedRoute && data.etape) {
+                const idx = stopsList.findIndex(s => s.id === data.etape);
+                if (idx !== -1 && idx !== currentStopIndex) {
+                    currentStopIndex = idx;
+                    renderStops();
+                    updateUI();
+                    if (data.passengers) {
+                        passengersData[data.etape] = data.passengers;
+                        renderStops();
+                    }
+                }
+            }
+        });
         
-        updateHistoryDisplay();
+        database.ref('passengers').on('value', (snap) => {
+            const data = snap.val();
+            if (data) { passengersData = { ...passengersData, ...data }; renderStops(); updateUI(); showReport(); }
+        });
     </script>
 </body>
 </html>
