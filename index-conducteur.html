@@ -1,1 +1,296 @@
-cc
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>🚌 Conducteur - Sélection Itinéraire</title>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.8;
+        }
+
+        .route-card {
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .route-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .route-card.selected {
+            border-color: #fbbf24;
+            background: linear-gradient(135deg, #fff 0%, #fef3c7 100%);
+        }
+
+        .route-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .route-icon {
+            font-size: 2.5em;
+        }
+
+        .route-title {
+            flex: 1;
+        }
+
+        .route-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .route-time {
+            color: #f59e0b;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .route-details {
+            color: #4b5563;
+            font-size: 0.9em;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .stops-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .stop-badge {
+            background: #e5e7eb;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            color: #374151;
+        }
+
+        .btn-start {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #1e3c72;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-start:active {
+            transform: scale(0.98);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .current-route {
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            margin-top: 30px;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚌 Conducteur Charisma</h1>
+            <p>Choisissez l'itinéraire du jour</p>
+        </div>
+
+        <div id="currentRouteDisplay" class="current-route" style="display: none;"></div>
+
+        <div id="route1" class="route-card" onclick="selectRoute('charisma')">
+            <div class="route-header">
+                <div class="route-icon">🚌💨</div>
+                <div class="route-title">
+                    <div class="route-name">Bus Charisma</div>
+                    <div class="route-time">⏱️ Trajet rapide - 4 arrêts</div>
+                </div>
+            </div>
+            <div class="route-details">
+                <strong>Itinéraire :</strong> Église → Brement → Noisy-le-Sec → Retour Église
+                <div class="stops-preview">
+                    <span class="stop-badge">⛪ Église</span>
+                    <span class="stop-badge">🏠 Brement</span>
+                    <span class="stop-badge">🚉 Noisy</span>
+                    <span class="stop-badge">⛪ Retour</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="route2" class="route-card" onclick="selectRoute('navieo')">
+            <div class="route-header">
+                <div class="route-icon">🚐✨</div>
+                <div class="route-title">
+                    <div class="route-name">Navieo - La Navette qui transporte la VIE</div>
+                    <div class="route-time">⏱️ Trajet complet - 18 arrêts</div>
+                </div>
+            </div>
+            <div class="route-details">
+                <strong>Itinéraire :</strong> Chelles → Mairie → Gare → Neuilly/Marne → La Mare → Gagny Arena → Jean Moulin → Henri Barbusse → Gare de Gagny → Château de Villemomble → Rosny Perrier Sud → Van derheyden → Montreuil Ruffins → Montreuil Mairie → Montreuil Croix de Chavaux → Montreuil Général de Gaulle → Église CHARISMA
+                <div class="stops-preview">
+                    <span class="stop-badge">📍 Chelles 7h55</span>
+                    <span class="stop-badge">📍 Mairie 8h00</span>
+                    <span class="stop-badge">📍 Gare 8h03</span>
+                    <span class="stop-badge">📍 Église 9h30</span>
+                    <span class="stop-badge">+14 arrêts</span>
+                </div>
+            </div>
+        </div>
+
+        <button id="startBtn" class="btn-start" onclick="startSelectedRoute()" disabled>Démarrer l'itinéraire</button>
+
+        <div class="footer">
+            Sélectionnez un itinéraire pour commencer le trajet
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4sWMc3fNaMpZ9cD8ahQdMJn6BjRyJDzk",
+            authDomain: "charisma-bus.firebaseapp.com",
+            databaseURL: "https://charisma-bus-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "charisma-bus",
+            storageBucket: "charisma-bus.firebasestorage.app",
+            messagingSenderId: "630450080183",
+            appId: "1:630450080183:web:c204b463f63b12a8d30032"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let selectedRoute = null;
+
+        function selectRoute(route) {
+            selectedRoute = route;
+            
+            // Mettre à jour l'apparence des cartes
+            document.getElementById('route1').classList.remove('selected');
+            document.getElementById('route2').classList.remove('selected');
+            document.getElementById(`${route === 'charisma' ? 'route1' : 'route2'}`).classList.add('selected');
+            
+            // Activer le bouton
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        function startSelectedRoute() {
+            if (!selectedRoute) return;
+            
+            const now = new Date();
+            const startTime = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            
+            // Sauvegarder l'itinéraire choisi dans Firebase
+            database.ref('current-route').set({
+                route: selectedRoute,
+                startTime: startTime,
+                active: true,
+                startDate: new Date().toISOString()
+            });
+            
+            // Réinitialiser le statut du bus
+            database.ref('bus-status').set(null);
+            database.ref('passengers').set(null);
+            
+            // Rediriger vers l'interface conducteur appropriée
+            if (selectedRoute === 'charisma') {
+                window.location.href = 'conductor-charisma.html';
+            } else {
+                window.location.href = 'conductor-navieo.html';
+            }
+        }
+
+        // Vérifier si un itinéraire est déjà actif
+        database.ref('current-route').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.active) {
+                const display = document.getElementById('currentRouteDisplay');
+                display.style.display = 'block';
+                const routeName = data.route === 'charisma' ? 'Bus Charisma' : 'Navieo';
+                display.innerHTML = `
+                    ⚠️ Un itinéraire est déjà en cours : <strong>${routeName}</strong><br>
+                    <small>Démarré à ${data.startTime}</small><br>
+                    <button onclick="forceNewRoute()" style="margin-top:10px; padding:8px 15px; background:#f59e0b; border:none; border-radius:20px; color:white; cursor:pointer;">Forcer un nouveau trajet</button>
+                `;
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('route1').style.pointerEvents = 'none';
+                document.getElementById('route2').style.pointerEvents = 'none';
+                document.getElementById('route1').style.opacity = '0.5';
+                document.getElementById('route2').style.opacity = '0.5';
+            }
+        });
+
+        function forceNewRoute() {
+            if (confirm('Attention : cela va réinitialiser le trajet en cours. Continuer ?')) {
+                database.ref('current-route').remove();
+                database.ref('bus-status').remove();
+                database.ref('passengers').remove();
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
