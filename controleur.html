@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Supervision · Gestionnaire de flotte</title>
+    <title>Gestionnaire de flotte - Bus Charisma</title>
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- FullCalendar pour le planning -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -17,82 +21,127 @@
         }
 
         body {
-            background: #eef2f5;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: #1e2f3e;
+            background: #f1f5f9;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: #0f172a;
             line-height: 1.5;
         }
 
         /* Header */
-        .app-header {
-            background: #1e2f3e;
-            padding: 20px 32px;
-            border-bottom: 3px solid #2c8c6e;
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 24px 32px;
+            border-bottom: 1px solid #334155;
         }
 
-        .header-container {
+        .header-content {
             max-width: 1400px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 20px;
         }
 
-        .logo-area h1 {
-            font-size: 1.5rem;
+        .header h1 {
+            font-size: 1.75rem;
             font-weight: 600;
-            color: white;
+            margin-bottom: 4px;
         }
 
-        .logo-area p {
-            font-size: 0.75rem;
-            color: #8aa9c4;
-            margin-top: 4px;
+        .header p {
+            color: #94a3b8;
+            font-size: 0.875rem;
         }
 
-        .stats-header {
+        .nav-tabs {
             display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
+            gap: 12px;
+            background: rgba(255,255,255,0.1);
+            padding: 6px;
+            border-radius: 50px;
         }
 
-        .stat-header-item {
-            background: #2a3f50;
-            padding: 8px 20px;
+        .tab-btn {
+            padding: 10px 24px;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            font-weight: 500;
+            cursor: pointer;
             border-radius: 40px;
-            text-align: center;
+            transition: all 0.2s;
         }
 
-        .stat-header-label {
-            font-size: 0.65rem;
-            color: #8aa9c4;
+        .tab-btn.active {
+            background: #ff9800;
+            color: #0f172a;
         }
 
-        .stat-header-value {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: white;
-        }
-
-        /* Dashboard */
+        /* Container principal */
         .dashboard {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 28px 24px;
+            padding: 32px;
         }
 
-        /* Grille bus */
-        .buses-grid {
+        /* Onglets */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cartes stats */
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 28px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
             margin-bottom: 32px;
         }
 
         @media (max-width: 900px) {
-            .buses-grid {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e3c72;
+            margin-top: 8px;
+        }
+
+        /* Cartes bus */
+        .buses-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 900px) {
+            .buses-container {
                 grid-template-columns: 1fr;
             }
         }
@@ -100,20 +149,19 @@
         .bus-card {
             background: white;
             border-radius: 24px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
             overflow: hidden;
             border: 1px solid #e2e8f0;
         }
 
         .bus-header {
             padding: 20px 24px;
-            border-bottom: 1px solid #e9edf2;
+            border-bottom: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 12px;
-            background: #fafcfd;
         }
 
         .bus-title {
@@ -123,150 +171,54 @@
         }
 
         .bus-badge {
-            width: 44px;
-            height: 44px;
-            border-radius: 44px;
+            width: 48px;
+            height: 48px;
+            border-radius: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.1rem;
-            color: white;
+            font-size: 1.25rem;
         }
 
-        .bus-badge.charisma {
-            background: #2c5f8a;
-        }
+        .bus-badge.charisma { background: #1e3c72; color: white; }
+        .bus-badge.navieo { background: #1e6b5e; color: white; }
 
-        .bus-badge.navieo {
-            background: #2c8c6e;
-        }
-
-        .bus-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #1e2f3e;
-        }
-
-        .bus-route {
-            font-size: 0.7rem;
-            color: #7c9abc;
-            margin-top: 2px;
-        }
-
-        .status-badge {
+        .bus-name { font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+        .bus-status {
+            font-size: 0.75rem;
             padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.7rem;
+            border-radius: 50px;
             font-weight: 500;
         }
+        .status-active { background: #dcfce7; color: #166534; }
+        .status-inactive { background: #f1f5f9; color: #475569; }
 
-        .status-active {
-            background: #e0f2e9;
-            color: #2c8c6e;
-        }
-
-        .status-inactive {
-            background: #eef2f5;
-            color: #7c9abc;
-        }
-
-        .status-enroute {
-            background: #fff3e0;
-            color: #e67e22;
-        }
-
-        .bus-content {
-            padding: 20px 24px;
-        }
-
-        .info-line {
+        .bus-content { padding: 20px 24px; }
+        .info-row {
             display: flex;
             justify-content: space-between;
             padding: 10px 0;
-            border-bottom: 1px solid #eef2f5;
-            font-size: 0.85rem;
+            border-bottom: 1px solid #f1f5f9;
         }
+        .info-label { font-size: 0.8rem; color: #64748b; }
+        .info-value { font-weight: 600; color: #0f172a; }
 
-        .info-label {
-            color: #7c9abc;
-            font-weight: 500;
-        }
-
-        .info-value {
-            font-weight: 600;
-            color: #1e2f3e;
-        }
-
-        .progress-container {
+        .progress-bar-container {
+            background: #e2e8f0;
+            border-radius: 100px;
+            height: 8px;
             margin: 16px 0;
         }
-
-        .progress-bar-bg {
-            background: #e2e8f0;
-            border-radius: 20px;
-            height: 6px;
-        }
-
-        .progress-fill {
-            background: #2c8c6e;
+        .progress-bar {
+            background: #ff9800;
             height: 100%;
-            border-radius: 20px;
-            width: 0%;
+            border-radius: 100px;
             transition: width 0.3s;
         }
 
-        .progress-text {
-            font-size: 0.7rem;
-            color: #7c9abc;
-            margin-top: 6px;
-            text-align: right;
-        }
-
-        .stops-preview {
-            margin-top: 16px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .preview-stop {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid #eef2f5;
-            font-size: 0.75rem;
-        }
-
-        .stop-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 6px;
-            background: #cbd5e1;
-        }
-
-        .stop-dot.completed {
-            background: #2c8c6e;
-        }
-
-        .stop-dot.active {
-            background: #e67e22;
-            width: 8px;
-            height: 8px;
-        }
-
-        .stop-name {
-            flex: 1;
-            color: #4a6f8f;
-        }
-
-        .stop-count {
-            color: #2c8c6e;
-            font-weight: 500;
-        }
-
-        /* Section rapports */
-        .reports-section {
+        /* Section planning */
+        .planning-section {
             background: white;
             border-radius: 24px;
             border: 1px solid #e2e8f0;
@@ -274,165 +226,390 @@
             margin-top: 32px;
         }
 
-        .reports-header {
+        .planning-header {
             padding: 20px 24px;
-            border-bottom: 1px solid #e9edf2;
-            background: #fafcfd;
-        }
-
-        .reports-header h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #1e2f3e;
-        }
-
-        .reports-header p {
-            font-size: 0.75rem;
-            color: #7c9abc;
-            margin-top: 4px;
-        }
-
-        .charts-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-            padding: 24px;
-            border-bottom: 1px solid #e9edf2;
-        }
-
-        @media (max-width: 700px) {
-            .charts-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .chart-card {
             background: #f8fafc;
-            border-radius: 18px;
-            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
-        .chart-title {
-            font-size: 0.8rem;
+        .planning-header h2 {
+            font-size: 1.25rem;
             font-weight: 600;
-            color: #4a6f8f;
-            margin-bottom: 16px;
+            color: #0f172a;
         }
 
-        canvas {
-            max-height: 220px;
-            width: 100%;
+        .btn-add {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .summary-table {
+        .btn-add:hover {
+            background: #e68900;
+        }
+
+        .calendar-container {
             padding: 24px;
-            overflow-x: auto;
         }
 
-        table {
+        /* Tableau des équipes */
+        .team-table {
+            padding: 0 24px 24px;
+        }
+
+        .team-table table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.8rem;
         }
 
-        th {
+        .team-table th {
             text-align: left;
             padding: 12px 8px;
             background: #f8fafc;
             font-weight: 600;
-            color: #4a6f8f;
+            font-size: 0.8rem;
+            color: #475569;
             border-bottom: 1px solid #e2e8f0;
         }
 
-        td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #eef2f5;
-            color: #1e2f3e;
+        .team-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.85rem;
         }
 
-        .total-row {
-            background: #f8fafc;
-            font-weight: 600;
+        .driver-badge {
+            background: #eef2ff;
+            color: #1e3c72;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
         }
 
-        .export-btn {
-            background: #1e2f3e;
-            color: white;
+        .action-btn {
+            background: none;
             border: none;
-            padding: 10px 24px;
-            border-radius: 40px;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 8px;
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .action-btn:hover {
+            background: #f1f5f9;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 28px;
+            max-width: 500px;
+            width: 90%;
+            padding: 28px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1e3c72;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
             font-size: 0.8rem;
             font-weight: 500;
-            cursor: pointer;
-            margin: 16px 24px 24px;
-            transition: background 0.2s;
+            color: #475569;
+            margin-bottom: 6px;
         }
 
-        .export-btn:hover {
-            background: #2c5f8a;
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #ff9800;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         .footer {
             text-align: center;
             padding: 24px;
-            color: #9aafc4;
-            font-size: 0.7rem;
+            color: #64748b;
+            font-size: 0.75rem;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 32px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
         }
     </style>
 </head>
 <body>
-    <div class="app-header">
-        <div class="header-container">
-            <div class="logo-area">
-                <h1>Supervision · Flotte Charisma</h1>
-                <p>Gestionnaire de lignes · Données temps réel</p>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>Gestionnaire de flotte</h1>
+                <p>Supervision des navettes • Planning conducteurs • Suivi en temps réel</p>
             </div>
-            <div class="stats-header">
-                <div class="stat-header-item">
-                    <div class="stat-header-label">Total passagers</div>
-                    <div class="stat-header-value" id="globalTotal">0</div>
-                </div>
-                <div class="stat-header-item">
-                    <div class="stat-header-label">Services actifs</div>
-                    <div class="stat-header-value" id="activeServices">0</div>
-                </div>
-                <div class="stat-header-item">
-                    <div class="stat-header-label">Dernière synchro</div>
-                    <div class="stat-header-value" id="lastSync" style="font-size:0.8rem;">--:--</div>
-                </div>
+            <div class="nav-tabs">
+                <button class="tab-btn active" onclick="switchTab('dashboard')">Tableau de bord</button>
+                <button class="tab-btn" onclick="switchTab('planning')">Planning annuel</button>
+                <button class="tab-btn" onclick="switchTab('drivers')">Gestion équipages</button>
             </div>
         </div>
     </div>
 
     <div class="dashboard">
-        <div class="buses-grid" id="busesContainer"></div>
+        <!-- Onglet Tableau de bord -->
+        <div id="tabDashboard" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total passagers (aujourd'hui)</div>
+                    <div class="stat-value" id="totalPassengers">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Trajets actifs</div>
+                    <div class="stat-value" id="activeTrips">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Chauffeurs enregistrés</div>
+                    <div class="stat-value" id="totalDrivers">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Accompagnateurs</div>
+                    <div class="stat-value" id="totalAccompanists">0</div>
+                </div>
+            </div>
 
-        <div class="reports-section">
-            <div class="reports-header">
-                <h2>Analyse de fréquentation</h2>
-                <p>Rapport détaillé par ligne et par arrêt</p>
-            </div>
-            <div class="charts-container">
-                <div class="chart-card">
-                    <div class="chart-title">Passagers par ligne</div>
-                    <canvas id="passengersChart"></canvas>
+            <div class="buses-container">
+                <div class="bus-card">
+                    <div class="bus-header">
+                        <div class="bus-title">
+                            <div class="bus-badge charisma">C</div>
+                            <div>
+                                <div class="bus-name">Bus Charisma</div>
+                                <div style="font-size: 0.7rem; color: #64748b;">Ligne express</div>
+                            </div>
+                        </div>
+                        <div class="bus-status" id="charismaStatus">Inactif</div>
+                    </div>
+                    <div class="bus-content">
+                        <div class="info-row"><span class="info-label">Position</span><span class="info-value" id="charismaLocation">-</span></div>
+                        <div class="info-row"><span class="info-label">Chauffeur</span><span class="info-value" id="charismaDriver">Non affecté</span></div>
+                        <div class="info-row"><span class="info-label">Accompagnateur</span><span class="info-value" id="charismaAccompanist">-</span></div>
+                        <div class="progress-bar-container"><div class="progress-bar" id="charismaProgress" style="width: 0%;"></div></div>
+                        <div class="info-row"><span class="info-label">Dernier arrêt</span><span class="info-value" id="charismaLastStop">-</span></div>
+                    </div>
                 </div>
-                <div class="chart-card">
-                    <div class="chart-title">Évolution cumulée des montées</div>
-                    <canvas id="evolutionChart"></canvas>
+
+                <div class="bus-card">
+                    <div class="bus-header">
+                        <div class="bus-title">
+                            <div class="bus-badge navieo">N</div>
+                            <div>
+                                <div class="bus-name">Navieo</div>
+                                <div style="font-size: 0.7rem; color: #64748b;">Navette complète</div>
+                            </div>
+                        </div>
+                        <div class="bus-status" id="navieoStatus">Inactif</div>
+                    </div>
+                    <div class="bus-content">
+                        <div class="info-row"><span class="info-label">Position</span><span class="info-value" id="navieoLocation">-</span></div>
+                        <div class="info-row"><span class="info-label">Chauffeur</span><span class="info-value" id="navieoDriver">Non affecté</span></div>
+                        <div class="info-row"><span class="info-label">Accompagnateur</span><span class="info-value" id="navieoAccompanist">-</span></div>
+                        <div class="progress-bar-container"><div class="progress-bar" id="navieoProgress" style="width: 0%;"></div></div>
+                        <div class="info-row"><span class="info-label">Dernier arrêt</span><span class="info-value" id="navieoLastStop">-</span></div>
+                    </div>
                 </div>
             </div>
-            <div class="summary-table">
-                <table id="summaryTable">
-                    <thead>
-                        <tr><th>Ligne</th><th>Arrêt</th><th>Passagers</th><th>Horaire</th></tr>
-                    </thead>
-                    <tbody id="summaryBody"><tr><td colspan="4">Chargement des données...</td></tr></tbody>
-                </table>
+
+            <div class="planning-section">
+                <div class="planning-header">
+                    <h2>📅 Équipages en service aujourd'hui</h2>
+                </div>
+                <div class="team-table">
+                    <table>
+                        <thead>
+                            <tr><th>Ligne</th><th>Chauffeur</th><th>Accompagnateur</th><th>Horaires</th><th>Statut</th> </tr>
+                        </thead>
+                        <tbody id="todayTeamBody">
+                            <tr><td colspan="5" class="empty-state">Aucun équipage planifié pour aujourd'hui</td> </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <button class="export-btn" onclick="exportReport()">Exporter le rapport (CSV)</button>
         </div>
-        <div class="footer">Données synchronisées en temps réel · Supervision flotte Charisma</div>
+
+        <!-- Onglet Planning annuel -->
+        <div id="tabPlanning" class="tab-content">
+            <div class="planning-section">
+                <div class="planning-header">
+                    <h2>📅 Planning annuel des navettes</h2>
+                    <button class="btn-add" onclick="openPlanningModal()">+ Nouvelle affectation</button>
+                </div>
+                <div class="calendar-container" id="calendar"></div>
+            </div>
+        </div>
+
+        <!-- Onglet Gestion équipages -->
+        <div id="tabDrivers" class="tab-content">
+            <div class="planning-section">
+                <div class="planning-header">
+                    <h2>👥 Chauffeurs</h2>
+                    <button class="btn-add" onclick="openDriverModal()">+ Ajouter un chauffeur</button>
+                </div>
+                <div class="team-table">
+                    <table>
+                        <thead>
+                            <tr><th>Nom</th><th>Prénom</th><th>Téléphone</th><th>Ligne attitrée</th><th>Actions</th> </tr>
+                        </thead>
+                        <tbody id="driversList"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="planning-section" style="margin-top: 24px;">
+                <div class="planning-header">
+                    <h2>👥 Accompagnateurs</h2>
+                    <button class="btn-add" onclick="openAccompanistModal()">+ Ajouter un accompagnateur</button>
+                </div>
+                <div class="team-table">
+                    <table>
+                        <thead>
+                            <tr><th>Nom</th><th>Prénom</th><th>Téléphone</th><th>Ligne attitrée</th><th>Actions</th> </tr>
+                        </thead>
+                        <tbody id="accompanistsList"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Système de supervision des navettes • Données mises à jour en temps réel
+        </div>
+    </div>
+
+    <!-- Modal planning -->
+    <div id="planningModal" class="modal-overlay">
+        <div class="modal">
+            <h3>Planifier une mission</h3>
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="missionDate">
+            </div>
+            <div class="form-group">
+                <label>Ligne</label>
+                <select id="missionLine">
+                    <option value="charisma">Bus Charisma</option>
+                    <option value="navieo">Navieo</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Chauffeur</label>
+                <select id="missionDriver">
+                    <option value="">Sélectionner un chauffeur</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Accompagnateur</label>
+                <select id="missionAccompanist">
+                    <option value="">Sélectionner un accompagnateur</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Horaire de départ</label>
+                <input type="time" id="missionStartTime" value="07:30">
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeModal()" style="background:#f1f5f9;">Annuler</button>
+                <button onclick="saveMission()" style="background:#ff9800; color:white;">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal chauffeur -->
+    <div id="driverModal" class="modal-overlay">
+        <div class="modal">
+            <h3>Ajouter un chauffeur</h3>
+            <div class="form-group"><label>Nom</label><input type="text" id="driverLastName" placeholder="Nom"></div>
+            <div class="form-group"><label>Prénom</label><input type="text" id="driverFirstName" placeholder="Prénom"></div>
+            <div class="form-group"><label>Téléphone</label><input type="tel" id="driverPhone" placeholder="Numéro"></div>
+            <div class="form-group"><label>Ligne attitrée</label><select id="driverLine"><option value="charisma">Bus Charisma</option><option value="navieo">Navieo</option><option value="both">Les deux</option></select></div>
+            <div class="modal-actions">
+                <button onclick="closeModal()" style="background:#f1f5f9;">Annuler</button>
+                <button onclick="saveDriver()" style="background:#ff9800; color:white;">Ajouter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal accompagnateur -->
+    <div id="accompanistModal" class="modal-overlay">
+        <div class="modal">
+            <h3>Ajouter un accompagnateur</h3>
+            <div class="form-group"><label>Nom</label><input type="text" id="accLastName" placeholder="Nom"></div>
+            <div class="form-group"><label>Prénom</label><input type="text" id="accFirstName" placeholder="Prénom"></div>
+            <div class="form-group"><label>Téléphone</label><input type="tel" id="accPhone" placeholder="Numéro"></div>
+            <div class="form-group"><label>Ligne attitrée</label><select id="accLine"><option value="charisma">Bus Charisma</option><option value="navieo">Navieo</option><option value="both">Les deux</option></select></div>
+            <div class="modal-actions">
+                <button onclick="closeModal()" style="background:#f1f5f9;">Annuler</button>
+                <button onclick="saveAccompanist()" style="background:#ff9800; color:white;">Ajouter</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -449,270 +626,320 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const STOPS = {
-            charisma: [
-                { id: "depart", name: "Église Charisma" },
-                { id: "brement", name: "Brement" },
-                { id: "noisy", name: "Noisy-le-Sec" },
-                { id: "retour", name: "Retour Église" }
-            ],
-            navieo: [
-                { id: "chelles", name: "Chelles ZAC Tuilerie" },
-                { id: "mairie", name: "Mairie" },
-                { id: "gare", name: "Gare" },
-                { id: "neuilly", name: "Neuilly/Marne" },
-                { id: "lamare", name: "La Mare" },
-                { id: "gagnyarena", name: "Gagny Arena" },
-                { id: "jeanmoulin", name: "Jean Moulin" },
-                { id: "henribarbusse", name: "Henri Barbusse" },
-                { id: "garegagny", name: "Gare de Gagny" },
-                { id: "chateau", name: "Château de Villemomble" },
-                { id: "rosny", name: "Rosny Perrier Sud" },
-                { id: "van", name: "Van derheyden" },
-                { id: "ruffins", name: "Montreuil Ruffins" },
-                { id: "mairiemontreuil", name: "Montreuil Mairie" },
-                { id: "croixchavaux", name: "Montreuil Croix de Chavaux" },
-                { id: "gaulle", name: "Montreuil Général de Gaulle" },
-                { id: "eglise", name: "Église CHARISMA" }
-            ]
-        };
+        let calendar = null;
+        let drivers = [];
+        let accompanists = [];
+        let missions = [];
 
-        let busStatus = { charisma: null, navieo: null };
-        let passengersData = { charisma: {}, navieo: {} };
-        let charts = {};
-
-        function initCharts() {
-            const ctx1 = document.getElementById('passengersChart').getContext('2d');
-            const ctx2 = document.getElementById('evolutionChart').getContext('2d');
-            
-            charts.passengers = new Chart(ctx1, {
-                type: 'bar',
-                data: { labels: ['Ligne Express', 'Navette Navieo'], datasets: [{ label: 'Passagers', data: [0, 0], backgroundColor: ['#2c5f8a', '#2c8c6e'], borderRadius: 8 }] },
-                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } } }
-            });
-            
-            charts.evolution = new Chart(ctx2, {
-                type: 'line',
-                data: { labels: [], datasets: [{ label: 'Ligne Express', data: [], borderColor: '#2c5f8a', backgroundColor: 'transparent', tension: 0.3 }, { label: 'Navette Navieo', data: [], borderColor: '#2c8c6e', backgroundColor: 'transparent', tension: 0.3 }] },
-                options: { responsive: true, maintainAspectRatio: true }
+        // Chargement des données
+        function loadDrivers() {
+            database.ref('drivers').on('value', (snapshot) => {
+                const data = snapshot.val();
+                drivers = data ? Object.values(data) : [];
+                updateDriversList();
+                updateSelectOptions();
+                document.getElementById('totalDrivers').innerHTML = drivers.length;
             });
         }
 
-        function getStopIndex(line, stopId) {
-            return STOPS[line].findIndex(s => s.id === stopId);
-        }
-
-        function calculateProgress(line, currentStopId) {
-            if (!currentStopId) return 0;
-            const index = getStopIndex(line, currentStopId);
-            if (index === -1) return 0;
-            return Math.round((index / (STOPS[line].length - 1)) * 100);
-        }
-
-        function renderBuses() {
-            const container = document.getElementById('busesContainer');
-            container.innerHTML = '';
-            
-            const lines = ['charisma', 'navieo'];
-            lines.forEach(line => {
-                const status = busStatus[line];
-                const passengers = passengersData[line];
-                const isActive = status && status.etape;
-                const currentStopId = isActive ? status.etape : null;
-                const progress = calculateProgress(line, currentStopId);
-                
-                const card = document.createElement('div');
-                card.className = 'bus-card';
-                card.innerHTML = `
-                    <div class="bus-header">
-                        <div class="bus-title">
-                            <div class="bus-badge ${line === 'charisma' ? 'charisma' : 'navieo'}">${line === 'charisma' ? 'EX' : 'NV'}</div>
-                            <div>
-                                <div class="bus-name">${line === 'charisma' ? 'Ligne Express' : 'Navette Navieo'}</div>
-                                <div class="bus-route">${line === 'charisma' ? 'Église → Brement → Noisy → Retour' : 'Chelles → Église Charisma (17 arrêts)'}</div>
-                            </div>
-                        </div>
-                        <div class="status-badge ${isActive ? 'status-active' : 'status-inactive'}">${isActive ? 'En service' : 'Stationné'}</div>
-                    </div>
-                    <div class="bus-content">
-                        <div class="info-line"><span class="info-label">Position</span><span class="info-value">${currentStopId ? (STOPS[line].find(s => s.id === currentStopId)?.name || '-') : '-'}</span></div>
-                        <div class="info-line"><span class="info-label">Dernier arrêt</span><span class="info-value">${status?.message || '-'}</span></div>
-                        <div class="info-line"><span class="info-label">Départ</span><span class="info-value">${status?.time || '-'}</span></div>
-                        <div class="progress-container">
-                            <div class="progress-bar-bg"><div class="progress-fill" style="width: ${progress}%; background: ${line === 'charisma' ? '#2c5f8a' : '#2c8c6e'};"></div></div>
-                            <div class="progress-text">${progress}% du parcours</div>
-                        </div>
-                        <div class="stops-preview">
-                            ${STOPS[line].slice(0, 5).map(stop => {
-                                const stopIdx = getStopIndex(line, stop.id);
-                                const currentIdx = currentStopId ? getStopIndex(line, currentStopId) : -1;
-                                let dotClass = '';
-                                if (stopIdx < currentIdx) dotClass = 'completed';
-                                if (stop.id === currentStopId) dotClass = 'active';
-                                const count = passengers[stop.id] || 0;
-                                return `<div class="preview-stop"><div class="stop-dot ${dotClass}"></div><span class="stop-name">${stop.name}</span>${count > 0 ? `<span class="stop-count">+${count}</span>` : ''}</div>`;
-                            }).join('')}
-                            ${STOPS[line].length > 5 ? `<div style="font-size:0.7rem; color:#7c9abc; padding-top:6px;">+ ${STOPS[line].length - 5} autres arrêts</div>` : ''}
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
+        function loadAccompanists() {
+            database.ref('accompanists').on('value', (snapshot) => {
+                const data = snapshot.val();
+                accompanists = data ? Object.values(data) : [];
+                updateAccompanistsList();
+                updateSelectOptions();
+                document.getElementById('totalAccompanists').innerHTML = accompanists.length;
             });
         }
 
-        function updateGlobalStats() {
-            let total = 0;
-            let active = 0;
-            
-            Object.keys(passengersData).forEach(line => {
-                total += Object.values(passengersData[line]).reduce((a,b) => a+b, 0);
-                if (busStatus[line] && busStatus[line].etape) active++;
+        function loadMissions() {
+            database.ref('missions').on('value', (snapshot) => {
+                const data = snapshot.val();
+                missions = data ? Object.values(data) : [];
+                updateCalendar();
+                updateTodayTeam();
             });
-            
-            document.getElementById('globalTotal').innerHTML = total;
-            document.getElementById('activeServices').innerHTML = active;
-            document.getElementById('lastSync').innerHTML = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-            
-            if (charts.passengers) {
-                const charismaTotal = Object.values(passengersData.charisma).reduce((a,b) => a+b, 0);
-                const navieoTotal = Object.values(passengersData.navieo).reduce((a,b) => a+b, 0);
-                charts.passengers.data.datasets[0].data = [charismaTotal, navieoTotal];
-                charts.passengers.update();
+        }
+
+        function updateDriversList() {
+            const tbody = document.getElementById('driversList');
+            if (drivers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aucun chauffeur enregistré</td></tr>';
+                return;
             }
-            
-            updateEvolutionChart();
-            updateSummaryTable();
+            tbody.innerHTML = drivers.map((d, idx) => `
+                <tr>
+                    <td>${d.nom || ''}</td>
+                    <td>${d.prenom || ''}</td>
+                    <td>${d.telephone || ''}</td>
+                    <td>${d.ligne === 'charisma' ? 'Bus Charisma' : d.ligne === 'navieo' ? 'Navieo' : 'Les deux'}</td>
+                    <td><button class="action-btn" onclick="deleteDriver('${d.id}')">🗑️</button></td>
+                </tr>
+            `).join('');
         }
 
-        function updateEvolutionChart() {
-            const charismaCumulative = [];
-            const navieoCumulative = [];
-            let charismaSum = 0, navieoSum = 0;
-            const maxStops = Math.max(STOPS.charisma.length, STOPS.navieo.length);
-            const labels = [];
-            
-            for (let i = 0; i < maxStops; i++) {
-                if (i < STOPS.charisma.length) {
-                    charismaSum += passengersData.charisma[STOPS.charisma[i].id] || 0;
-                    charismaCumulative.push(charismaSum);
-                } else charismaCumulative.push(charismaSum);
-                
-                if (i < STOPS.navieo.length) {
-                    navieoSum += passengersData.navieo[STOPS.navieo[i].id] || 0;
-                    navieoCumulative.push(navieoSum);
-                } else navieoCumulative.push(navieoSum);
-                
-                labels.push(`${i + 1}`);
+        function updateAccompanistsList() {
+            const tbody = document.getElementById('accompanistsList');
+            if (accompanists.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aucun accompagnateur enregistré</td></tr>';
+                return;
             }
+            tbody.innerHTML = accompanists.map((a, idx) => `
+                <tr>
+                    <td>${a.nom || ''}</td>
+                    <td>${a.prenom || ''}</td>
+                    <td>${a.telephone || ''}</td>
+                    <td>${a.ligne === 'charisma' ? 'Bus Charisma' : a.ligne === 'navieo' ? 'Navieo' : 'Les deux'}</td>
+                    <td><button class="action-btn" onclick="deleteAccompanist('${a.id}')">🗑️</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function updateSelectOptions() {
+            const driverSelect = document.getElementById('missionDriver');
+            const accSelect = document.getElementById('missionAccompanist');
             
-            if (charts.evolution) {
-                charts.evolution.data.labels = labels;
-                charts.evolution.data.datasets[0].data = charismaCumulative;
-                charts.evolution.data.datasets[1].data = navieoCumulative;
-                charts.evolution.update();
+            driverSelect.innerHTML = '<option value="">Sélectionner un chauffeur</option>' + 
+                drivers.map(d => `<option value="${d.id}">${d.prenom} ${d.nom}</option>`).join('');
+            
+            accSelect.innerHTML = '<option value="">Sélectionner un accompagnateur</option>' + 
+                accompanists.map(a => `<option value="${a.id}">${a.prenom} ${a.nom}</option>`).join('');
+        }
+
+        function updateCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            if (!calendar) {
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+                    locale: 'fr',
+                    height: 500,
+                    events: missions.map(m => ({
+                        title: `${m.line === 'charisma' ? 'Bus Charisma' : 'Navieo'} - ${m.driverName || 'Chauffeur'}`,
+                        start: m.date,
+                        extendedProps: { driver: m.driverName, accompanist: m.accompanistName, line: m.line }
+                    }))
+                });
+                calendar.render();
+            } else {
+                calendar.removeAllEvents();
+                calendar.addEventSource(missions.map(m => ({
+                    title: `${m.line === 'charisma' ? 'Bus Charisma' : 'Navieo'} - ${m.driverName || 'Chauffeur'}`,
+                    start: m.date,
+                    extendedProps: { driver: m.driverName, accompanist: m.accompanistName, line: m.line }
+                })));
             }
         }
 
-        function updateSummaryTable() {
-            const tbody = document.getElementById('summaryBody');
-            tbody.innerHTML = '';
+        function updateTodayTeam() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayMissions = missions.filter(m => m.date === today);
+            const tbody = document.getElementById('todayTeamBody');
             
-            const entries = [];
-            
-            STOPS.charisma.forEach(stop => {
-                const count = passengersData.charisma[stop.id] || 0;
-                const status = busStatus.charisma;
-                const time = (status && status.etape === stop.id) ? status.time : '-';
-                if (count > 0 || (status && status.etape === stop.id)) {
-                    entries.push({ line: 'Ligne Express', stop: stop.name, passengers: count, time: time });
-                }
-            });
-            
-            STOPS.navieo.forEach(stop => {
-                const count = passengersData.navieo[stop.id] || 0;
-                const status = busStatus.navieo;
-                const time = (status && status.etape === stop.id) ? status.time : '-';
-                if (count > 0 || (status && status.etape === stop.id)) {
-                    entries.push({ line: 'Navette Navieo', stop: stop.name, passengers: count, time: time });
-                }
-            });
-            
-            if (entries.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4">Aucune donnée disponible</td></tr>';
+            if (todayMissions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aucun équipage planifié pour aujourd\'hui</td></tr>';
                 return;
             }
             
-            entries.forEach(entry => {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td style="font-weight:500;">${entry.line}</td><td>${entry.stop}</td><td style="font-weight:600;">${entry.passengers}</td><td style="color:#7c9abc;">${entry.time}</td>`;
-                tbody.appendChild(row);
-            });
-            
-            const totalCharisma = Object.values(passengersData.charisma).reduce((a,b) => a+b, 0);
-            const totalNavieo = Object.values(passengersData.navieo).reduce((a,b) => a+b, 0);
-            const totalRow = document.createElement('tr');
-            totalRow.className = 'total-row';
-            totalRow.innerHTML = `<td colspan="2"><strong>Total général</strong></td><td><strong>${totalCharisma + totalNavieo}</strong></td><td></td>`;
-            tbody.appendChild(totalRow);
+            tbody.innerHTML = todayMissions.map(m => `
+                <tr>
+                    <td>${m.line === 'charisma' ? 'Bus Charisma' : 'Navieo'}</td>
+                    <td>${m.driverName || 'Non affecté'}</td>
+                    <td>${m.accompanistName || 'Non affecté'}</td>
+                    <td>${m.startTime || '07:30'}</td>
+                    <td><span class="driver-badge" style="background:#dcfce7; color:#166534;">Prévu</span></td>
+                </tr>
+            `).join('');
         }
 
-        function exportReport() {
-            const now = new Date();
-            const dateStr = now.toISOString().slice(0,19).replace(/:/g, '-');
-            let csv = "Ligne,Arrêt,Passagers,Horaire\n";
+        function saveMission() {
+            const date = document.getElementById('missionDate').value;
+            const line = document.getElementById('missionLine').value;
+            const driverId = document.getElementById('missionDriver').value;
+            const accompanistId = document.getElementById('missionAccompanist').value;
+            const startTime = document.getElementById('missionStartTime').value;
             
-            STOPS.charisma.forEach(stop => {
-                const count = passengersData.charisma[stop.id] || 0;
-                const status = busStatus.charisma;
-                const time = (status && status.etape === stop.id) ? status.time : '-';
-                csv += `Ligne Express,"${stop.name}",${count},"${time}"\n`;
-            });
-            
-            STOPS.navieo.forEach(stop => {
-                const count = passengersData.navieo[stop.id] || 0;
-                const status = busStatus.navieo;
-                const time = (status && status.etape === stop.id) ? status.time : '-';
-                csv += `Navette Navieo,"${stop.name}",${count},"${time}"\n`;
-            });
-            
-            const total = Object.values(passengersData.charisma).reduce((a,b)=>a+b,0) + Object.values(passengersData.navieo).reduce((a,b)=>a+b,0);
-            csv += `\nTOTAL GÉNÉRAL,,${total},\n`;
-            
-            const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `rapport_flotte_${dateStr}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
-
-        // Firebase listeners
-        database.ref('bus-status').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                if (data.route === 'charisma') busStatus.charisma = data;
-                else if (data.route === 'navieo') busStatus.navieo = data;
-                else if (!data.route) busStatus.charisma = data;
+            if (!date) {
+                alert('Veuillez sélectionner une date');
+                return;
             }
-            renderBuses();
-            updateGlobalStats();
-        });
-        
+            
+            const driver = drivers.find(d => d.id === driverId);
+            const accompanist = accompanists.find(a => a.id === accompanistId);
+            
+            const newMission = {
+                id: Date.now().toString(),
+                date: date,
+                line: line,
+                driverId: driverId,
+                driverName: driver ? `${driver.prenom} ${driver.nom}` : '',
+                accompanistId: accompanistId,
+                accompanistName: accompanist ? `${accompanist.prenom} ${accompanist.nom}` : '',
+                startTime: startTime,
+                createdAt: new Date().toISOString()
+            };
+            
+            database.ref('missions/' + newMission.id).set(newMission);
+            closeModal();
+        }
+
+        function saveDriver() {
+            const nom = document.getElementById('driverLastName').value;
+            const prenom = document.getElementById('driverFirstName').value;
+            const telephone = document.getElementById('driverPhone').value;
+            const ligne = document.getElementById('driverLine').value;
+            
+            if (!nom || !prenom) {
+                alert('Veuillez remplir le nom et prénom');
+                return;
+            }
+            
+            const newDriver = {
+                id: Date.now().toString(),
+                nom: nom,
+                prenom: prenom,
+                telephone: telephone,
+                ligne: ligne,
+                role: 'driver',
+                createdAt: new Date().toISOString()
+            };
+            database.ref('drivers/' + newDriver.id).set(newDriver);
+            closeModal();
+            document.getElementById('driverLastName').value = '';
+            document.getElementById('driverFirstName').value = '';
+            document.getElementById('driverPhone').value = '';
+        }
+
+        function saveAccompanist() {
+            const nom = document.getElementById('accLastName').value;
+            const prenom = document.getElementById('accFirstName').value;
+            const telephone = document.getElementById('accPhone').value;
+            const ligne = document.getElementById('accLine').value;
+            
+            if (!nom || !prenom) {
+                alert('Veuillez remplir le nom et prénom');
+                return;
+            }
+            
+            const newAcc = {
+                id: Date.now().toString(),
+                nom: nom,
+                prenom: prenom,
+                telephone: telephone,
+                ligne: ligne,
+                role: 'accompanist',
+                createdAt: new Date().toISOString()
+            };
+            database.ref('accompanists/' + newAcc.id).set(newAcc);
+            closeModal();
+            document.getElementById('accLastName').value = '';
+            document.getElementById('accFirstName').value = '';
+            document.getElementById('accPhone').value = '';
+        }
+
+        function deleteDriver(id) {
+            if (confirm('Supprimer ce chauffeur ?')) database.ref('drivers/' + id).remove();
+        }
+
+        function deleteAccompanist(id) {
+            if (confirm('Supprimer cet accompagnateur ?')) database.ref('accompanists/' + id).remove();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`tab${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tab === 'planning' && calendar) setTimeout(() => calendar.updateSize(), 100);
+        }
+
+        function openPlanningModal() {
+            document.getElementById('missionDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('planningModal').style.display = 'flex';
+        }
+
+        function openDriverModal() {
+            document.getElementById('driverModal').style.display = 'flex';
+        }
+
+        function openAccompanistModal() {
+            document.getElementById('accompanistModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+        }
+
+        // Suivi bus en temps réel
+        function updateBusTracking() {
+            database.ref('bus-status').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    if (data.route === 'charisma') {
+                        document.getElementById('charismaStatus').innerHTML = 'En service';
+                        document.getElementById('charismaStatus').className = 'bus-status status-active';
+                        document.getElementById('charismaLocation').innerHTML = data.etape || '-';
+                        document.getElementById('charismaLastStop').innerHTML = data.message || '-';
+                    } else if (data.route === 'navieo') {
+                        document.getElementById('navieoStatus').innerHTML = 'En service';
+                        document.getElementById('navieoStatus').className = 'bus-status status-active';
+                        document.getElementById('navieoLocation').innerHTML = data.etape || '-';
+                        document.getElementById('navieoLastStop').innerHTML = data.message || '-';
+                    }
+                }
+            });
+            
+            // Mise à jour des affectations des chauffeurs
+            database.ref('missions').on('value', (snapshot) => {
+                const data = snapshot.val();
+                const missionsToday = data ? Object.values(data).filter(m => m.date === new Date().toISOString().split('T')[0]) : [];
+                const charismaMission = missionsToday.find(m => m.line === 'charisma');
+                const navieoMission = missionsToday.find(m => m.line === 'navieo');
+                
+                if (charismaMission) {
+                    document.getElementById('charismaDriver').innerHTML = charismaMission.driverName || 'Non affecté';
+                    document.getElementById('charismaAccompanist').innerHTML = charismaMission.accompanistName || '-';
+                }
+                if (navieoMission) {
+                    document.getElementById('navieoDriver').innerHTML = navieoMission.driverName || 'Non affecté';
+                    document.getElementById('navieoAccompanist').innerHTML = navieoMission.accompanistName || '-';
+                }
+            });
+        }
+
+        // Stats passagers
         database.ref('passengers').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                passengersData.charisma = { ...passengersData.charisma, ...data };
-                passengersData.navieo = { ...passengersData.navieo, ...data };
+                const total = Object.values(data).reduce((a,b) => a + b, 0);
+                document.getElementById('totalPassengers').innerHTML = total;
             }
-            renderBuses();
-            updateGlobalStats();
         });
 
-        initCharts();
-        setInterval(() => { updateGlobalStats(); }, 3000);
+        // Nombre de trajets actifs
+        database.ref('bus-status').on('value', (snapshot) => {
+            const data = snapshot.val();
+            let active = 0;
+            if (data) {
+                if (data.route === 'charisma' || data.etape) active++;
+                if (data.route === 'navieo') active++;
+            }
+            document.getElementById('activeTrips').innerHTML = active;
+        });
+
+        // Initialisation
+        loadDrivers();
+        loadAccompanists();
+        loadMissions();
+        updateBusTracking();
+
+        // Fermer modal en cliquant en dehors
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeModal();
+            }
+        }
     </script>
 </body>
 </html>
