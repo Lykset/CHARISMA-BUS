@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Conducteur · Service Navettes Charisma</title>
+    <title>Conducteur · Service Navettes</title>
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -16,100 +16,71 @@
         }
 
         body {
-            background: #f5f7fb;
+            background: #eef2f5;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: #1a2c3e;
+            color: #1e2f3e;
             line-height: 1.5;
         }
 
-        /* Bandeau d'accueil chaleureux - Dégradé vibrant */
-        .hero-band {
-            background: linear-gradient(135deg, #0b2b44 0%, #1c5d7a 50%, #2c8c6e 100%);
-            padding: 32px 24px 48px;
-            margin-bottom: -24px;
-            position: relative;
-            overflow: hidden;
+        /* Header professionnel */
+        .app-header {
+            background: #1e2f3e;
+            padding: 20px 32px;
+            border-bottom: 3px solid #2c8c6e;
         }
 
-        .hero-band::before {
-            content: "";
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(255,215,120,0.2) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .hero-band::after {
-            content: "";
-            position: absolute;
-            bottom: -30%;
-            left: -10%;
-            width: 250px;
-            height: 250px;
-            background: radial-gradient(circle, rgba(255,180,60,0.15) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .hero-content {
+        .header-container {
             max-width: 1280px;
             margin: 0 auto;
-            position: relative;
-            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
-        .hero-title {
-            font-size: 2rem;
-            font-weight: 700;
+        .logo-area h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
             color: white;
             letter-spacing: -0.3px;
-            margin-bottom: 8px;
         }
 
-        .hero-subtitle {
-            font-size: 1rem;
-            color: rgba(255,255,255,0.9);
-            font-weight: 400;
+        .logo-area p {
+            font-size: 0.75rem;
+            color: #8aa9c4;
+            margin-top: 4px;
         }
 
-        .hero-quote {
-            margin-top: 20px;
-            font-style: italic;
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.95);
-            border-left: 3px solid #ffb347;
-            padding-left: 16px;
-            background: rgba(0,0,0,0.15);
-            display: inline-block;
-            border-radius: 0 16px 16px 0;
-            padding: 10px 20px;
+        .date-area {
+            background: #2a3f50;
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: #eef2f5;
+            font-size: 0.85rem;
+            font-weight: 500;
         }
 
         /* Container principal */
         .dashboard {
             max-width: 1280px;
             margin: 0 auto;
-            padding: 24px;
+            padding: 28px 24px;
         }
 
         /* Cartes */
         .card {
-            background: white;
-            border-radius: 28px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
             overflow: hidden;
             margin-bottom: 28px;
-            transition: transform 0.2s, box-shadow 0.2s;
         }
 
         .card-header {
-            padding: 20px 28px;
-            border-bottom: 1px solid #eef2f8;
-            background: white;
+            padding: 18px 24px;
+            border-bottom: 1px solid #e9edf2;
+            background: #fafcfd;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -118,36 +89,34 @@
         }
 
         .card-header h2 {
-            font-size: 1.25rem;
+            font-size: 1rem;
             font-weight: 600;
-            background: linear-gradient(135deg, #1c5d7a 0%, #2c8c6e 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #2c5f8a;
+            letter-spacing: -0.2px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .badge {
-            background: linear-gradient(135deg, #fff5e6 0%, #ffe8d4 100%);
-            color: #e67e22;
-            padding: 4px 14px;
+            background: #eef2f5;
+            color: #4a6f8f;
+            padding: 4px 12px;
             border-radius: 30px;
             font-size: 0.7rem;
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .card-content {
-            padding: 24px 28px;
+            padding: 24px;
         }
 
         /* Sélection itinéraire */
         .route-selector {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-            margin-bottom: 28px;
+            gap: 20px;
+            margin-bottom: 24px;
         }
 
         @media (max-width: 700px) {
@@ -158,405 +127,369 @@
 
         .route-card {
             background: #ffffff;
-            border: 2px solid #eef2f8;
-            border-radius: 24px;
-            padding: 24px;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 20px;
             cursor: pointer;
-            transition: all 0.25s ease;
-            position: relative;
+            transition: all 0.2s ease;
         }
 
         .route-card:hover {
-            border-color: #ffb347;
-            transform: translateY(-3px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+            border-color: #2c8c6e;
+            box-shadow: 0 4px 12px rgba(44, 140, 110, 0.1);
         }
 
         .route-card.selected {
-            border-color: #ffb347;
-            background: linear-gradient(135deg, #fffaf5 0%, #fff5e8 100%);
-            box-shadow: 0 8px 25px rgba(255, 180, 71, 0.2);
+            border-color: #2c8c6e;
+            background: #f5fbf9;
+            box-shadow: 0 4px 12px rgba(44, 140, 110, 0.15);
         }
 
         .route-icon {
-            font-size: 2.5rem;
-            margin-bottom: 16px;
+            font-size: 2rem;
+            margin-bottom: 12px;
         }
 
         .route-name {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #1c5d7a 0%, #2c8c6e 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
+            color: #1e2f3e;
+            margin-bottom: 6px;
         }
 
         .route-desc {
-            font-size: 0.85rem;
-            color: #6b8cae;
-            margin-bottom: 16px;
-            line-height: 1.4;
+            font-size: 0.8rem;
+            color: #5f7d9c;
+            margin-bottom: 12px;
         }
 
         .route-stats {
             display: flex;
             gap: 16px;
             font-size: 0.7rem;
-            color: #8aa9c4;
-            border-top: 1px solid #eef2f8;
-            padding-top: 16px;
-            margin-top: 8px;
+            color: #7c9abc;
+            border-top: 1px solid #e9edf2;
+            padding-top: 12px;
+            margin-top: 4px;
         }
 
-        .btn-start {
+        .btn-primary {
             width: 100%;
-            background: linear-gradient(135deg, #ffb347 0%, #ff8c33 100%);
+            background: #2c8c6e;
             border: none;
-            padding: 14px 24px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 0.95rem;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
             color: white;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 15px rgba(255, 140, 51, 0.3);
+            transition: background 0.2s;
         }
 
-        .btn-start:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 140, 51, 0.4);
+        .btn-primary:hover {
+            background: #236e56;
         }
 
-        .btn-start:disabled {
-            opacity: 0.5;
-            transform: none;
+        .btn-primary:disabled {
+            background: #b9cdc4;
             cursor: not-allowed;
         }
 
-        /* Infos trajet */
-        .journey-panel {
-            background: linear-gradient(135deg, #fefcf8 0%, #ffffff 100%);
-            border-radius: 24px;
+        /* Panneau de bord */
+        .info-panel {
+            background: #f8fafc;
+            border-radius: 18px;
             padding: 20px;
             margin-bottom: 24px;
-            border: 1px solid #f0e6d8;
+            border: 1px solid #e9edf2;
         }
 
-        .stats-row {
+        .stats-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 24px;
-            margin-bottom: 24px;
+            gap: 20px;
+            margin-bottom: 20px;
         }
 
-        .stat-block {
+        .stat-card {
             flex: 1;
-            min-width: 100px;
+            min-width: 110px;
+            background: white;
+            border-radius: 16px;
+            padding: 14px 12px;
             text-align: center;
-            padding: 16px 12px;
-            background: linear-gradient(135deg, #fefaf5 0%, #fff7ef 100%);
-            border-radius: 20px;
-            border: 1px solid #ffe6cc;
+            border: 1px solid #e9edf2;
         }
 
         .stat-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #e67e22;
-            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #6f8fae;
+            font-weight: 500;
         }
 
         .stat-value {
-            font-size: 1.6rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #1c5d7a 0%, #2c8c6e 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e2f3e;
             margin-top: 6px;
         }
 
         .stat-sub {
-            font-size: 0.7rem;
-            color: #ffb347;
-            font-weight: 500;
+            font-size: 0.65rem;
+            color: #2c8c6e;
             margin-top: 4px;
         }
 
         /* Progression */
-        .progress-area {
-            margin: 20px 0;
+        .progress-block {
+            margin-top: 16px;
         }
 
         .progress-bar-bg {
-            background: #eef2f8;
-            border-radius: 40px;
-            height: 12px;
+            background: #e2e8f0;
+            border-radius: 20px;
+            height: 8px;
             overflow: hidden;
         }
 
         .progress-fill {
-            background: linear-gradient(90deg, #ffb347, #ff8c33);
+            background: #2c8c6e;
             height: 100%;
             width: 0%;
-            border-radius: 40px;
-            transition: width 0.4s ease;
+            border-radius: 20px;
+            transition: width 0.3s;
         }
 
         .progress-labels {
             display: flex;
             justify-content: space-between;
-            margin-top: 10px;
+            margin-top: 8px;
             font-size: 0.7rem;
-            color: #8aa9c4;
+            color: #7c9abc;
         }
 
-        /* Liste des arrêts */
+        /* Liste arrêts */
         .stops-container {
             max-height: 380px;
             overflow-y: auto;
             margin: 20px 0;
-            border-radius: 20px;
         }
 
-        .stop-card-item {
-            background: #ffffff;
-            border: 1px solid #eef2f8;
-            border-radius: 16px;
-            padding: 14px 18px;
-            margin-bottom: 10px;
+        .stop-row {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
+            padding: 12px 16px;
+            background: #ffffff;
+            border: 1px solid #e9edf2;
+            border-radius: 14px;
+            margin-bottom: 8px;
             transition: all 0.2s;
         }
 
-        .stop-card-item.completed {
-            background: #f9fafc;
-            border-color: #e2e8f0;
+        .stop-row.completed {
+            background: #f8fafc;
             opacity: 0.7;
         }
 
-        .stop-card-item.active {
-            background: linear-gradient(135deg, #fff8f0 0%, #fff3e6 100%);
-            border-color: #ffb347;
-            box-shadow: 0 4px 12px rgba(255, 180, 71, 0.2);
+        .stop-row.active {
+            background: #ecf7f3;
+            border-color: #2c8c6e;
+            border-left: 4px solid #2c8c6e;
         }
 
         .stop-number {
-            width: 38px;
-            height: 38px;
-            background: linear-gradient(135deg, #eef2f8 0%, #e6ecf3 100%);
-            border-radius: 38px;
+            width: 32px;
+            height: 32px;
+            background: #eef2f5;
+            border-radius: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: #2c5f8a;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #4a6f8f;
         }
 
-        .stop-card-item.active .stop-number {
-            background: linear-gradient(135deg, #ffb347, #ff8c33);
+        .stop-row.active .stop-number {
+            background: #2c8c6e;
             color: white;
         }
 
-        .stop-details {
+        .stop-info {
             flex: 1;
         }
 
         .stop-name {
-            font-weight: 700;
-            color: #1e4b6e;
+            font-weight: 600;
+            color: #1e2f3e;
         }
 
         .stop-time {
             font-size: 0.7rem;
-            color: #8aa9c4;
+            color: #7c9abc;
             margin-top: 2px;
         }
 
         .stop-count {
-            background: linear-gradient(135deg, #fff5e6 0%, #ffefdf 100%);
-            padding: 6px 14px;
+            background: #eef2f5;
+            padding: 4px 12px;
             border-radius: 30px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #e67e22;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #2c8c6e;
         }
 
         /* Actions */
-        .actions-bar {
+        .actions-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 10px;
             margin: 20px 0;
         }
 
-        .btn-action {
-            background: #fefaf5;
-            border: 1px solid #ffe6cc;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-size: 0.8rem;
+        .btn-secondary {
+            background: #ffffff;
+            border: 1px solid #dce3e9;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.75rem;
             font-weight: 500;
-            color: #e67e22;
+            color: #4a6f8f;
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .btn-action:hover {
-            background: #fff0e0;
-            border-color: #ffb347;
+        .btn-secondary:hover {
+            background: #f0f4f8;
+            border-color: #2c8c6e;
         }
 
-        .btn-warning {
-            background: #fff5e6;
-            border-color: #ffd9b0;
-            color: #e67e22;
-        }
-
-        .input-custom {
+        .input-group {
             display: flex;
             gap: 10px;
             margin-top: 8px;
         }
 
-        .input-custom input {
+        .input-group input {
             flex: 1;
-            padding: 12px 18px;
-            border: 1px solid #ffe6cc;
-            border-radius: 50px;
+            padding: 10px 16px;
+            border: 1px solid #dce3e9;
+            border-radius: 40px;
             font-family: inherit;
-            font-size: 0.85rem;
-            background: #fefaf5;
+            font-size: 0.8rem;
         }
 
-        .input-custom input:focus {
+        .input-group input:focus {
             outline: none;
-            border-color: #ffb347;
+            border-color: #2c8c6e;
         }
 
         /* Rapport */
-        .report-box {
-            background: linear-gradient(135deg, #fff8f0 0%, #fff3e6 100%);
-            border-radius: 24px;
-            padding: 24px;
+        .report-container {
+            background: #f8fafc;
+            border-radius: 18px;
+            padding: 20px;
             margin-top: 24px;
-            border: 1px solid #ffe6cc;
+            border: 1px solid #e9edf2;
         }
 
         .report-title {
-            font-weight: 800;
-            font-size: 0.9rem;
-            color: #e67e22;
-            margin-bottom: 20px;
-            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #2c8c6e;
+            margin-bottom: 16px;
         }
 
         .report-numbers {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 16px;
-            margin-bottom: 20px;
         }
 
-        .report-number-card {
+        .report-card-item {
             background: white;
-            border-radius: 20px;
-            padding: 16px;
+            border-radius: 14px;
+            padding: 14px;
             text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid #e9edf2;
         }
 
-        .report-big-number {
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffb347, #ff8c33);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .report-number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1e2f3e;
         }
 
         .report-label {
             font-size: 0.7rem;
-            color: #8aa9c4;
-            margin-top: 6px;
+            color: #7c9abc;
+            margin-top: 4px;
         }
 
         /* Historique */
         .history-area {
             margin-top: 24px;
-            border-top: 1px solid #f0e6d8;
+            border-top: 1px solid #e9edf2;
             padding-top: 20px;
         }
 
         .history-title {
             font-weight: 600;
-            font-size: 0.8rem;
-            color: #e67e22;
-            letter-spacing: 0.5px;
+            font-size: 0.75rem;
+            color: #6f8fae;
             margin-bottom: 12px;
         }
 
         .history-list {
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
         }
 
-        .history-entry {
-            padding: 10px 0;
-            border-bottom: 1px solid #f0e6d8;
-            font-size: 0.8rem;
+        .history-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eef2f5;
+            font-size: 0.8rem;
         }
 
         .history-stop {
-            font-weight: 600;
-            color: #1e4b6e;
+            font-weight: 500;
+            color: #1e2f3e;
+        }
+
+        .history-value {
+            color: #2c8c6e;
+            font-weight: 500;
         }
 
         .history-time {
-            color: #8aa9c4;
+            color: #9aafc4;
             font-size: 0.7rem;
-        }
-
-        .history-pass {
-            background: linear-gradient(135deg, #ffb347, #ff8c33);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 700;
         }
 
         .btn-reset {
             width: 100%;
-            background: #fefaf5;
-            border: 1px solid #ffe6cc;
+            background: #ffffff;
+            border: 1px solid #dce3e9;
             padding: 12px;
-            border-radius: 50px;
+            border-radius: 40px;
             font-size: 0.8rem;
             font-weight: 500;
-            color: #e67e22;
+            color: #6f8fae;
             cursor: pointer;
             margin-top: 20px;
-            transition: all 0.2s;
-        }
-
-        .btn-reset:hover {
-            background: #fff0e0;
         }
 
         .footer-note {
             text-align: center;
             font-size: 0.7rem;
-            color: #8aa9c4;
-            padding: 24px 0 16px;
+            color: #9aafc4;
+            padding: 20px 0 8px;
         }
 
         /* Modal */
@@ -568,7 +501,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(3px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -576,26 +509,22 @@
 
         .modal {
             background: white;
-            border-radius: 32px;
-            max-width: 380px;
+            border-radius: 28px;
+            max-width: 360px;
             width: 90%;
-            padding: 32px;
+            padding: 28px;
             text-align: center;
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
         }
 
         .modal h3 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #1c5d7a 0%, #2c8c6e 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e2f3e;
             margin-bottom: 8px;
         }
 
         .modal p {
-            color: #8aa9c4;
+            color: #7c9abc;
             font-size: 0.85rem;
         }
 
@@ -603,37 +532,32 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 28px;
-            margin: 28px 0;
+            gap: 24px;
+            margin: 24px 0;
         }
 
         .counter-btn {
-            width: 52px;
-            height: 52px;
-            border-radius: 52px;
-            background: #fefaf5;
-            border: 1px solid #ffe6cc;
-            font-size: 1.8rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 48px;
+            background: #eef2f5;
+            border: none;
+            font-size: 1.5rem;
             font-weight: 600;
-            color: #e67e22;
+            color: #2c8c6e;
             cursor: pointer;
-            transition: all 0.2s;
         }
 
         .counter-btn:hover {
-            background: linear-gradient(135deg, #ffb347, #ff8c33);
+            background: #2c8c6e;
             color: white;
-            border-color: transparent;
         }
 
         .counter-value {
-            font-size: 2.2rem;
-            font-weight: 800;
-            min-width: 70px;
-            background: linear-gradient(135deg, #1c5d7a 0%, #2c8c6e 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 2rem;
+            font-weight: 700;
+            min-width: 60px;
+            color: #1e2f3e;
         }
 
         .modal-actions {
@@ -645,18 +569,20 @@
         .modal-actions button {
             flex: 1;
             padding: 12px;
-            border-radius: 50px;
-            font-weight: 600;
+            border-radius: 40px;
+            font-weight: 500;
             cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="hero-band">
-        <div class="hero-content">
-            <div class="hero-title">Service Navettes Charisma</div>
-            <div class="hero-subtitle">Conducteur · Au service de la communauté</div>
-            <div class="hero-quote">"Chaque trajet est une rencontre, chaque passager compte."</div>
+    <div class="app-header">
+        <div class="header-container">
+            <div class="logo-area">
+                <h1>Service Navettes</h1>
+                <p>Plateforme conducteur · Gestion des lignes</p>
+            </div>
+            <div class="date-area" id="currentDate"></div>
         </div>
     </div>
 
@@ -666,14 +592,14 @@
             <div class="card">
                 <div class="card-header">
                     <h2>📋 Sélection de la ligne</h2>
-                    <span class="badge">Nouvelle journée</span>
+                    <span class="badge">Nouveau service</span>
                 </div>
                 <div class="card-content">
                     <div class="route-selector">
                         <div id="routeCharisma" class="route-card" onclick="selectRoute('charisma')">
                             <div class="route-icon">🚌</div>
-                            <div class="route-name">Ligne Express Charisma</div>
-                            <div class="route-desc">Trajet rapide · 4 arrêts · 45 minutes</div>
+                            <div class="route-name">Ligne Express</div>
+                            <div class="route-desc">4 arrêts · 45 min</div>
                             <div class="route-stats">
                                 <span>Église → Brement → Noisy → Retour</span>
                             </div>
@@ -681,14 +607,14 @@
                         <div id="routeNavieo" class="route-card" onclick="selectRoute('navieo')">
                             <div class="route-icon">🚐</div>
                             <div class="route-name">Navette Navieo</div>
-                            <div class="route-desc">Ligne complète · 17 arrêts · 1h35</div>
+                            <div class="route-desc">17 arrêts · 1h35</div>
                             <div class="route-stats">
                                 <span>Chelles → Église Charisma</span>
-                                <span>📞 07 45 44 60 15</span>
+                                <span>Réservation: 07 45 44 60 15</span>
                             </div>
                         </div>
                     </div>
-                    <button id="startBtn" class="btn-start" onclick="startRoute()" disabled>Démarrer la journée</button>
+                    <button id="startBtn" class="btn-primary" onclick="startRoute()" disabled>Démarrer le service</button>
                 </div>
             </div>
         </div>
@@ -697,30 +623,29 @@
         <div id="driverInterface" style="display: none;">
             <div class="card">
                 <div class="card-header">
-                    <h2 id="routeTitle">Ligne Express Charisma</h2>
-                    <span class="badge" id="statusBadge">En attente</span>
+                    <h2 id="routeTitle">Ligne Express</h2>
+                    <span class="badge" id="statusBadge">Prêt</span>
                 </div>
                 <div class="card-content">
-                    <!-- Stats -->
-                    <div class="journey-panel">
-                        <div class="stats-row">
-                            <div class="stat-block">
+                    <!-- Panneau info -->
+                    <div class="info-panel">
+                        <div class="stats-grid">
+                            <div class="stat-card">
                                 <div class="stat-label">POSITION</div>
                                 <div class="stat-value" id="currentLocation">-</div>
                                 <div class="stat-sub" id="nextHint"></div>
                             </div>
-                            <div class="stat-block">
-                                <div class="stat-label">HEURE</div>
+                            <div class="stat-card">
+                                <div class="stat-label">HORAIRE</div>
                                 <div class="stat-value" id="currentTime">--:--</div>
                             </div>
-                            <div class="stat-block">
+                            <div class="stat-card">
                                 <div class="stat-label">PASSAGERS</div>
-                                <div class="stat-value" id="totalPassengersDisplay">0</div>
-                                <div class="stat-sub">à bord cumulé</div>
+                                <div class="stat-value" id="totalPassengers">0</div>
+                                <div class="stat-sub">total cumulé</div>
                             </div>
                         </div>
-
-                        <div class="progress-area">
+                        <div class="progress-block">
                             <div class="progress-bar-bg">
                                 <div class="progress-fill" id="progressFill"></div>
                             </div>
@@ -732,22 +657,22 @@
                         </div>
                     </div>
 
-                    <!-- Liste des arrêts -->
+                    <!-- Arrêts -->
                     <div style="margin-bottom: 12px;">
-                        <span style="font-weight: 700; font-size: 0.8rem; color: #e67e22;">ARRÊTS DU PARCOURS</span>
+                        <span style="font-weight: 600; font-size: 0.75rem; color: #6f8fae;">PARCOURS</span>
                     </div>
                     <div class="stops-container" id="stopsList"></div>
 
-                    <!-- Actions rapides -->
-                    <div class="actions-bar">
-                        <button class="btn-action" onclick="sendTrafficAlert('retard_5', 'Retard de 5 minutes sur le trajet')">⏱ +5 min</button>
-                        <button class="btn-action" onclick="sendTrafficAlert('retard_10', 'Retard de 10 minutes')">⏱ +10 min</button>
-                        <button class="btn-action" onclick="sendTrafficAlert('retard_15', 'Retard de 15 minutes')">⏱ +15 min</button>
-                        <button class="btn-action btn-warning" onclick="sendTrafficAlert('approche', 'La navette approche de votre arrêt')">📍 À proximité</button>
+                    <!-- Actions -->
+                    <div class="actions-row">
+                        <button class="btn-secondary" onclick="sendTrafficAlert('retard_5', 'Retard de 5 minutes')">+5 min</button>
+                        <button class="btn-secondary" onclick="sendTrafficAlert('retard_10', 'Retard de 10 minutes')">+10 min</button>
+                        <button class="btn-secondary" onclick="sendTrafficAlert('retard_15', 'Retard de 15 minutes')">+15 min</button>
+                        <button class="btn-secondary" onclick="sendTrafficAlert('approche', 'Navette en approche')">À proximité</button>
                     </div>
-                    <div class="input-custom">
-                        <input type="text" id="customMessage" placeholder="Message personnalisé (circulation, incident, encouragement...)" autocomplete="off">
-                        <button class="btn-action" onclick="sendCustomTraffic()">Envoyer</button>
+                    <div class="input-group">
+                        <input type="text" id="customMessage" placeholder="Message personnalisé (circulation, incident...)" autocomplete="off">
+                        <button class="btn-secondary" onclick="sendCustomTraffic()">Envoyer</button>
                     </div>
 
                     <!-- Rapport -->
@@ -755,35 +680,35 @@
 
                     <!-- Historique -->
                     <div class="history-area">
-                        <div class="history-title">📋 DERNIERS ÉVÉNEMENTS</div>
+                        <div class="history-title">ÉVÉNEMENTS RÉCENTS</div>
                         <div id="historyList" class="history-list">
-                            <div class="history-entry"><span>Prêt à démarrer</span><span class="history-time">-</span></div>
+                            <div class="history-item"><span>Aucun événement</span><span class="history-time">-</span></div>
                         </div>
                     </div>
 
-                    <button class="btn-reset" onclick="resetJourney()">⟳ Nouvelle journée / Réinitialiser</button>
+                    <button class="btn-reset" onclick="resetJourney()">Réinitialiser le service</button>
                 </div>
             </div>
         </div>
 
         <div class="footer-note">
-            Données synchronisées en temps réel · Service Navettes Charisma
+            Synchronisation en temps réel · Service Navettes Charisma
         </div>
     </div>
 
-    <!-- Modal comptage -->
+    <!-- Modal -->
     <div id="passengerModal" class="modal-overlay">
         <div class="modal">
-            <h3 id="modalTitle">Arrivée à l'arrêt</h3>
-            <p id="modalSubtitle">Combien de personnes montent à bord ?</p>
+            <h3 id="modalTitle">Arrivée</h3>
+            <p id="modalSubtitle">Nombre de passagers montés</p>
             <div class="counter">
                 <button class="counter-btn" onclick="decrementCount()">−</button>
                 <span class="counter-value" id="passengerCount">0</span>
                 <button class="counter-btn" onclick="incrementCount()">+</button>
             </div>
             <div class="modal-actions">
-                <button class="btn-action" onclick="closeModal()" style="background:#fefaf5;">Annuler</button>
-                <button class="btn-start" onclick="confirmPassengers()" style="background:linear-gradient(135deg,#ffb347,#ff8c33); color:white;">Valider</button>
+                <button class="btn-secondary" onclick="closeModal()">Annuler</button>
+                <button class="btn-primary" onclick="confirmPassengers()">Valider</button>
             </div>
         </div>
     </div>
@@ -812,7 +737,7 @@
 
         const ROUTES = {
             charisma: {
-                name: "Ligne Express Charisma",
+                name: "Ligne Express",
                 stops: [
                     { id: "depart", name: "Église Charisma", time: "Départ" },
                     { id: "brement", name: "Brement", time: "Arrêt 1" },
@@ -862,7 +787,6 @@
             document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('driverInterface').style.display = 'block';
             document.getElementById('routeTitle').innerHTML = ROUTES[selectedRoute].name;
-            document.getElementById('statusBadge').innerHTML = 'Prêt';
             
             renderStops();
             updateUI();
@@ -880,7 +804,7 @@
             
             stopsList.forEach((stop, idx) => {
                 const div = document.createElement('div');
-                div.className = 'stop-card-item';
+                div.className = 'stop-row';
                 if (idx < currentStopIndex) div.classList.add('completed');
                 if (idx === currentStopIndex) div.classList.add('active');
                 
@@ -888,14 +812,13 @@
                 
                 div.innerHTML = `
                     <div class="stop-number">${idx + 1}</div>
-                    <div class="stop-details">
+                    <div class="stop-info">
                         <div class="stop-name">${stop.name}</div>
                         <div class="stop-time">${stop.time}</div>
                     </div>
                     ${count > 0 ? `<div class="stop-count">+${count}</div>` : ''}
                 `;
                 
-                // Ajouter un événement click pour déclencher l'arrêt
                 if (idx === currentStopIndex + 1 || (currentStopIndex === -1 && idx === 0)) {
                     div.style.cursor = 'pointer';
                     div.onclick = () => triggerStop(idx);
@@ -909,18 +832,16 @@
             if (index === currentStopIndex + 1 || (currentStopIndex === -1 && index === 0)) {
                 currentStopIndex = index;
                 const stop = stopsList[currentStopIndex];
-                askPassengers(stop.id, stop.name, currentStopIndex);
+                askPassengers(stop.id, stop.name);
             }
         }
 
-        function askPassengers(stopId, stopName, index) {
-            const isLast = index === stopsList.length - 1;
-            
-            pendingStop = { id: stopId, name: stopName, index: index };
+        function askPassengers(stopId, stopName) {
+            pendingStop = { id: stopId, name: stopName };
             currentPassengerCount = 0;
             document.getElementById('passengerCount').innerText = '0';
             document.getElementById('modalTitle').innerHTML = stopName;
-            document.getElementById('modalSubtitle').innerHTML = 'Combien de personnes montent ?';
+            document.getElementById('modalSubtitle').innerHTML = 'Nombre de passagers montés';
             document.getElementById('passengerModal').style.display = 'flex';
         }
 
@@ -951,10 +872,7 @@
             updateUI();
             closeModal();
             
-            // Si ce n'est pas le dernier arrêt, passer automatiquement au suivant
-            if (pendingStop.index < stopsList.length - 1) {
-                // Ne pas avancer automatiquement, le conducteur clique sur le prochain arrêt
-            } else {
+            if (currentStopIndex === stopsList.length - 1) {
                 showReport();
             }
             
@@ -970,13 +888,13 @@
             document.getElementById('currentLocation').innerHTML = currentStop ? currentStop.name : stopsList[0].name;
             
             const nextStop = currentStopIndex + 1 < stopsList.length ? stopsList[currentStopIndex + 1] : null;
-            document.getElementById('nextHint').innerHTML = nextStop ? `Prochain: ${nextStop.name}` : 'Arrivée';
+            document.getElementById('nextHint').innerHTML = nextStop ? `Prochain: ${nextStop.name}` : 'Terminé';
             
             const total = Object.values(passengersData).reduce((a,b) => a+b, 0);
-            document.getElementById('totalPassengersDisplay').innerHTML = total;
+            document.getElementById('totalPassengers').innerHTML = total;
             
             if (currentStopIndex === stopsList.length - 1) {
-                document.getElementById('statusBadge').innerHTML = 'Trajet terminé';
+                document.getElementById('statusBadge').innerHTML = 'Service terminé';
                 showReport();
             } else if (currentStopIndex >= 0) {
                 document.getElementById('statusBadge').innerHTML = 'En service';
@@ -1005,14 +923,14 @@
         function updateHistory() {
             const container = document.getElementById('historyList');
             container.innerHTML = '';
-            if (history.length === 0) { container.innerHTML = '<div class="history-entry"><span>Aucun événement</span><span class="history-time">-</span></div>'; return; }
+            if (history.length === 0) { container.innerHTML = '<div class="history-item"><span>Aucun événement</span><span class="history-time">-</span></div>'; return; }
             history.slice(0, 8).forEach(item => {
                 const div = document.createElement('div');
-                div.className = 'history-entry';
+                div.className = 'history-item';
                 if (item.isTraffic) {
                     div.innerHTML = `<span>⚠️ ${item.passengers}</span><span class="history-time">${item.time}</span>`;
                 } else {
-                    div.innerHTML = `<span class="history-stop">${item.stop}</span><span><span class="history-pass">+${item.passengers}</span> <span class="history-time">${item.time}</span></span>`;
+                    div.innerHTML = `<span class="history-stop">${item.stop}</span><span><span class="history-value">+${item.passengers}</span> <span class="history-time">${item.time}</span></span>`;
                 }
                 container.appendChild(div);
             });
@@ -1022,20 +940,28 @@
             const total = Object.values(passengersData).reduce((a,b) => a+b, 0);
             const reportDiv = document.getElementById('reportArea');
             reportDiv.innerHTML = `
-                <div class="report-box">
-                    <div class="report-title">📊 Bilan de la journée</div>
+                <div class="report-container">
+                    <div class="report-title">BILAN DU SERVICE</div>
                     <div class="report-numbers">
-                        <div class="report-number-card"><div class="report-big-number">${total}</div><div class="report-label">Passagers transportés</div></div>
-                        <div class="report-number-card"><div class="report-big-number">${stopsList.length}</div><div class="report-label">Arrêts desservis</div></div>
-                        <div class="report-number-card"><div class="report-big-number">${Object.keys(passengersData).filter(k => passengersData[k] > 0).length}</div><div class="report-label">Arrêts avec montées</div></div>
+                        <div class="report-card-item">
+                            <div class="report-number">${total}</div>
+                            <div class="report-label">Passagers transportés</div>
+                        </div>
+                        <div class="report-card-item">
+                            <div class="report-number">${stopsList.length}</div>
+                            <div class="report-label">Arrêts desservis</div>
+                        </div>
+                        <div class="report-card-item">
+                            <div class="report-number">${Object.keys(passengersData).filter(k => passengersData[k] > 0).length}</div>
+                            <div class="report-label">Arrêts avec montées</div>
+                        </div>
                     </div>
-                    <div style="font-size:0.7rem; text-align:center; color:#e67e22;">🙌 Merci pour votre service ! 🙌</div>
                 </div>
             `;
         }
 
         function resetJourney() {
-            if (confirm('Réinitialiser la journée ? Toutes les données seront effacées.')) {
+            if (confirm('Réinitialiser le service ? Toutes les données seront effacées.')) {
                 passengersData = {}; history = []; currentStopIndex = -1;
                 database.ref('bus-status').remove();
                 database.ref('passengers').remove();
@@ -1053,10 +979,10 @@
         function updateTime() {
             const now = new Date();
             document.getElementById('currentTime').innerHTML = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('currentDate').innerHTML = now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
         }
         updateTime(); setInterval(updateTime, 1000);
         
-        // Écouteur pour récupérer les données existantes
         database.ref('bus-status').on('value', (snap) => {
             const data = snap.val();
             if (data && data.route === selectedRoute && data.etape) {
