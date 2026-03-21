@@ -17,8 +17,8 @@
         body {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
             min-height: 100vh;
+            padding: 20px;
         }
 
         .container {
@@ -26,11 +26,101 @@
             margin: 0 auto;
         }
 
-        h1 {
+        /* Page de sélection */
+        .selection-screen {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
             text-align: center;
-            color: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .selection-screen h1 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .selection-screen p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .route-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 20px;
+            padding: 20px;
             margin-bottom: 20px;
-            font-size: 1.8em;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .route-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .route-card.selected {
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b5 100%);
+        }
+
+        .route-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .route-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .route-desc {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .btn-start {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-start:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Interface conducteur */
+        .driver-interface {
+            display: none;
+        }
+
+        .route-header {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #1e3c72;
+        }
+
+        .route-header h2 {
+            margin-bottom: 5px;
+        }
+
+        .route-header p {
+            font-size: 0.8em;
+            opacity: 0.7;
         }
 
         .status-box {
@@ -70,6 +160,7 @@
         .btn-brement { background: #2196F3; }
         .btn-noisy { background: #9C27B0; }
         .btn-retour { background: #4CAF50; }
+        .btn-navieo { background: #1e6b5e; }
 
         button:disabled {
             opacity: 0.5;
@@ -77,9 +168,8 @@
             cursor: not-allowed;
         }
 
-        /* Section messages de trafic */
         .traffic-section {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.15);
             border-radius: 20px;
             padding: 15px;
             margin: 20px 0;
@@ -88,17 +178,13 @@
         .traffic-title {
             color: white;
             margin-bottom: 10px;
-            font-size: 1em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-weight: bold;
         }
 
         .traffic-buttons {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 15px;
         }
 
         .traffic-btn {
@@ -117,19 +203,60 @@
 
         .custom-traffic input {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             border: none;
-            border-radius: 10px;
-            font-size: 0.9em;
+            border-radius: 25px;
         }
 
         .custom-traffic button {
-            padding: 12px 20px;
+            padding: 10px 20px;
             background: #f59e0b;
             flex: 0;
         }
 
-        /* Modal pour le comptage */
+        .report-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            color: white;
+            text-align: center;
+        }
+
+        .reset-btn {
+            background: #ff9800;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .history-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .history-section h3 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .history-item {
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 8px 0;
+            font-size: 0.9em;
+            color: white;
+        }
+
+        .footer {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            margin-top: 20px;
+            font-size: 0.8em;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -150,17 +277,6 @@
             max-width: 350px;
             width: 90%;
             text-align: center;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-content h2 {
-            margin-bottom: 20px;
-            color: #333;
         }
 
         .counter {
@@ -192,132 +308,79 @@
         .modal-buttons {
             display: flex;
             gap: 15px;
-            margin-top: 20px;
         }
 
         .modal-buttons button {
             flex: 1;
             padding: 12px;
         }
-
-        .btn-confirm { background: #4CAF50; }
-        .btn-cancel { background: #f44336; }
-
-        /* Compte rendu final */
-        .report-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            padding: 20px;
-            margin: 20px 0;
-            color: white;
-            text-align: center;
-        }
-
-        .report-card h3 {
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-
-        .report-stats {
-            background: rgba(255,255,255,0.2);
-            border-radius: 15px;
-            padding: 15px;
-            margin: 10px 0;
-        }
-
-        .report-stats p {
-            margin: 8px 0;
-            font-size: 1.1em;
-        }
-
-        .total-passengers {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 2px solid rgba(255,255,255,0.3);
-        }
-
-        .reset-btn {
-            background: #ff9800;
-            margin-top: 15px;
-        }
-
-        .history-section {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 15px;
-            margin-top: 20px;
-        }
-
-        .history-item {
-            background: rgba(255,255,255,0.15);
-            border-radius: 10px;
-            padding: 10px;
-            margin: 8px 0;
-            font-size: 0.9em;
-        }
-
-        .footer {
-            text-align: center;
-            color: rgba(255,255,255,0.7);
-            margin-top: 20px;
-            font-size: 0.8em;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚌 Conducteur Charisma</h1>
-        
-        <div class="status-box" id="status">
-            📍 Prêt à démarrer
-        </div>
-
-        <div class="btn-group">
-            <button class="btn-depart" id="btnDepart" onclick="askPassengers('depart', 'Départ Église')">
-                🚌 DÉPART Église
-            </button>
-            <button class="btn-brement" id="btnBrement" onclick="askPassengers('brement', 'Arrivée Brement')" disabled>
-                🏠 ARRIVÉE Brement
-            </button>
-            <button class="btn-noisy" id="btnNoisy" onclick="askPassengers('noisy', 'Arrivée Noisy')" disabled>
-                🚉 ARRIVÉE Noisy
-            </button>
-            <button class="btn-retour" id="btnRetour" onclick="finishJourney()" disabled>
-                ⛪ RETOUR Église
-            </button>
-        </div>
-
-        <!-- Section messages de trafic -->
-        <div class="traffic-section">
-            <div class="traffic-title">⚠️ INFORMER LES PASSAGERS</div>
-            <div class="traffic-buttons">
-                <button class="traffic-btn" onclick="sendTrafficAlert('retard 5 minutes', '🚌 Retard de 5 minutes sur le trajet')">⏰ +5 min</button>
-                <button class="traffic-btn" onclick="sendTrafficAlert('retard 10 minutes', '🚌 Retard de 10 minutes - Circulation dense')">⏰ +10 min</button>
-                <button class="traffic-btn" onclick="sendTrafficAlert('retard 15 minutes', '🚌 Retard de 15 minutes - Incident sur la route')">⏰ +15 min</button>
-                <button class="traffic-btn" onclick="sendTrafficAlert('à proximité', '🚌 Le bus approche de votre arrêt !')">📍 À proximité</button>
+        <!-- Écran de sélection -->
+        <div id="selectionScreen" class="selection-screen">
+            <h1>🚌 Conducteur Charisma</h1>
+            <p>Choisissez l'itinéraire du jour</p>
+            
+            <div id="routeCharisma" class="route-card" onclick="selectRoute('charisma')">
+                <div class="route-icon">🚌💨</div>
+                <div class="route-name">Bus Charisma</div>
+                <div class="route-desc">Trajet rapide • 4 arrêts</div>
             </div>
-            <div class="custom-traffic">
-                <input type="text" id="customTrafficMessage" placeholder="Message personnalisé..." autocomplete="off">
-                <button onclick="sendCustomTraffic()">Envoyer</button>
+            
+            <div id="routeNavieo" class="route-card" onclick="selectRoute('navieo')">
+                <div class="route-icon">🚐✨</div>
+                <div class="route-name">Navieo</div>
+                <div class="route-desc">Trajet complet • 17 arrêts • Réservation 07 45 44 60 15</div>
             </div>
+            
+            <button id="startBtn" class="btn-start" onclick="startRoute()" disabled>Démarrer l'itinéraire</button>
         </div>
 
-        <!-- Zone de compte rendu -->
-        <div id="reportArea" style="display: none;"></div>
+        <!-- Interface conducteur -->
+        <div id="driverInterface" class="driver-interface">
+            <div class="route-header" id="routeHeader">
+                <h2 id="routeTitle">🚌 Bus Charisma</h2>
+                <p id="routeSubtitle">Trajet en cours</p>
+            </div>
+            
+            <div class="status-box" id="status">
+                📍 Prêt à démarrer
+            </div>
 
-        <div class="history-section">
-            <h3 style="color:white; margin-bottom:10px;">📋 Historique des arrêts</h3>
-            <div id="historyList"></div>
+            <div class="btn-group" id="buttonsGroup"></div>
+
+            <div class="traffic-section">
+                <div class="traffic-title">⚠️ INFORMER LES PASSAGERS</div>
+                <div class="traffic-buttons">
+                    <button class="traffic-btn" onclick="sendTrafficAlert('retard 5 minutes', '🚌 Retard de 5 minutes sur le trajet')">⏰ +5 min</button>
+                    <button class="traffic-btn" onclick="sendTrafficAlert('retard 10 minutes', '🚌 Retard de 10 minutes')">⏰ +10 min</button>
+                    <button class="traffic-btn" onclick="sendTrafficAlert('retard 15 minutes', '🚌 Retard de 15 minutes')">⏰ +15 min</button>
+                    <button class="traffic-btn" onclick="sendTrafficAlert('à proximité', '🚌 Le bus approche de votre arrêt !')">📍 À proximité</button>
+                </div>
+                <div class="custom-traffic">
+                    <input type="text" id="customTrafficMessage" placeholder="Message personnalisé...">
+                    <button onclick="sendCustomTraffic()">Envoyer</button>
+                </div>
+            </div>
+
+            <div id="reportArea" style="display: none;"></div>
+
+            <div class="history-section">
+                <h3>📋 Historique des arrêts</h3>
+                <div id="historyList"></div>
+            </div>
+
+            <button class="reset-btn" onclick="resetJourney()">🔄 Nouveau trajet</button>
         </div>
 
         <div class="footer">
-            N'oubliez pas de compter les passagers à chaque arrêt (sauf retour)
+            N'oubliez pas de compter les passagers à chaque arrêt
         </div>
     </div>
 
-    <!-- Modal de comptage des passagers -->
+    <!-- Modal comptage passagers -->
     <div id="passengerModal" class="modal">
         <div class="modal-content">
             <h2 id="modalTitle">Comptage des passagers</h2>
@@ -327,8 +390,8 @@
                 <button class="counter-btn" onclick="incrementCount()">+</button>
             </div>
             <div class="modal-buttons">
-                <button class="btn-confirm" onclick="confirmPassengers()">✓ Valider</button>
-                <button class="btn-cancel" onclick="closeModal()">✗ Annuler</button>
+                <button class="btn-confirm" onclick="confirmPassengers()" style="background:#4CAF50;">✓ Valider</button>
+                <button class="btn-cancel" onclick="closeModal()" style="background:#f44336;">✗ Annuler</button>
             </div>
         </div>
     </div>
@@ -347,133 +410,190 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        let currentStep = null;
+        let selectedRoute = null;
+        let currentStopIndex = -1;
         let currentPassengerCount = 0;
-        let pendingEtape = null;
-        let pendingMessage = null;
-        
-        let passengersData = {
-            eglise: 0,
-            brement: 0,
-            noisy: 0,
-            retour: 0
-        };
-        
+        let pendingStop = null;
+        let passengersData = {};
         let history = [];
 
-        database.ref('bus-status').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data && data.etape) {
-                currentStep = data.etape;
-                updateButtonsState();
-            }
-        });
+        // STOPS pour chaque itinéraire
+        const STOPS = {
+            charisma: [
+                { id: "depart", name: "Départ Église", time: "Départ", message: "DÉPART Église" },
+                { id: "brement", name: "Brement", time: "Arrêt 1", message: "ARRIVÉE Brement" },
+                { id: "noisy", name: "Noisy-le-Sec", time: "Arrêt 2", message: "ARRIVÉE Noisy" },
+                { id: "retour", name: "Retour Église", time: "Arrivée", message: "RETOUR Église" }
+            ],
+            navieo: [
+                { id: "chelles", name: "Chelles ZAC de Tuilerie", time: "7:55", message: "DÉPART Chelles" },
+                { id: "mairie", name: "Mairie", time: "8:00", message: "ARRIVÉE Mairie" },
+                { id: "gare", name: "Gare", time: "8:03", message: "ARRIVÉE Gare" },
+                { id: "neuilly", name: "Neuilly/Marne", time: "8:13", message: "ARRIVÉE Neuilly/Marne" },
+                { id: "lamare", name: "La Mare", time: "8:19", message: "ARRIVÉE La Mare" },
+                { id: "gagnyarena", name: "Gagny Arena", time: "8:21", message: "ARRIVÉE Gagny Arena" },
+                { id: "jeanmoulin", name: "Jean Moulin", time: "8:24", message: "ARRIVÉE Jean Moulin" },
+                { id: "henribarbusse", name: "Henri Barbusse", time: "8:27", message: "ARRIVÉE Henri Barbusse" },
+                { id: "garegagny", name: "Gare de Gagny", time: "8:30", message: "ARRIVÉE Gare de Gagny" },
+                { id: "chateau", name: "Château de Villemomble", time: "8:33", message: "ARRIVÉE Château de Villemomble" },
+                { id: "rosny", name: "Rosny Perrier Sud", time: "8:36", message: "ARRIVÉE Rosny Perrier Sud" },
+                { id: "van", name: "Van derheyden", time: "8:39", message: "ARRIVÉE Van derheyden" },
+                { id: "ruffins", name: "Montreuil Ruffins", time: "8:49", message: "ARRIVÉE Montreuil Ruffins" },
+                { id: "mairiemontreuil", name: "Montreuil Mairie", time: "8:59", message: "ARRIVÉE Montreuil Mairie" },
+                { id: "croixchavaux", name: "Montreuil Croix de Chavaux", time: "9:05", message: "ARRIVÉE Montreuil Croix de Chavaux" },
+                { id: "gaulle", name: "Montreuil Général de Gaulle", time: "9:08", message: "ARRIVÉE Montreuil Général de Gaulle" },
+                { id: "eglise", name: "Église CHARISMA", time: "9:30", message: "ARRIVÉE Église CHARISMA" }
+            ]
+        };
 
-        database.ref('passengers').on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                passengersData = { ...passengersData, ...data };
-                if (currentStep === 'retour') {
-                    showFullReport();
-                }
-            }
-        });
-
-        function updateButtonsState() {
-            const btnDepart = document.getElementById('btnDepart');
-            const btnBrement = document.getElementById('btnBrement');
-            const btnNoisy = document.getElementById('btnNoisy');
-            const btnRetour = document.getElementById('btnRetour');
-
-            switch(currentStep) {
-                case null:
-                case undefined:
-                    btnDepart.disabled = false;
-                    btnBrement.disabled = true;
-                    btnNoisy.disabled = true;
-                    btnRetour.disabled = true;
-                    document.getElementById('status').innerHTML = '📍 Prêt à démarrer<br><small>Appuyez sur "DÉPART Église"</small>';
-                    break;
-                case 'depart':
-                    btnDepart.disabled = true;
-                    btnBrement.disabled = false;
-                    btnNoisy.disabled = true;
-                    btnRetour.disabled = true;
-                    document.getElementById('status').innerHTML = '🚌 En route vers Brement<br><small>Prochain arrêt : Brement</small>';
-                    break;
-                case 'brement':
-                    btnDepart.disabled = true;
-                    btnBrement.disabled = true;
-                    btnNoisy.disabled = false;
-                    btnRetour.disabled = true;
-                    document.getElementById('status').innerHTML = '🏠 Arrivé à Brement<br><small>Prochain arrêt : Noisy-le-Sec</small>';
-                    break;
-                case 'noisy':
-                    btnDepart.disabled = true;
-                    btnBrement.disabled = true;
-                    btnNoisy.disabled = true;
-                    btnRetour.disabled = false;
-                    document.getElementById('status').innerHTML = '🚉 Arrivé à Noisy<br><small>Prochain arrêt : Retour Église</small>';
-                    break;
-                case 'retour':
-                    btnDepart.disabled = true;
-                    btnBrement.disabled = true;
-                    btnNoisy.disabled = true;
-                    btnRetour.disabled = true;
-                    document.getElementById('status').innerHTML = '✅ Voyage terminé !<br><small>Merci d\'avoir conduit</small>';
-                    break;
-            }
+        function selectRoute(route) {
+            selectedRoute = route;
+            document.getElementById('routeCharisma').classList.remove('selected');
+            document.getElementById('routeNavieo').classList.remove('selected');
+            document.getElementById(route === 'charisma' ? 'routeCharisma' : 'routeNavieo').classList.add('selected');
+            document.getElementById('startBtn').disabled = false;
         }
 
-        function askPassengers(etape, message) {
-            if (etape === 'retour') {
-                finishJourney();
+        function startRoute() {
+            if (!selectedRoute) return;
+            
+            document.getElementById('selectionScreen').style.display = 'none';
+            document.getElementById('driverInterface').style.display = 'block';
+            
+            const routeName = selectedRoute === 'charisma' ? '🚌 Bus Charisma' : '🚐 Navieo - La navette qui transporte la VIE';
+            const routeSub = selectedRoute === 'charisma' ? 'Trajet: Église → Brement → Noisy → Retour' : 'Trajet: Chelles → Église Charisma (17 arrêts)';
+            
+            document.getElementById('routeTitle').innerHTML = routeName;
+            document.getElementById('routeSubtitle').innerHTML = routeSub;
+            
+            createButtons();
+            
+            // Sauvegarder l'itinéraire choisi
+            database.ref('current-route').set({
+                route: selectedRoute,
+                startTime: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}),
+                active: true
+            });
+        }
+
+        function createButtons() {
+            const container = document.getElementById('buttonsGroup');
+            container.innerHTML = '';
+            
+            const stops = STOPS[selectedRoute];
+            stops.forEach((stop, index) => {
+                const btn = document.createElement('button');
+                btn.id = `btn_${stop.id}`;
+                btn.innerHTML = index === 0 ? `🚐 ${stop.message} (${stop.time})` : `📍 ${stop.message} (${stop.time})`;
+                btn.className = selectedRoute === 'charisma' ? 
+                    (index === 0 ? 'btn-depart' : index === 1 ? 'btn-brement' : index === 2 ? 'btn-noisy' : 'btn-retour') : 
+                    'btn-navieo';
+                btn.onclick = () => askPassengers(stop.id, stop.message, index);
+                btn.disabled = index !== 0;
+                container.appendChild(btn);
+            });
+        }
+
+        function askPassengers(stopId, message, index) {
+            const stops = STOPS[selectedRoute];
+            const isLastStop = index === stops.length - 1;
+            
+            if (isLastStop && selectedRoute === 'charisma') {
+                finishJourney(stopId, message);
                 return;
             }
             
-            pendingEtape = etape;
-            pendingMessage = message;
+            pendingStop = { id: stopId, message: message, index: index };
             currentPassengerCount = 0;
             document.getElementById('passengerCount').innerText = '0';
             document.getElementById('modalTitle').innerHTML = `🧑‍🤝‍🧑 ${message}<br><small>Combien de personnes montent ?</small>`;
             document.getElementById('passengerModal').style.display = 'flex';
         }
 
-        function finishJourney() {
+        function finishJourney(stopId, message) {
             const now = new Date();
-            const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            const time = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             
-            // Ne pas demander le nombre de passagers pour le retour
             const data = {
-                etape: 'retour',
-                message: 'Retour Église',
+                etape: stopId,
+                message: message,
+                time: time,
+                route: selectedRoute
+            };
+            
+            database.ref('bus-status').set(data);
+            updateButtonsStateAfterStop(stopId);
+            
+            document.getElementById('status').innerHTML = `✅ ${message}<br><small>${time}</small>`;
+            showFullReport();
+        }
+
+        function confirmPassengers() {
+            if (!pendingStop) return;
+            
+            const now = new Date();
+            const time = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            
+            passengersData[pendingStop.id] = currentPassengerCount;
+            database.ref('passengers').set(passengersData);
+            
+            history.unshift({
+                stop: pendingStop.message,
+                passengers: currentPassengerCount,
                 time: time
+            });
+            updateHistoryDisplay();
+            
+            const data = {
+                etape: pendingStop.id,
+                message: pendingStop.message,
+                time: time,
+                passengers: currentPassengerCount,
+                route: selectedRoute
             };
             
             database.ref('bus-status').set(data);
             
-            document.getElementById('status').innerHTML = `✅ Retour Église<br><small>${time}</small>`;
+            document.getElementById('status').innerHTML = `✅ ${pendingStop.message}<br><small>${time} - ${currentPassengerCount} passager(s) monté(s)</small>`;
             
-            // Afficher directement le compte rendu
-            setTimeout(() => {
+            updateButtonsStateAfterStop(pendingStop.id);
+            closeModal();
+            pendingStop = null;
+        }
+
+        function updateButtonsStateAfterStop(stopId) {
+            const stops = STOPS[selectedRoute];
+            const stopIndex = stops.findIndex(s => s.id === stopId);
+            
+            const buttons = document.querySelectorAll('#buttonsGroup button');
+            buttons.forEach((btn, idx) => {
+                if (idx <= stopIndex) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                } else if (idx === stopIndex + 1) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                } else {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                }
+            });
+            
+            if (stopIndex === stops.length - 1) {
                 showFullReport();
-            }, 500);
+            }
         }
 
         function sendTrafficAlert(title, message) {
             const now = new Date();
-            const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            const time = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             
-            const trafficData = {
+            database.ref('bus-status/trafficAlert').set({
                 title: title,
                 message: message,
                 time: time
-            };
+            });
             
-            // Envoyer l'alerte aux passagers
-            database.ref('bus-status/trafficAlert').set(trafficData);
-            
-            // Sauvegarder dans l'historique
             history.unshift({
                 stop: 'INFO TRAFIC',
                 passengers: message,
@@ -482,7 +602,6 @@
             });
             updateHistoryDisplay();
             
-            // Afficher confirmation
             const statusDiv = document.getElementById('status');
             const originalText = statusDiv.innerHTML;
             statusDiv.innerHTML = `⚠️ Message envoyé: ${message}<br><small>${time}</small>`;
@@ -490,7 +609,6 @@
                 statusDiv.innerHTML = originalText;
             }, 3000);
             
-            // Effacer l'alerte après 10 secondes
             setTimeout(() => {
                 database.ref('bus-status/trafficAlert').remove();
             }, 10000);
@@ -519,36 +637,6 @@
 
         function closeModal() {
             document.getElementById('passengerModal').style.display = 'none';
-            pendingEtape = null;
-            pendingMessage = null;
-        }
-
-        function confirmPassengers() {
-            const now = new Date();
-            const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-            
-            passengersData[pendingEtape] = currentPassengerCount;
-            database.ref('passengers').set(passengersData);
-            
-            history.unshift({
-                stop: pendingMessage,
-                passengers: currentPassengerCount,
-                time: time
-            });
-            updateHistoryDisplay();
-            
-            const data = {
-                etape: pendingEtape,
-                message: pendingMessage,
-                time: time,
-                passengers: currentPassengerCount
-            };
-            
-            database.ref('bus-status').set(data);
-            
-            document.getElementById('status').innerHTML = `✅ ${pendingMessage}<br><small>${time} - ${currentPassengerCount} passager(s) monté(s)</small>`;
-            
-            closeModal();
         }
 
         function updateHistoryDisplay() {
@@ -559,65 +647,53 @@
                 div.className = 'history-item';
                 if (item.isTraffic) {
                     div.style.background = 'rgba(245,158,11,0.3)';
-                    div.innerHTML = `
-                        <strong>⚠️ ${item.stop}</strong><br>
-                        📢 ${item.passengers}<br>
-                        ⏰ ${item.time}
-                    `;
+                    div.innerHTML = `⚠️ ${item.stop}<br>📢 ${item.passengers}<br>⏰ ${item.time}`;
                 } else {
-                    div.innerHTML = `
-                        <strong>${item.stop}</strong><br>
-                        👥 ${item.passengers} passager(s) • ⏰ ${item.time}
-                    `;
+                    div.innerHTML = `📍 ${item.stop}<br>👥 ${item.passengers} passager(s) • ⏰ ${item.time}`;
                 }
                 historyList.appendChild(div);
             });
-            
-            if (history.length === 0) {
-                historyList.innerHTML = '<div class="history-item" style="opacity:0.7;">Aucun arrêt enregistré</div>';
-            }
         }
 
         function showFullReport() {
-            const total = (passengersData.eglise || 0) + (passengersData.brement || 0) + 
-                         (passengersData.noisy || 0) + (passengersData.retour || 0);
-            
+            const total = Object.values(passengersData).reduce((a, b) => a + b, 0);
             const reportArea = document.getElementById('reportArea');
             reportArea.style.display = 'block';
             reportArea.innerHTML = `
                 <div class="report-card">
                     <h3>📊 COMPTE RENDU DU VOYAGE</h3>
                     <div class="report-stats">
-                        <p>⛪ Départ Église: <strong>${passengersData.eglise || 0}</strong> passagers</p>
-                        <p>🏠 Arrêt Brement: <strong>${passengersData.brement || 0}</strong> passagers</p>
-                        <p>🚉 Arrêt Noisy: <strong>${passengersData.noisy || 0}</strong> passagers</p>
-                        <p>⛪ Retour Église: <strong>${passengersData.retour || 0}</strong> passagers</p>
-                        <div class="total-passengers">
+                        ${Object.entries(passengersData).map(([stop, count]) => `<p>📍 ${stop}: <strong>${count}</strong> passagers</p>`).join('')}
+                        <div class="total-passengers" style="margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.3);">
                             🎯 TOTAL: ${total} PASSAGERS TRANSPORTÉS
                         </div>
                     </div>
-                    <button class="reset-btn" onclick="resetJourney()">🔄 Nouveau trajet</button>
                 </div>
             `;
         }
 
         function resetJourney() {
             if (confirm('Êtes-vous sûr de vouloir réinitialiser le trajet ? Toutes les données seront effacées.')) {
-                passengersData = { eglise: 0, brement: 0, noisy: 0, retour: 0 };
+                passengersData = {};
                 history = [];
-                currentStep = null;
+                currentStopIndex = -1;
                 
-                database.ref('bus-status').set(null);
-                database.ref('passengers').set(null);
+                database.ref('bus-status').remove();
+                database.ref('passengers').remove();
+                database.ref('current-route').remove();
                 
                 document.getElementById('reportArea').style.display = 'none';
                 updateHistoryDisplay();
-                updateButtonsState();
-                document.getElementById('status').innerHTML = '📍 Prêt à démarrer<br><small>Appuyez sur "DÉPART Église"</small>';
+                
+                document.getElementById('selectionScreen').style.display = 'block';
+                document.getElementById('driverInterface').style.display = 'none';
+                document.getElementById('routeCharisma').classList.remove('selected');
+                document.getElementById('routeNavieo').classList.remove('selected');
+                document.getElementById('startBtn').disabled = true;
+                selectedRoute = null;
             }
         }
 
-        updateButtonsState();
         updateHistoryDisplay();
     </script>
 </body>
