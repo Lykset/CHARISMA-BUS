@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Gestionnaire de flotte - Bus Charisma</title>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <!-- Chart.js pour les graphiques -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            color: #0f172a;
+            line-height: 1.5;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 24px 32px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        .stats-grid {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 16px 24px;
+            min-width: 150px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #94a3b8;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        /* Container principal */
+        .dashboard {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        /* Cartes bus */
+        .buses-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 900px) {
+            .buses-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .bus-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            transition: box-shadow 0.2s;
+        }
+
+        .bus-card:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        .bus-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .bus-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bus-badge {
+            width: 48px;
+            height: 48px;
+            border-radius: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .bus-badge.charisma {
+            background: #1e3c72;
+            color: white;
+        }
+
+        .bus-badge.navieo {
+            background: #1e6b5e;
+            color: white;
+        }
+
+        .bus-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .bus-status {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-inactive {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .status-en-route {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .bus-content {
+            padding: 20px 24px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .progress-section {
+            margin: 16px 0;
+        }
+
+        .progress-bar-container {
+            background: #e2e8f0;
+            border-radius: 100px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: #3b82f6;
+            height: 100%;
+            border-radius: 100px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar.navieo {
+            background: #1e6b5e;
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .stops-list {
+            margin-top: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .stop-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.875rem;
+        }
+
+        .stop-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 8px;
+            background: #cbd5e1;
+        }
+
+        .stop-dot.completed {
+            background: #10b981;
+        }
+
+        .stop-dot.active {
+            background: #f59e0b;
+            width: 10px;
+            height: 10px;
+            box-shadow: 0 0 0 2px #fef3c7;
+        }
+
+        .stop-name {
+            flex: 1;
+        }
+
+        .stop-passengers {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        /* Section rapports */
+        .reports-section {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            margin-top: 32px;
+            overflow: hidden;
+        }
+
+        .reports-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .reports-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .reports-header p {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            padding: 24px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 700px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .chart-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 16px;
+        }
+
+        canvas {
+            max-height: 250px;
+            width: 100%;
+        }
+
+        .summary-table {
+            padding: 24px;
+        }
+
+        .summary-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .summary-table th {
+            text-align: left;
+            padding: 12px 8px;
+            background: #f8fafc;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .summary-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.875rem;
+        }
+
+        .summary-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .total-row {
+            background: #f8fafc;
+            font-weight: 600;
+        }
+
+        .export-btn {
+            background: #0f172a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 16px;
+        }
+
+        .export-btn:hover {
+            background: #1e293b;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: #64748b;
+            font-size: 0.75rem;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 32px;
+        }
+
+        .refresh-indicator {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            text-align: right;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>Gestionnaire de flotte</h1>
+            <p>Supervision des navettes • Suivi en temps réel • Rapports de fréquentation</p>
+            <div class="stats-grid" id="globalStats">
+                <div class="stat-card">
+                    <div class="stat-label">Total passagers</div>
+                    <div class="stat-value" id="totalPassengers">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Trajets actifs</div>
+                    <div class="stat-value" id="activeTrips">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Arrêts desservis</div>
+                    <div class="stat-value" id="totalStops">21</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Dernière mise à jour</div>
+                    <div class="stat-value" id="lastUpdate" style="font-size: 0.9rem;">--:--</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <div class="buses-container" id="busesContainer">
+            <!-- Bus Charisma -->
+            <div class="bus-card" id="busCharisma">
+                <div class="bus-header">
+                    <div class="bus-title">
+                        <div class="bus-badge charisma">C</div>
+                        <div>
+                            <div class="bus-name">Bus Charisma</div>
+                            <div style="font-size: 0.75rem; color: #64748b;">Ligne express</div>
+                        </div>
+                    </div>
+                    <div class="bus-status" id="charismaStatus">Inactif</div>
+                </div>
+                <div class="bus-content">
+                    <div class="info-row">
+                        <span class="info-label">Position actuelle</span>
+                        <span class="info-value" id="charismaLocation">En attente</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Dernier arrêt</span>
+                        <span class="info-value" id="charismaLastStop">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Heure de départ</span>
+                        <span class="info-value" id="charismaStartTime">--</span>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="charismaProgress" style="width: 0%;"></div>
+                        </div>
+                        <div class="progress-text" id="charismaProgressText">0% du trajet</div>
+                    </div>
+                    <div class="stops-list" id="charismaStopsList"></div>
+                </div>
+            </div>
+
+            <!-- Bus Navieo -->
+            <div class="bus-card" id="busNavieo">
+                <div class="bus-header">
+                    <div class="bus-title">
+                        <div class="bus-badge navieo">N</div>
+                        <div>
+                            <div class="bus-name">Navieo</div>
+                            <div style="font-size: 0.75rem; color: #64748b;">Navette complète</div>
+                        </div>
+                    </div>
+                    <div class="bus-status" id="navieoStatus">Inactif</div>
+                </div>
+                <div class="bus-content">
+                    <div class="info-row">
+                        <span class="info-label">Position actuelle</span>
+                        <span class="info-value" id="navieoLocation">En attente</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Dernier arrêt</span>
+                        <span class="info-value" id="navieoLastStop">--</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Heure de départ</span>
+                        <span class="info-value" id="navieoStartTime">--</span>
+                    </div>
+                    <div class="progress-section">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar navieo" id="navieoProgress" style="width: 0%;"></div>
+                        </div>
+                        <div class="progress-text" id="navieoProgressText">0% du trajet</div>
+                    </div>
+                    <div class="stops-list" id="navieoStopsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section rapports -->
+        <div class="reports-section">
+            <div class="reports-header">
+                <h2>Rapports de fréquentation</h2>
+                <p>Analyse du nombre de passagers par arrêt et par ligne</p>
+            </div>
+            <div class="charts-container">
+                <div class="chart-card">
+                    <div class="chart-title">Répartition des passagers par ligne</div>
+                    <canvas id="passengersChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Évolution du trajet (cumul passagers)</div>
+                    <canvas id="evolutionChart"></canvas>
+                </div>
+            </div>
+            <div class="summary-table">
+                <table id="summaryTable">
+                    <thead>
+                        <tr>
+                            <th>Ligne</th>
+                            <th>Arrêt</th>
+                            <th>Passagers montés</th>
+                            <th>Heure d'arrivée</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryBody">
+                        <tr><td colspan="4" style="text-align: center;">Aucune donnée disponible</td></tr>
+                    </tbody>
+                </table>
+                <button class="export-btn" onclick="exportReport()">Exporter le rapport (CSV)</button>
+            </div>
+        </div>
+        <div class="refresh-indicator" id="refreshIndicator">Dernière synchronisation en temps réel</div>
+    </div>
+
+    <div class="footer">
+        Système de supervision des navettes • Données mises à jour en temps réel depuis Firebase
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC4sWMc3fNaMpZ9cD8ahQdMJn6BjRyJDzk",
+            authDomain: "charisma-bus.firebaseapp.com",
+            databaseURL: "https://charisma-bus-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "charisma-bus",
+            storageBucket: "charisma-bus.firebasestorage.app",
+            messagingSenderId: "630450080183",
+            appId: "1:630450080183:web:c204b463f63b12a8d30032"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Données
+        let busStatus = { charisma: null, navieo: null };
+        let passengersData = { charisma: {}, navieo: {} };
+        let currentRoute = null;
+        
+        // Définition des arrêts par ligne
+        const STOPS = {
+            charisma: [
+                { id: "depart", name: "Départ Église" },
+                { id: "brement", name: "Brement" },
+                { id: "noisy", name: "Noisy-le-Sec" },
+                { id: "retour", name: "Retour Église" }
+            ],
+            navieo: [
+                { id: "chelles", name: "Chelles ZAC de Tuilerie" },
+                { id: "mairie", name: "Mairie" },
+                { id: "gare", name: "Gare" },
+                { id: "neuilly", name: "Neuilly/Marne" },
+                { id: "lamare", name: "La Mare" },
+                { id: "gagnyarena", name: "Gagny Arena" },
+                { id: "jeanmoulin", name: "Jean Moulin" },
+                { id: "henribarbusse", name: "Henri Barbusse" },
+                { id: "garegagny", name: "Gare de Gagny" },
+                { id: "chateau", name: "Château de Villemomble" },
+                { id: "rosny", name: "Rosny Perrier Sud" },
+                { id: "van", name: "Van derheyden" },
+                { id: "ruffins", name: "Montreuil Ruffins" },
+                { id: "mairiemontreuil", name: "Montreuil Mairie" },
+                { id: "croixchavaux", name: "Montreuil Croix de Chavaux" },
+                { id: "gaulle", name: "Montreuil Général de Gaulle" },
+                { id: "eglise", name: "Église CHARISMA" }
+            ]
+        };
+
+        let charts = {};
+
+        function initCharts() {
+            const ctx1 = document.getElementById('passengersChart').getContext('2d');
+            const ctx2 = document.getElementById('evolutionChart').getContext('2d');
+            
+            charts.passengers = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Bus Charisma', 'Navieo'],
+                    datasets: [{
+                        label: 'Nombre de passagers',
+                        data: [0, 0],
+                        backgroundColor: ['#1e3c72', '#1e6b5e'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+            
+            charts.evolution = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Bus Charisma', data: [], borderColor: '#1e3c72', backgroundColor: 'transparent', tension: 0.3 },
+                        { label: 'Navieo', data: [], borderColor: '#1e6b5e', backgroundColor: 'transparent', tension: 0.3 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.raw} passagers` } }
+                    }
+                }
+            });
+        }
+
+        function getStopIndex(line, stopId) {
+            const stops = STOPS[line];
+            return stops.findIndex(s => s.id === stopId);
+        }
+
+        function calculateProgress(line, currentStopId) {
+            if (!currentStopId) return 0;
+            const stops = STOPS[line];
+            const index = getStopIndex(line, currentStopId);
+            if (index === -1) return 0;
+            return Math.round((index / (stops.length - 1)) * 100);
+        }
+
+        function renderStopsList(line, currentStopId, passengers) {
+            const stops = STOPS[line];
+            const container = document.getElementById(`${line}StopsList`);
+            if (!container) return;
+            
+            container.innerHTML = '';
+            stops.forEach(stop => {
+                const stopIndex = getStopIndex(line, stop.id);
+                const currentIndex = currentStopId ? getStopIndex(line, currentStopId) : -1;
+                let statusClass = '';
+                if (stopIndex < currentIndex) statusClass = 'completed';
+                if (stop.id === currentStopId) statusClass = 'active';
+                
+                const passengerCount = passengers[stop.id] || 0;
+                
+                const div = document.createElement('div');
+                div.className = 'stop-item';
+                div.innerHTML = `
+                    <div class="stop-dot ${statusClass}"></div>
+                    <span class="stop-name">${stop.name}</span>
+                    ${passengerCount > 0 ? `<span class="stop-passengers">+${passengerCount}</span>` : ''}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateBusDisplay(line, status, passengers, routeInfo) {
+            const isActive = status && status.etape;
+            const statusElement = document.getElementById(`${line}Status`);
+            const locationElement = document.getElementById(`${line}Location`);
+            const lastStopElement = document.getElementById(`${line}LastStop`);
+            const startTimeElement = document.getElementById(`${line}StartTime`);
+            const progressBar = document.getElementById(`${line}Progress`);
+            const progressText = document.getElementById(`${line}ProgressText`);
+            
+            if (isActive && status.route === line) {
+                statusElement.textContent = 'En service';
+                statusElement.className = 'bus-status status-active';
+                
+                const currentStop = STOPS[line].find(s => s.id === status.etape);
+                locationElement.textContent = currentStop ? currentStop.name : status.etape;
+                lastStopElement.textContent = status.message || '--';
+                startTimeElement.textContent = routeInfo && routeInfo.startTime ? routeInfo.startTime : '--';
+                
+                const progress = calculateProgress(line, status.etape);
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${progress}% du trajet effectué`;
+                
+                renderStopsList(line, status.etape, passengers);
+            } else {
+                statusElement.textContent = 'Inactif';
+                statusElement.className = 'bus-status status-inactive';
+                locationElement.textContent = 'Stationné';
+                lastStopElement.textContent = '--';
+                startTimeElement.textContent = '--';
+                progressBar.style.width = '0%';
+                progressText.textContent = '0% du trajet';
+                renderStopsList(line, null, passengers);
+            }
+        }
+
+        function updateGlobalStats() {
+            let total = 0;
+            let activeCount = 0;
+            
+            Object.keys(passengersData).forEach(line => {
+                const linePassengers = Object.values(passengersData[line] || {}).reduce((a, b) => a + b, 0);
+                total += linePassengers;
+                if (busStatus[line] && busStatus[line].etape && busStatus[line].route === line) {
+                    activeCount++;
+                }
+            });
+            
+            document.getElementById('totalPassengers').textContent = total;
+            document.getElementById('activeTrips').textContent = activeCount;
+            document.getElementById('totalStops').textContent = STOPS.charisma.length + STOPS.navieo.length;
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+            
+            if (charts.passengers) {
+                const charismaTotal = Object.values(passengersData.charisma || {}).reduce((a, b) => a + b, 0);
+                const navieoTotal = Object.values(passengersData.navieo || {}).reduce((a, b) => a + b, 0);
+                charts.passengers.data.datasets[0].data = [charismaTotal, navieoTotal];
+                charts.passengers.update();
+            }
+            
+            updateEvolutionChart();
+            updateSummaryTable();
+        }
+
+        function updateEvolutionChart() {
+            const charismaCumulative = [];
+            const navieoCumulative = [];
+            let charismaSum = 0;
+            let navieoSum = 0;
+            const maxStops = Math.max(STOPS.charisma.length, STOPS.navieo.length);
+            const labels = [];
+            
+            for (let i = 0; i < maxStops; i++) {
+                if (i < STOPS.charisma.length) {
+                    const stopId = STOPS.charisma[i].id;
+                    charismaSum += passengersData.charisma[stopId] || 0;
+                    charismaCumulative.push(charismaSum);
+                } else {
+                    charismaCumulative.push(charismaSum);
+                }
+                
+                if (i < STOPS.navieo.length) {
+                    const stopId = STOPS.navieo[i].id;
+                    navieoSum += passengersData.navieo[stopId] || 0;
+                    navieoCumulative.push(navieoSum);
+                } else {
+                    navieoCumulative.push(navieoSum);
+                }
+                
+                labels.push(`Arrêt ${i + 1}`);
+            }
+            
+            if (charts.evolution) {
+                charts.evolution.data.labels = labels;
+                charts.evolution.data.datasets[0].data = charismaCumulative;
+                charts.evolution.data.datasets[1].data = navieoCumulative;
+                charts.evolution.update();
+            }
+        }
+
+        function updateSummaryTable() {
+            const tbody = document.getElementById('summaryBody');
+            tbody.innerHTML = '';
+            
+            let allEntries = [];
+            
+            STOPS.charisma.forEach(stop => {
+                const count = passengersData.charisma[stop.id] || 0;
+                const status = busStatus.charisma;
+                const time = (status && status.etape === stop.id) ? status.time : '--';
+                if (count > 0 || status && status.etape === stop.id) {
+                    allEntries.push({ line: 'Bus Charisma', stop: stop.name, passengers: count, time: time });
+                }
+            });
+            
+            STOPS.navieo.forEach(stop => {
+                const count = passengersData.navieo[stop.id] || 0;
+                const status = busStatus.navieo;
+                const time = (status && status.etape === stop.id) ? status.time : '--';
+                if (count > 0 || status && status.etape === stop.id) {
+                    allEntries.push({ line: 'Navieo', stop: stop.name, passengers: count, time: time });
+                }
+            });
+            
+            if (allEntries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Aucune donnée disponible</td></tr>';
+                return;
+            }
+            
+            allEntries.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight: 500;">${entry.line}</td>
+                    <td>${entry.stop}</td>
+                    <td style="font-weight: 600;">${entry.passengers}</td>
+                    <td style="color: #64748b;">${entry.time}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            const totalCharisma = Object.values(passengersData.charisma || {}).reduce((a, b) => a + b, 0);
+            const totalNavieo = Object.values(passengersData.navieo || {}).reduce((a, b) => a + b, 0);
+            
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row';
+            totalRow.innerHTML = `
+                <td colspan="2" style="font-weight: 700;">TOTAL GÉNÉRAL</td>
+                <td style="font-weight: 700;">${totalCharisma + totalNavieo}</td>
+                <td></td>
+            `;
+            tbody.appendChild(totalRow);
+        }
+
+        function exportReport() {
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0,19).replace(/:/g, '-');
+            let csvContent = "Ligne,Arrêt,Passagers montés,Heure d'arrivée\n";
+            
+            STOPS.charisma.forEach(stop => {
+                const count = passengersData.charisma[stop.id] || 0;
+                const status = busStatus.charisma;
+                const time = (status && status.etape === stop.id) ? status.time : '--';
+                csvContent += `Bus Charisma,"${stop.name}",${count},"${time}"\n`;
+            });
+            
+            STOPS.navieo.forEach(stop => {
+                const count = passengersData.navieo[stop.id] || 0;
+                const status = busStatus.navieo;
+                const time = (status && status.etape === stop.id) ? status.time : '--';
+                csvContent += `Navieo,"${stop.name}",${count},"${time}"\n`;
+            });
+            
+            const totalCharisma = Object.values(passengersData.charisma || {}).reduce((a, b) => a + b, 0);
+            const totalNavieo = Object.values(passengersData.navieo || {}).reduce((a, b) => a + b, 0);
+            csvContent += `\nTOTAL,Bus Charisma,${totalCharisma},\n`;
+            csvContent += `TOTAL,Navieo,${totalNavieo},\n`;
+            csvContent += `TOTAL GÉNÉRAL,,${totalCharisma + totalNavieo},\n`;
+            
+            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `rapport_flotte_${dateStr}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Écouteurs Firebase
+        database.ref('bus-status').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                if (data.route === 'charisma') busStatus.charisma = data;
+                else if (data.route === 'navieo') busStatus.navieo = data;
+                else if (!data.route) busStatus.charisma = data;
+            }
+            updateBusDisplay('charisma', busStatus.charisma, passengersData.charisma, null);
+            updateBusDisplay('navieo', busStatus.navieo, passengersData.navieo, null);
+            updateGlobalStats();
+        });
+        
+        database.ref('passengers').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                passengersData.charisma = { ...passengersData.charisma, ...data };
+                passengersData.navieo = { ...passengersData.navieo, ...data };
+            }
+            updateBusDisplay('charisma', busStatus.charisma, passengersData.charisma, null);
+            updateBusDisplay('navieo', busStatus.navieo, passengersData.navieo, null);
+            updateGlobalStats();
+        });
+        
+        database.ref('current-route').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.route === 'charisma') {
+                updateBusDisplay('charisma', busStatus.charisma, passengersData.charisma, data);
+            } else if (data && data.route === 'navieo') {
+                updateBusDisplay('navieo', busStatus.navieo, passengersData.navieo, data);
+            }
+        });
+        
+        initCharts();
+        
+        setInterval(() => {
+            updateGlobalStats();
+        }, 2000);
+    </script>
+</body>
+</html>
