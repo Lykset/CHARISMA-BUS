@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Conducteur · Service Navettes</title>
+    <title>Conducteur · Service Navettes Charisma</title>
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -16,15 +16,15 @@
         }
 
         body {
-            background: #f0f4f8;
+            background: #f5f7fb;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             color: #1a2c3e;
             line-height: 1.5;
         }
 
-        /* Bandeau d'accueil chaleureux */
+        /* Bandeau d'accueil chaleureux - Dégradé vibrant */
         .hero-band {
-            background: linear-gradient(135deg, #1e4b6e 0%, #2c5f8a 100%);
+            background: linear-gradient(135deg, #0b2b44 0%, #1c5d7a 50%, #2c8c6e 100%);
             padding: 32px 24px 48px;
             margin-bottom: -24px;
             position: relative;
@@ -34,11 +34,24 @@
         .hero-band::before {
             content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path fill="white" d="M20,50 L30,40 L40,50 L50,30 L60,50 L70,40 L80,50 L90,30 L85,70 L15,70 L10,30 L20,50Z"/></svg>') repeat;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,215,120,0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-band::after {
+            content: "";
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(255,180,60,0.15) 0%, transparent 70%);
+            border-radius: 50%;
             pointer-events: none;
         }
 
@@ -59,7 +72,7 @@
 
         .hero-subtitle {
             font-size: 1rem;
-            color: rgba(255,255,255,0.85);
+            color: rgba(255,255,255,0.9);
             font-weight: 400;
         }
 
@@ -67,12 +80,12 @@
             margin-top: 20px;
             font-style: italic;
             font-size: 0.9rem;
-            color: rgba(255,255,255,0.9);
-            border-left: 3px solid #f9b43a;
+            color: rgba(255,255,255,0.95);
+            border-left: 3px solid #ffb347;
             padding-left: 16px;
-            background: rgba(0,0,0,0.1);
+            background: rgba(0,0,0,0.15);
             display: inline-block;
-            border-radius: 0 12px 12px 0;
+            border-radius: 0 16px 16px 0;
             padding: 10px 20px;
         }
 
@@ -86,20 +99,16 @@
         /* Cartes */
         .card {
             background: white;
-            border-radius: 24px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            border-radius: 28px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
             overflow: hidden;
             margin-bottom: 28px;
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .card:hover {
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-        }
-
         .card-header {
             padding: 20px 28px;
-            border-bottom: 1px solid #ecf3f9;
+            border-bottom: 1px solid #eef2f8;
             background: white;
             display: flex;
             justify-content: space-between;
@@ -111,19 +120,22 @@
         .card-header h2 {
             font-size: 1.25rem;
             font-weight: 600;
-            color: #1a4c6e;
+            background: linear-gradient(135deg, #1c5d7a 0%, #2c8c6e 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
         .badge {
-            background: #eef3fc;
-            color: #2c5f8a;
-            padding: 4px 12px;
+            background: linear-gradient(135deg, #fff5e6 0%, #ffe8d4 100%);
+            color: #e67e22;
+            padding: 4px 14px;
             border-radius: 30px;
             font-size: 0.7rem;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .card-content {
@@ -146,8 +158,8 @@
 
         .route-card {
             background: #ffffff;
-            border: 1px solid #e4edf5;
-            border-radius: 20px;
+            border: 2px solid #eef2f8;
+            border-radius: 24px;
             padding: 24px;
             cursor: pointer;
             transition: all 0.25s ease;
@@ -155,32 +167,35 @@
         }
 
         .route-card:hover {
-            border-color: #cbdde9;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border-color: #ffb347;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
         }
 
         .route-card.selected {
-            border-color: #f9b43a;
-            background: linear-gradient(135deg, #fffaf2 0%, #fff7ed 100%);
-            box-shadow: 0 8px 25px rgba(249, 180, 58, 0.15);
+            border-color: #ffb347;
+            background: linear-gradient(135deg, #fffaf5 0%, #fff5e8 100%);
+            box-shadow: 0 8px 25px rgba(255, 180, 71, 0.2);
         }
 
         .route-icon {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             margin-bottom: 16px;
         }
 
         .route-name {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #1e4b6e;
+            background: linear-gradient(135deg, #1c5d7a 0%, #2c8c6e 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
         }
 
         .route-desc {
             font-size: 0.85rem;
-            color: #5f7d9c;
+            color: #6b8cae;
             margin-bottom: 16px;
             line-height: 1.4;
         }
@@ -188,30 +203,30 @@
         .route-stats {
             display: flex;
             gap: 16px;
-            font-size: 0.75rem;
-            color: #6f8fae;
-            border-top: 1px solid #ecf3f9;
+            font-size: 0.7rem;
+            color: #8aa9c4;
+            border-top: 1px solid #eef2f8;
             padding-top: 16px;
             margin-top: 8px;
         }
 
         .btn-start {
             width: 100%;
-            background: linear-gradient(135deg, #f9b43a 0%, #e69f2c 100%);
+            background: linear-gradient(135deg, #ffb347 0%, #ff8c33 100%);
             border: none;
             padding: 14px 24px;
-            border-radius: 40px;
-            font-weight: 600;
+            border-radius: 50px;
+            font-weight: 700;
             font-size: 0.95rem;
-            color: #1e3a4d;
+            color: white;
             cursor: pointer;
             transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(249, 180, 58, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 140, 51, 0.3);
         }
 
         .btn-start:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(249, 180, 58, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 140, 51, 0.4);
         }
 
         .btn-start:disabled {
@@ -222,11 +237,11 @@
 
         /* Infos trajet */
         .journey-panel {
-            background: linear-gradient(135deg, #f8fafd 0%, #ffffff 100%);
-            border-radius: 20px;
+            background: linear-gradient(135deg, #fefcf8 0%, #ffffff 100%);
+            border-radius: 24px;
             padding: 20px;
             margin-bottom: 24px;
-            border: 1px solid #ecf3f9;
+            border: 1px solid #f0e6d8;
         }
 
         .stats-row {
@@ -238,33 +253,37 @@
 
         .stat-block {
             flex: 1;
-            min-width: 120px;
+            min-width: 100px;
             text-align: center;
-            padding: 12px;
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            padding: 16px 12px;
+            background: linear-gradient(135deg, #fefaf5 0%, #fff7ef 100%);
+            border-radius: 20px;
+            border: 1px solid #ffe6cc;
         }
 
         .stat-label {
             font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #8aa4c0;
-            font-weight: 500;
+            letter-spacing: 1px;
+            color: #e67e22;
+            font-weight: 600;
         }
 
         .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e4b6e;
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1c5d7a 0%, #2c8c6e 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-top: 6px;
         }
 
         .stat-sub {
             font-size: 0.7rem;
-            color: #f9b43a;
+            color: #ffb347;
             font-weight: 500;
+            margin-top: 4px;
         }
 
         /* Progression */
@@ -273,14 +292,14 @@
         }
 
         .progress-bar-bg {
-            background: #e4edf5;
+            background: #eef2f8;
             border-radius: 40px;
             height: 12px;
             overflow: hidden;
         }
 
         .progress-fill {
-            background: linear-gradient(90deg, #f9b43a, #e69f2c);
+            background: linear-gradient(90deg, #ffb347, #ff8c33);
             height: 100%;
             width: 0%;
             border-radius: 40px;
@@ -292,21 +311,21 @@
             justify-content: space-between;
             margin-top: 10px;
             font-size: 0.7rem;
-            color: #7c9abc;
+            color: #8aa9c4;
         }
 
         /* Liste des arrêts */
         .stops-container {
-            max-height: 360px;
+            max-height: 380px;
             overflow-y: auto;
             margin: 20px 0;
-            border-radius: 16px;
+            border-radius: 20px;
         }
 
         .stop-card-item {
             background: #ffffff;
-            border: 1px solid #ecf3f9;
-            border-radius: 14px;
+            border: 1px solid #eef2f8;
+            border-radius: 16px;
             padding: 14px 18px;
             margin-bottom: 10px;
             display: flex;
@@ -316,32 +335,32 @@
         }
 
         .stop-card-item.completed {
-            background: #f8fafc;
-            border-color: #e0eaf2;
+            background: #f9fafc;
+            border-color: #e2e8f0;
             opacity: 0.7;
         }
 
         .stop-card-item.active {
-            background: linear-gradient(135deg, #fff9ef 0%, #fff5e8 100%);
-            border-color: #f9b43a;
-            box-shadow: 0 4px 12px rgba(249, 180, 58, 0.15);
+            background: linear-gradient(135deg, #fff8f0 0%, #fff3e6 100%);
+            border-color: #ffb347;
+            box-shadow: 0 4px 12px rgba(255, 180, 71, 0.2);
         }
 
         .stop-number {
-            width: 36px;
-            height: 36px;
-            background: #ecf3f9;
-            border-radius: 36px;
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #eef2f8 0%, #e6ecf3 100%);
+            border-radius: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: #2c5f8a;
         }
 
         .stop-card-item.active .stop-number {
-            background: #f9b43a;
+            background: linear-gradient(135deg, #ffb347, #ff8c33);
             color: white;
         }
 
@@ -350,23 +369,23 @@
         }
 
         .stop-name {
-            font-weight: 600;
+            font-weight: 700;
             color: #1e4b6e;
         }
 
         .stop-time {
             font-size: 0.7rem;
-            color: #8aa4c0;
+            color: #8aa9c4;
             margin-top: 2px;
         }
 
         .stop-count {
-            background: #eef3fc;
+            background: linear-gradient(135deg, #fff5e6 0%, #ffefdf 100%);
             padding: 6px 14px;
             border-radius: 30px;
             font-size: 0.8rem;
-            font-weight: 600;
-            color: #2c5f8a;
+            font-weight: 700;
+            color: #e67e22;
         }
 
         /* Actions */
@@ -378,26 +397,26 @@
         }
 
         .btn-action {
-            background: #f8fafd;
-            border: 1px solid #e0eaf2;
-            padding: 10px 18px;
-            border-radius: 40px;
+            background: #fefaf5;
+            border: 1px solid #ffe6cc;
+            padding: 10px 20px;
+            border-radius: 50px;
             font-size: 0.8rem;
             font-weight: 500;
-            color: #2c5f8a;
+            color: #e67e22;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .btn-action:hover {
-            background: #f0f5fa;
-            border-color: #cbdde9;
+            background: #fff0e0;
+            border-color: #ffb347;
         }
 
         .btn-warning {
-            background: #fff7ed;
-            border-color: #f9e0b0;
-            color: #b87c2e;
+            background: #fff5e6;
+            border-color: #ffd9b0;
+            color: #e67e22;
         }
 
         .input-custom {
@@ -408,82 +427,89 @@
 
         .input-custom input {
             flex: 1;
-            padding: 10px 16px;
-            border: 1px solid #e0eaf2;
-            border-radius: 40px;
+            padding: 12px 18px;
+            border: 1px solid #ffe6cc;
+            border-radius: 50px;
             font-family: inherit;
             font-size: 0.85rem;
+            background: #fefaf5;
         }
 
         .input-custom input:focus {
             outline: none;
-            border-color: #f9b43a;
+            border-color: #ffb347;
         }
 
         /* Rapport */
         .report-box {
-            background: linear-gradient(135deg, #f0f6fc 0%, #eaf1f8 100%);
-            border-radius: 20px;
-            padding: 20px;
+            background: linear-gradient(135deg, #fff8f0 0%, #fff3e6 100%);
+            border-radius: 24px;
+            padding: 24px;
             margin-top: 24px;
+            border: 1px solid #ffe6cc;
         }
 
         .report-title {
-            font-weight: 700;
+            font-weight: 800;
             font-size: 0.9rem;
-            color: #1e4b6e;
-            margin-bottom: 16px;
+            color: #e67e22;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
         .report-numbers {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 16px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .report-number-card {
             background: white;
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 16px;
             text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         }
 
         .report-big-number {
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 800;
-            color: #f9b43a;
+            background: linear-gradient(135deg, #ffb347, #ff8c33);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .report-label {
             font-size: 0.7rem;
-            color: #7c9abc;
+            color: #8aa9c4;
             margin-top: 6px;
         }
 
         /* Historique */
         .history-area {
             margin-top: 24px;
-            border-top: 1px solid #ecf3f9;
+            border-top: 1px solid #f0e6d8;
             padding-top: 20px;
         }
 
         .history-title {
             font-weight: 600;
             font-size: 0.8rem;
-            color: #7c9abc;
+            color: #e67e22;
             letter-spacing: 0.5px;
             margin-bottom: 12px;
         }
 
         .history-list {
-            max-height: 180px;
+            max-height: 200px;
             overflow-y: auto;
         }
 
         .history-entry {
             padding: 10px 0;
-            border-bottom: 1px solid #ecf3f9;
+            border-bottom: 1px solid #f0e6d8;
             font-size: 0.8rem;
             display: flex;
             justify-content: space-between;
@@ -491,37 +517,45 @@
         }
 
         .history-stop {
-            font-weight: 500;
+            font-weight: 600;
             color: #1e4b6e;
         }
 
         .history-time {
-            color: #8aa4c0;
+            color: #8aa9c4;
             font-size: 0.7rem;
         }
 
         .history-pass {
-            color: #f9b43a;
-            font-weight: 600;
+            background: linear-gradient(135deg, #ffb347, #ff8c33);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
         }
 
         .btn-reset {
             width: 100%;
-            background: white;
-            border: 1px solid #e0eaf2;
+            background: #fefaf5;
+            border: 1px solid #ffe6cc;
             padding: 12px;
-            border-radius: 40px;
+            border-radius: 50px;
             font-size: 0.8rem;
             font-weight: 500;
-            color: #7c9abc;
+            color: #e67e22;
             cursor: pointer;
             margin-top: 20px;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: #fff0e0;
         }
 
         .footer-note {
             text-align: center;
             font-size: 0.7rem;
-            color: #8aa4c0;
+            color: #8aa9c4;
             padding: 24px 0 16px;
         }
 
@@ -553,12 +587,15 @@
         .modal h3 {
             font-size: 1.4rem;
             font-weight: 700;
-            color: #1e4b6e;
+            background: linear-gradient(135deg, #1c5d7a 0%, #2c8c6e 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
         }
 
         .modal p {
-            color: #7c9abc;
+            color: #8aa9c4;
             font-size: 0.85rem;
         }
 
@@ -574,25 +611,29 @@
             width: 52px;
             height: 52px;
             border-radius: 52px;
-            background: #f0f5fa;
-            border: none;
+            background: #fefaf5;
+            border: 1px solid #ffe6cc;
             font-size: 1.8rem;
             font-weight: 600;
-            color: #2c5f8a;
+            color: #e67e22;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .counter-btn:hover {
-            background: #f9b43a;
+            background: linear-gradient(135deg, #ffb347, #ff8c33);
             color: white;
+            border-color: transparent;
         }
 
         .counter-value {
             font-size: 2.2rem;
             font-weight: 800;
             min-width: 70px;
-            color: #1e4b6e;
+            background: linear-gradient(135deg, #1c5d7a 0%, #2c8c6e 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .modal-actions {
@@ -604,7 +645,7 @@
         .modal-actions button {
             flex: 1;
             padding: 12px;
-            border-radius: 40px;
+            border-radius: 50px;
             font-weight: 600;
             cursor: pointer;
         }
@@ -613,7 +654,7 @@
 <body>
     <div class="hero-band">
         <div class="hero-content">
-            <div class="hero-title">Service Navettes</div>
+            <div class="hero-title">Service Navettes Charisma</div>
             <div class="hero-subtitle">Conducteur · Au service de la communauté</div>
             <div class="hero-quote">"Chaque trajet est une rencontre, chaque passager compte."</div>
         </div>
@@ -631,7 +672,7 @@
                     <div class="route-selector">
                         <div id="routeCharisma" class="route-card" onclick="selectRoute('charisma')">
                             <div class="route-icon">🚌</div>
-                            <div class="route-name">Ligne Express</div>
+                            <div class="route-name">Ligne Express Charisma</div>
                             <div class="route-desc">Trajet rapide · 4 arrêts · 45 minutes</div>
                             <div class="route-stats">
                                 <span>Église → Brement → Noisy → Retour</span>
@@ -656,7 +697,7 @@
         <div id="driverInterface" style="display: none;">
             <div class="card">
                 <div class="card-header">
-                    <h2 id="routeTitle">Ligne Express</h2>
+                    <h2 id="routeTitle">Ligne Express Charisma</h2>
                     <span class="badge" id="statusBadge">En attente</span>
                 </div>
                 <div class="card-content">
@@ -675,7 +716,7 @@
                             <div class="stat-block">
                                 <div class="stat-label">PASSAGERS</div>
                                 <div class="stat-value" id="totalPassengersDisplay">0</div>
-                                <div class="stat-sub">à bord</div>
+                                <div class="stat-sub">à bord cumulé</div>
                             </div>
                         </div>
 
@@ -692,14 +733,14 @@
                     </div>
 
                     <!-- Liste des arrêts -->
-                    <div style="margin-bottom: 8px;">
-                        <span style="font-weight: 600; font-size: 0.8rem; color: #1e4b6e;">ARRÊTS DU PARCOURS</span>
+                    <div style="margin-bottom: 12px;">
+                        <span style="font-weight: 700; font-size: 0.8rem; color: #e67e22;">ARRÊTS DU PARCOURS</span>
                     </div>
                     <div class="stops-container" id="stopsList"></div>
 
                     <!-- Actions rapides -->
                     <div class="actions-bar">
-                        <button class="btn-action" onclick="sendTrafficAlert('retard_5', 'Retard de 5 minutes')">⏱ +5 min</button>
+                        <button class="btn-action" onclick="sendTrafficAlert('retard_5', 'Retard de 5 minutes sur le trajet')">⏱ +5 min</button>
                         <button class="btn-action" onclick="sendTrafficAlert('retard_10', 'Retard de 10 minutes')">⏱ +10 min</button>
                         <button class="btn-action" onclick="sendTrafficAlert('retard_15', 'Retard de 15 minutes')">⏱ +15 min</button>
                         <button class="btn-action btn-warning" onclick="sendTrafficAlert('approche', 'La navette approche de votre arrêt')">📍 À proximité</button>
@@ -733,7 +774,7 @@
     <!-- Modal comptage -->
     <div id="passengerModal" class="modal-overlay">
         <div class="modal">
-            <h3 id="modalTitle">Arrivée</h3>
+            <h3 id="modalTitle">Arrivée à l'arrêt</h3>
             <p id="modalSubtitle">Combien de personnes montent à bord ?</p>
             <div class="counter">
                 <button class="counter-btn" onclick="decrementCount()">−</button>
@@ -741,8 +782,8 @@
                 <button class="counter-btn" onclick="incrementCount()">+</button>
             </div>
             <div class="modal-actions">
-                <button class="btn-action" onclick="closeModal()" style="background:#f0f5fa;">Annuler</button>
-                <button class="btn-start" onclick="confirmPassengers()" style="background:#f9b43a; color:#1e3a4d;">Valider</button>
+                <button class="btn-action" onclick="closeModal()" style="background:#fefaf5;">Annuler</button>
+                <button class="btn-start" onclick="confirmPassengers()" style="background:linear-gradient(135deg,#ffb347,#ff8c33); color:white;">Valider</button>
             </div>
         </div>
     </div>
@@ -771,7 +812,7 @@
 
         const ROUTES = {
             charisma: {
-                name: "Ligne Express",
+                name: "Ligne Express Charisma",
                 stops: [
                     { id: "depart", name: "Église Charisma", time: "Départ" },
                     { id: "brement", name: "Brement", time: "Arrêt 1" },
@@ -844,6 +885,7 @@
                 if (idx === currentStopIndex) div.classList.add('active');
                 
                 const count = passengersData[stop.id] || 0;
+                
                 div.innerHTML = `
                     <div class="stop-number">${idx + 1}</div>
                     <div class="stop-details">
@@ -852,48 +894,27 @@
                     </div>
                     ${count > 0 ? `<div class="stop-count">+${count}</div>` : ''}
                 `;
+                
+                // Ajouter un événement click pour déclencher l'arrêt
+                if (idx === currentStopIndex + 1 || (currentStopIndex === -1 && idx === 0)) {
+                    div.style.cursor = 'pointer';
+                    div.onclick = () => triggerStop(idx);
+                }
+                
                 container.appendChild(div);
             });
         }
 
-        function updateUI() {
-            const progress = currentStopIndex >= 0 ? Math.round((currentStopIndex / (stopsList.length - 1)) * 100) : 0;
-            document.getElementById('progressFill').style.width = `${progress}%`;
-            document.getElementById('progressPercent').innerHTML = `${progress}%`;
-            
-            const currentStop = currentStopIndex >= 0 ? stopsList[currentStopIndex] : null;
-            document.getElementById('currentLocation').innerHTML = currentStop ? currentStop.name : stopsList[0].name;
-            
-            const nextStop = currentStopIndex + 1 < stopsList.length ? stopsList[currentStopIndex + 1] : null;
-            document.getElementById('nextHint').innerHTML = nextStop ? `Prochain: ${nextStop.name}` : 'Arrivée';
-            
-            const total = Object.values(passengersData).reduce((a,b) => a+b, 0);
-            document.getElementById('totalPassengersDisplay').innerHTML = total;
-            
-            if (currentStopIndex === stopsList.length - 1) {
-                document.getElementById('statusBadge').innerHTML = 'Trajet terminé';
-                showReport();
-            } else if (currentStopIndex >= 0) {
-                document.getElementById('statusBadge').innerHTML = 'En service';
-            }
-        }
-
-        function nextStopTrigger() {
-            if (currentStopIndex === -1) {
-                currentStopIndex = 0;
-                askPassengers(stopsList[0].id, stopsList[0].name, 0);
-            } else if (currentStopIndex < stopsList.length - 1) {
-                currentStopIndex++;
-                askPassengers(stopsList[currentStopIndex].id, stopsList[currentStopIndex].name, currentStopIndex);
+        function triggerStop(index) {
+            if (index === currentStopIndex + 1 || (currentStopIndex === -1 && index === 0)) {
+                currentStopIndex = index;
+                const stop = stopsList[currentStopIndex];
+                askPassengers(stop.id, stop.name, currentStopIndex);
             }
         }
 
         function askPassengers(stopId, stopName, index) {
             const isLast = index === stopsList.length - 1;
-            if (isLast && selectedRoute === 'charisma') {
-                finishStop(stopId, stopName);
-                return;
-            }
             
             pendingStop = { id: stopId, name: stopName, index: index };
             currentPassengerCount = 0;
@@ -901,22 +922,6 @@
             document.getElementById('modalTitle').innerHTML = stopName;
             document.getElementById('modalSubtitle').innerHTML = 'Combien de personnes montent ?';
             document.getElementById('passengerModal').style.display = 'flex';
-        }
-
-        function finishStop(stopId, stopName) {
-            const now = new Date();
-            const time = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            
-            database.ref('bus-status').set({
-                etape: stopId,
-                message: `Arrivée - ${stopName}`,
-                time: time,
-                route: selectedRoute
-            });
-            
-            renderStops();
-            updateUI();
-            showReport();
         }
 
         function confirmPassengers() {
@@ -945,9 +950,37 @@
             renderStops();
             updateUI();
             closeModal();
-            pendingStop = null;
             
-            if (pendingStop && pendingStop.index === stopsList.length - 1) showReport();
+            // Si ce n'est pas le dernier arrêt, passer automatiquement au suivant
+            if (pendingStop.index < stopsList.length - 1) {
+                // Ne pas avancer automatiquement, le conducteur clique sur le prochain arrêt
+            } else {
+                showReport();
+            }
+            
+            pendingStop = null;
+        }
+
+        function updateUI() {
+            const progress = currentStopIndex >= 0 ? Math.round((currentStopIndex / (stopsList.length - 1)) * 100) : 0;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            document.getElementById('progressPercent').innerHTML = `${progress}%`;
+            
+            const currentStop = currentStopIndex >= 0 ? stopsList[currentStopIndex] : null;
+            document.getElementById('currentLocation').innerHTML = currentStop ? currentStop.name : stopsList[0].name;
+            
+            const nextStop = currentStopIndex + 1 < stopsList.length ? stopsList[currentStopIndex + 1] : null;
+            document.getElementById('nextHint').innerHTML = nextStop ? `Prochain: ${nextStop.name}` : 'Arrivée';
+            
+            const total = Object.values(passengersData).reduce((a,b) => a+b, 0);
+            document.getElementById('totalPassengersDisplay').innerHTML = total;
+            
+            if (currentStopIndex === stopsList.length - 1) {
+                document.getElementById('statusBadge').innerHTML = 'Trajet terminé';
+                showReport();
+            } else if (currentStopIndex >= 0) {
+                document.getElementById('statusBadge').innerHTML = 'En service';
+            }
         }
 
         function sendTrafficAlert(title, message) {
@@ -996,7 +1029,7 @@
                         <div class="report-number-card"><div class="report-big-number">${stopsList.length}</div><div class="report-label">Arrêts desservis</div></div>
                         <div class="report-number-card"><div class="report-big-number">${Object.keys(passengersData).filter(k => passengersData[k] > 0).length}</div><div class="report-label">Arrêts avec montées</div></div>
                     </div>
-                    <div style="font-size:0.7rem; text-align:center; color:#8aa4c0;">Merci pour votre service 🙌</div>
+                    <div style="font-size:0.7rem; text-align:center; color:#e67e22;">🙌 Merci pour votre service ! 🙌</div>
                 </div>
             `;
         }
@@ -1028,13 +1061,14 @@
             const data = snap.val();
             if (data && data.route === selectedRoute && data.etape) {
                 const idx = stopsList.findIndex(s => s.id === data.etape);
-                if (idx !== -1 && idx !== currentStopIndex) {
+                if (idx !== -1 && idx > currentStopIndex) {
                     currentStopIndex = idx;
                     renderStops();
                     updateUI();
                     if (data.passengers) {
                         passengersData[data.etape] = data.passengers;
                         renderStops();
+                        updateUI();
                     }
                 }
             }
@@ -1042,7 +1076,12 @@
         
         database.ref('passengers').on('value', (snap) => {
             const data = snap.val();
-            if (data) { passengersData = { ...passengersData, ...data }; renderStops(); updateUI(); showReport(); }
+            if (data && selectedRoute) {
+                passengersData = { ...passengersData, ...data };
+                renderStops(); 
+                updateUI(); 
+                if (currentStopIndex === stopsList.length - 1) showReport();
+            }
         });
     </script>
 </body>
