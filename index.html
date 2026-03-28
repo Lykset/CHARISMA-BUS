@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>🚌 Bus CHARISMA • Passager</title>
+    <title>Navieo • Suivi en temps réel</title>
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,10 +16,10 @@
         }
 
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f0f4f9 0%, #e6ecf3 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             min-height: 100vh;
-            color: #f8fafc;
+            color: #1e293b;
             padding: 20px;
         }
 
@@ -27,290 +28,254 @@
             margin: 0 auto;
         }
 
+        /* Logo Navieo */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            font-family: 'Inter', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span:first-child {
+            color: #1e3c72;
+        }
+
+        .logo span:last-child {
+            color: #f97316;
+        }
+
+        .logo-sub {
+            font-size: 0.7rem;
+            color: #64748b;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
         /* En-tête */
         .header {
+            background: linear-gradient(135deg, #1e6b5e 0%, #2c8c6e 100%);
+            border-radius: 32px;
+            padding: 28px 24px;
+            margin-bottom: 24px;
+            color: white;
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #1e2b3c 0%, #0f1a24 100%);
-            border-radius: 40px;
-            border: 1px solid rgba(251,191,36,0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
         .church-name {
-            font-size: 1.8em;
-            font-weight: 800;
-            margin-bottom: 10px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
 
-        .bus-title {
-            color: #fbbf24;
-            font-size: 1.1em;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(0,0,0,0.3);
-            padding: 8px 20px;
-            border-radius: 50px;
+        .bus-name {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 8px 0;
+        }
+
+        .reservation {
+            background: #f97316;
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 12px;
         }
 
         /* État d'attente */
         .waiting-state {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-radius: 40px;
-            padding: 50px 30px;
+            background: white;
+            border-radius: 32px;
+            padding: 48px 28px;
             text-align: center;
             margin: 20px 0;
-            border: 2px dashed #fbbf24;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; border-color: #fbbf24; }
-            50% { opacity: 0.7; border-color: #f59e0b; }
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
 
         .waiting-icon {
-            font-size: 4em;
+            font-size: 3.5rem;
             margin-bottom: 20px;
         }
 
         .waiting-title {
-            font-size: 1.5em;
+            font-size: 1.3rem;
             font-weight: 700;
-            margin-bottom: 15px;
-            color: #fbbf24;
+            margin-bottom: 12px;
+            color: #1e6b5e;
         }
 
         .waiting-text {
-            color: #94a3b8;
-            line-height: 1.6;
+            color: #64748b;
+            line-height: 1.5;
         }
 
         /* Message inspirant */
-        .message-feature {
-            background: linear-gradient(135deg, #1e2b3c 0%, #162433 100%);
-            padding: 25px;
-            border-radius: 35px;
-            border: 1px solid rgba(251,191,36,0.3);
-            text-align: center;
+        .message-card {
+            background: linear-gradient(135deg, #fff9f0 0%, #fff5e8 100%);
+            border-radius: 28px;
+            padding: 20px;
             margin: 20px 0;
-        }
-
-        .featured-message {
-            font-size: 1.3em;
-            font-weight: 600;
-            color: #fbbf24;
-            line-height: 1.4;
-            margin-bottom: 10px;
-            font-style: italic;
-        }
-
-        /* Message de trafic */
-        .traffic-info {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            border-radius: 20px;
-            padding: 12px 20px;
-            margin: 10px 0;
+            border-left: 4px solid #f97316;
             text-align: center;
-            animation: slideDown 0.5s ease;
         }
 
-        @keyframes slideDown {
-            from {
-                transform: translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .traffic-info .title {
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-
-        .traffic-info .message {
-            font-size: 1.1em;
-            font-weight: bold;
-            margin-top: 5px;
+        .message-text {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #1e6b5e;
+            font-style: italic;
+            line-height: 1.5;
         }
 
         /* Statut en direct */
-        .big-status {
-            background: linear-gradient(135deg, #1a2a3a 0%, #0f1e2c 100%);
-            padding: 25px;
-            border-radius: 40px;
-            border: 1px solid #334155;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .big-icon {
-            width: 70px;
-            height: 70px;
-            background: #1e2f40;
-            border-radius: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5em;
-            border: 3px solid #3b82f6;
-        }
-
-        .big-text {
-            flex: 1;
-        }
-
-        .big-text .label {
-            font-size: 0.8em;
-            color: #94a3b8;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-
-        .big-text .location {
-            font-size: 1.3em;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .big-text .time {
-            color: #3b82f6;
-            font-weight: 600;
-            font-size: 1em;
-            background: rgba(59,130,246,0.15);
-            padding: 4px 12px;
-            border-radius: 50px;
-            display: inline-block;
-        }
-
-        /* Progression du bus */
-        .journey-progress {
-            background: #1a2938;
-            border-radius: 30px;
+        .status-card {
+            background: white;
+            border-radius: 28px;
             padding: 20px;
             margin: 20px 0;
-        }
-
-        .progress-title {
-            text-align: center;
-            margin-bottom: 15px;
-            color: #fbbf24;
-            font-weight: 600;
-        }
-
-        .progress-bar-container {
-            background: #2d3b4c;
-            border-radius: 30px;
-            height: 12px;
-            overflow: hidden;
-            margin: 15px 0;
-        }
-
-        .progress-bar {
-            background: linear-gradient(90deg, #3b82f6, #fbbf24);
-            width: 0%;
-            height: 100%;
-            transition: width 0.5s ease;
-            border-radius: 30px;
-        }
-
-        .stops-progress {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-
-        .stop-point {
-            text-align: center;
-            flex: 1;
-        }
-
-        .stop-point .dot {
-            width: 12px;
-            height: 12px;
-            background: #5f6b7a;
-            border-radius: 12px;
-            margin: 0 auto 5px;
-        }
-
-        .stop-point.active .dot {
-            background: #fbbf24;
-            box-shadow: 0 0 10px #fbbf24;
-        }
-
-        .stop-point.completed .dot {
-            background: #10b981;
-        }
-
-        .stop-point span {
-            font-size: 0.7em;
-            color: #94a3b8;
-        }
-
-        .stop-point.active span {
-            color: #fbbf24;
-            font-weight: bold;
-        }
-
-        .bus-animation {
-            position: relative;
-            height: 40px;
-            margin: 15px 0;
-        }
-
-        .bus-icon-moving {
-            position: absolute;
-            font-size: 1.8em;
-            transition: left 0.5s ease;
-            filter: drop-shadow(0 0 5px #3b82f6);
-        }
-
-        /* Liste des arrêts */
-        .stops-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin: 20px 0;
-        }
-
-        .stop-card {
-            background: #1a2938;
-            border-radius: 30px;
-            padding: 18px;
-            border: 1px solid #334155;
             display: flex;
             align-items: center;
             gap: 18px;
-            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
         }
 
-        .stop-card.completed {
-            border-color: #10b981;
-            background: linear-gradient(135deg, #14532d 0%, #0f3a20 100%);
-        }
-
-        .stop-card.active {
-            border-color: #f97316;
-            background: linear-gradient(135deg, #422006 0%, #2d1404 100%);
-            transform: scale(1.02);
-        }
-
-        .stop-icon {
+        .status-icon {
             width: 60px;
             height: 60px;
-            background: #1e2f40;
+            background: linear-gradient(135deg, #1e6b5e, #2c8c6e);
             border-radius: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2em;
-            border: 2px solid #3b82f6;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .status-info {
+            flex: 1;
+        }
+
+        .status-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.5px;
+        }
+
+        .status-location {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1e6b5e;
+            margin: 4px 0;
+        }
+
+        .status-time {
+            font-size: 0.8rem;
+            color: #f97316;
+            font-weight: 500;
+        }
+
+        /* Progression */
+        .progress-section {
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .progress-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .progress-bar-container {
+            background: #e2e8f0;
+            border-radius: 100px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #f97316, #ffb347);
+            height: 100%;
+            width: 0%;
+            border-radius: 100px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        /* Liste des arrêts */
+        .stops-container {
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e2e8f0;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+
+        .stops-title {
+            font-weight: 600;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            color: #1e6b5e;
+        }
+
+        .stop-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .stop-item:last-child {
+            border-bottom: none;
+        }
+
+        .stop-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 32px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .stop-item.completed .stop-dot {
+            background: #10b981;
+            color: white;
+        }
+
+        .stop-item.active .stop-dot {
+            background: #f97316;
+            color: white;
+            box-shadow: 0 0 0 3px #fed7aa;
         }
 
         .stop-info {
@@ -318,224 +283,171 @@
         }
 
         .stop-name {
-            font-size: 1.2em;
-            font-weight: 700;
-            margin-bottom: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
         }
 
-        .stop-address {
-            color: #9ca3af;
-            font-size: 0.75em;
-            margin-bottom: 8px;
+        .stop-time {
+            font-size: 0.65rem;
+            color: #64748b;
+            margin-top: 2px;
         }
 
-        .stop-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 0.75em;
-            background: #2d3b4c;
+        .stop-passengers {
+            font-size: 0.7rem;
+            color: #f97316;
+            font-weight: 500;
         }
 
-        .passengers-count {
-            background: #0f1a24;
+        /* Alertes trafic */
+        .traffic-alert {
+            background: #fff7ed;
             border-radius: 20px;
-            padding: 8px 12px;
-            margin-top: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-left: 4px solid #f97316;
+            animation: slideIn 0.4s ease;
         }
 
-        .passengers-label {
-            font-size: 0.75em;
-            color: #94a3b8;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .passengers-number {
-            font-size: 1.1em;
-            font-weight: 700;
-            color: #fbbf24;
+        .traffic-message {
+            font-size: 0.85rem;
+            color: #9b4a0a;
+            font-weight: 500;
         }
 
         /* Notifications */
-        .notif-section {
-            background: #1a2938;
+        .notifications-card {
+            background: white;
+            border-radius: 28px;
             padding: 20px;
-            border-radius: 35px;
             margin: 20px 0;
+            border: 1px solid #e2e8f0;
         }
 
         .notif-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
             font-weight: 600;
-            margin-bottom: 15px;
-            color: #fbbf24;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            color: #1e6b5e;
         }
 
         .notif-item {
-            background: #0f1a24;
-            border-radius: 20px;
+            background: #f8fafc;
+            border-radius: 16px;
             padding: 12px;
-            margin-bottom: 8px;
-            border-left: 4px solid #fbbf24;
+            margin-bottom: 10px;
+            border-left: 3px solid #f97316;
         }
 
         .notif-time {
-            color: #94a3b8;
-            font-size: 0.7em;
-            margin-bottom: 5px;
+            font-size: 0.65rem;
+            color: #64748b;
+            margin-bottom: 4px;
         }
 
         .notif-message {
-            font-size: 0.9em;
-            line-height: 1.4;
+            font-size: 0.8rem;
+            color: #1e293b;
         }
 
-        .notif-traffic {
-            border-left-color: #f59e0b;
-            background: linear-gradient(135deg, #2d1f0a 0%, #1a1408 100%);
-        }
-
+        /* Bannière culte */
         .culte-banner {
-            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-            color: #0b1120;
-            padding: 15px;
-            border-radius: 40px;
+            background: linear-gradient(135deg, #f97316, #ffb347);
+            border-radius: 28px;
+            padding: 16px;
             text-align: center;
-            font-weight: 800;
-            font-size: 1.2em;
             margin: 20px 0;
-            animation: pulse-gold 2s infinite;
-        }
-
-        @keyframes pulse-gold {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
         }
 
         .footer {
             text-align: center;
-            color: #5f6b7a;
-            font-size: 0.7em;
-            margin-top: 20px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Logo Navieo -->
+        <div class="logo-container">
+            <div class="logo">
+                <span>NAVI</span><span>EO</span>
+            </div>
+            <div class="logo-sub">LA NAVETTE QUI TRANSPORTE LA VIE</div>
+        </div>
+
         <div class="header">
             <div class="church-name">Église Charisma</div>
-            <div class="bus-title">🚌 LE BUS CHARISMA  <span style="background:#fbbf24; padding:2px 8px; border-radius:20px; font-size:0.7em;">passager</span></div>
+            <div class="bus-name">Navieo</div>
+            <div class="reservation">📞 Réservation: 07 45 44 60 15</div>
         </div>
 
         <!-- État d'attente -->
         <div id="waitingState" class="waiting-state">
             <div class="waiting-icon">⏳</div>
-            <div class="waiting-title">En attente du départ...</div>
-            <div class="waiting-text">Le bus n'a pas encore commencé son trajet.<br>Restez connecté, le départ sera annoncé ici.</div>
+            <div class="waiting-title">En attente du départ</div>
+            <div class="waiting-text">La navette Navieo n'a pas encore commencé son trajet.<br>Restez connecté, le départ sera annoncé ici.</div>
         </div>
 
         <!-- Contenu principal -->
         <div id="mainContent" style="display: none;">
-            <div class="message-feature">
-                <div class="featured-message" id="inspirationalMessage">✨ Que Dieu bénisse ce voyage ✨</div>
+            <div class="message-card">
+                <div class="message-text" id="inspirationalMessage">✨ Navieo - La navette qui transporte la VIE ✨</div>
             </div>
 
-            <div id="trafficAlert" style="display: none;" class="traffic-info"></div>
+            <div id="trafficAlert" class="traffic-alert" style="display: none;">
+                <div class="traffic-message" id="trafficMessage"></div>
+            </div>
 
-            <div class="big-status">
-                <div class="big-icon" id="bigIcon">⛪</div>
-                <div class="big-text">
-                    <div class="label">🚌 POSITION ACTUELLE</div>
-                    <div class="location" id="bigLocation">En attente</div>
-                    <div class="time" id="bigTime">--:--</div>
+            <div class="status-card">
+                <div class="status-icon" id="statusIcon">🚐</div>
+                <div class="status-info">
+                    <div class="status-label">POSITION ACTUELLE</div>
+                    <div class="status-location" id="currentLocation">-</div>
+                    <div class="status-time" id="currentTime">--:--</div>
                 </div>
             </div>
 
-            <!-- Progression du trajet -->
-            <div class="journey-progress">
-                <div class="progress-title">📍 Progression du trajet</div>
+            <div class="progress-section">
+                <div class="progress-title">PROGRESSION DU TRAJET</div>
                 <div class="progress-bar-container">
-                    <div class="progress-bar" id="progressBar"></div>
+                    <div class="progress-fill" id="progressBar"></div>
                 </div>
-                <div class="bus-animation">
-                    <div class="bus-icon-moving" id="movingBus">🚌</div>
-                </div>
-                <div class="stops-progress" id="stopsProgress">
-                    <div class="stop-point" id="progressEglise"><div class="dot"></div><span>Église</span></div>
-                    <div class="stop-point" id="progressBrement"><div class="dot"></div><span>Brement</span></div>
-                    <div class="stop-point" id="progressNoisy"><div class="dot"></div><span>Noisy</span></div>
-                    <div class="stop-point" id="progressRetour"><div class="dot"></div><span>Retour</span></div>
+                <div class="progress-stats">
+                    <span>Chelles</span>
+                    <span id="progressPercent">0%</span>
+                    <span>Église</span>
                 </div>
             </div>
 
-            <div class="stops-grid">
-                <div class="stop-card" id="cardEglise">
-                    <div class="stop-icon">⛪</div>
-                    <div class="stop-info">
-                        <div class="stop-name">Église Charisma</div>
-                        <div class="stop-address">Départ</div>
-                        <span class="stop-badge" id="badgeEglise">--</span>
-                        <div class="passengers-count" id="passengersEglise" style="display: none;">
-                            <span class="passengers-label">🚶 Montés</span>
-                            <span class="passengers-number" id="countEglise">0</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="stop-card" id="cardBrement">
-                    <div class="stop-icon">🏠</div>
-                    <div class="stop-info">
-                        <div class="stop-name">Brement</div>
-                        <div class="stop-address">Arrêt 1</div>
-                        <span class="stop-badge" id="badgeBrement">--</span>
-                        <div class="passengers-count" id="passengersBrement" style="display: none;">
-                            <span class="passengers-label">🚶 Montés</span>
-                            <span class="passengers-number" id="countBrement">0</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="stop-card" id="cardNoisy">
-                    <div class="stop-icon">🚉</div>
-                    <div class="stop-info">
-                        <div class="stop-name">Noisy-le-Sec</div>
-                        <div class="stop-address">Arrêt 2</div>
-                        <span class="stop-badge" id="badgeNoisy">--</span>
-                        <div class="passengers-count" id="passengersNoisy" style="display: none;">
-                            <span class="passengers-label">🚶 Montés</span>
-                            <span class="passengers-number" id="countNoisy">0</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="stop-card" id="cardRetour">
-                    <div class="stop-icon">⛪</div>
-                    <div class="stop-info">
-                        <div class="stop-name">Retour Église</div>
-                        <div class="stop-address">Arrivée finale</div>
-                        <span class="stop-badge" id="badgeRetour">--</span>
-                        <div class="passengers-count" id="passengersRetour" style="display: none;">
-                            <span class="passengers-label">🚶 Montés</span>
-                            <span class="passengers-number" id="countRetour">0</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="stops-container">
+                <div class="stops-title">📍 PARCOURS COMPLET (17 arrêts)</div>
+                <div id="stopsList"></div>
             </div>
 
             <div class="culte-banner">
                 🎉 BON CULTE ! 🎉
             </div>
 
-            <div class="notif-section">
+            <div class="notifications-card">
                 <div class="notif-title">🔔 DERNIÈRES INFORMATIONS</div>
                 <div id="notificationsList"></div>
             </div>
         </div>
 
         <div class="footer">
-            Le Bus de la Vie • Église Charisma • Mise à jour en direct
+            Navieo • Service navette Église Charisma • Suivi en direct
         </div>
     </div>
 
@@ -553,240 +465,163 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const STOPS_ORDER = ['depart', 'brement', 'noisy', 'retour'];
-        const STOP_NAMES = {
-            depart: 'Église',
-            brement: 'Brement',
-            noisy: 'Noisy',
-            retour: 'Retour'
-        };
+        // Arrêts Navieo (17 arrêts)
+        const STOPS = [
+            { id: "chelles", name: "Chelles ZAC de Tuilerie", time: "7:55", emoji: "🏭", order: 0 },
+            { id: "mairie", name: "Mairie", time: "8:00", emoji: "🏛️", order: 1 },
+            { id: "gare", name: "Gare", time: "8:03", emoji: "🚉", order: 2 },
+            { id: "neuilly", name: "Neuilly/Marne", time: "8:13", emoji: "🌊", order: 3 },
+            { id: "lamare", name: "La Mare", time: "8:19", emoji: "🌾", order: 4 },
+            { id: "gagnyarena", name: "Gagny Arena", time: "8:21", emoji: "🏟️", order: 5 },
+            { id: "jeanmoulin", name: "Jean Moulin", time: "8:24", emoji: "👤", order: 6 },
+            { id: "henribarbusse", name: "Henri Barbusse", time: "8:27", emoji: "📚", order: 7 },
+            { id: "garegagny", name: "Gare de Gagny", time: "8:30", emoji: "🚉", order: 8 },
+            { id: "chateau", name: "Château de Villemomble", time: "8:33", emoji: "🏰", order: 9 },
+            { id: "rosny", name: "Rosny Perrier Sud", time: "8:36", emoji: "🌹", order: 10 },
+            { id: "van", name: "Van derheyden", time: "8:39", emoji: "🏠", order: 11 },
+            { id: "ruffins", name: "Montreuil Ruffins", time: "8:49", emoji: "🏘️", order: 12 },
+            { id: "mairiemontreuil", name: "Montreuil Mairie", time: "8:59", emoji: "🏛️", order: 13 },
+            { id: "croixchavaux", name: "Montreuil Croix de Chavaux", time: "9:05", emoji: "✝️", order: 14 },
+            { id: "gaulle", name: "Montreuil Général de Gaulle", time: "9:08", emoji: "👨‍✈️", order: 15 },
+            { id: "eglise", name: "Église CHARISMA", time: "9:30", emoji: "⛪", order: 16 }
+        ];
 
-        const MESSAGES = {
-            depart: {
-                principal: "🚀 C'est parti ! Le bus de la vie commence son trajet. Que Dieu bénisse ce voyage !",
-                court: "🚌 DÉPART de l'Église Charisma"
-            },
-            brement: {
-                principal: "🏠 Arrivée à Brement ! La communauté vous accueille avec joie.",
-                court: "✅ ARRIVÉE à Brement"
-            },
-            noisy: {
-                principal: "🚉 Nous voici à Noisy-le-Sec ! Prenez place pour la suite du voyage.",
-                court: "🟣 ARRIVÉE à Noisy-le-Sec"
-            },
-            retour: {
-                principal: "🎉 Retour à l'Église Charisma ! Merci d'avoir voyagé avec nous. Bon culte à tous !",
-                court: "🔚 RETOUR à l'Église Charisma"
-            }
-        };
+        let currentStopIndex = -1;
+        let passengersData = {};
 
-        let currentStep = null;
-        let passengersData = { eglise: 0, brement: 0, noisy: 0, retour: 0 };
-
-        function updateProgress(step) {
-            const stepIndex = STOPS_ORDER.indexOf(step);
-            const progressPercent = (stepIndex / (STOPS_ORDER.length - 1)) * 100;
-            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+        function renderStops() {
+            const container = document.getElementById('stopsList');
+            container.innerHTML = '';
             
-            // Mettre à jour les points de progression
-            STOPS_ORDER.forEach((s, idx) => {
-                const pointId = `progress${s.charAt(0).toUpperCase() + s.slice(1)}`;
-                const point = document.getElementById(pointId);
-                if (point) {
-                    point.classList.remove('active', 'completed');
-                    if (idx < stepIndex) {
-                        point.classList.add('completed');
-                    } else if (idx === stepIndex) {
-                        point.classList.add('active');
-                    }
-                }
+            STOPS.forEach((stop, idx) => {
+                const div = document.createElement('div');
+                div.className = 'stop-item';
+                if (idx < currentStopIndex) div.classList.add('completed');
+                if (idx === currentStopIndex) div.classList.add('active');
+                
+                const passengerCount = passengersData[stop.id] || 0;
+                
+                div.innerHTML = `
+                    <div class="stop-dot">${stop.emoji}</div>
+                    <div class="stop-info">
+                        <div class="stop-name">${stop.name}</div>
+                        <div class="stop-time">⏰ ${stop.time}</div>
+                    </div>
+                    ${passengerCount > 0 ? `<div class="stop-passengers">+${passengerCount}</div>` : ''}
+                `;
+                container.appendChild(div);
             });
-            
-            // Déplacer le bus animé
-            const busElement = document.getElementById('movingBus');
-            const container = document.querySelector('.progress-bar-container');
-            if (container && busElement) {
-                const containerWidth = container.offsetWidth;
-                const leftPosition = (progressPercent / 100) * containerWidth;
-                busElement.style.left = `${Math.min(leftPosition, containerWidth - 40)}px`;
+        }
+
+        function updateProgress() {
+            if (currentStopIndex >= 0) {
+                const progress = (currentStopIndex / (STOPS.length - 1)) * 100;
+                document.getElementById('progressBar').style.width = `${progress}%`;
+                document.getElementById('progressPercent').innerHTML = `${Math.round(progress)}%`;
             }
         }
 
         function showTrafficAlert(alert) {
             if (alert && alert.message) {
-                const trafficDiv = document.getElementById('trafficAlert');
-                trafficDiv.style.display = 'block';
-                trafficDiv.innerHTML = `
-                    <div class="title">⚠️ INFORMATION TRAFIC</div>
-                    <div class="message">${alert.message}</div>
-                `;
+                const alertDiv = document.getElementById('trafficAlert');
+                const alertMsg = document.getElementById('trafficMessage');
+                alertMsg.innerHTML = `⚠️ ${alert.message}`;
+                alertDiv.style.display = 'block';
                 setTimeout(() => {
-                    trafficDiv.style.opacity = '0';
+                    alertDiv.style.opacity = '0';
                     setTimeout(() => {
-                        trafficDiv.style.display = 'none';
-                        trafficDiv.style.opacity = '1';
+                        alertDiv.style.display = 'none';
+                        alertDiv.style.opacity = '1';
                     }, 500);
                 }, 8000);
             }
         }
 
-        function updateDisplay(data) {
-            if (!data) return;
-
-            const etape = data.etape;
-            const time = data.time || new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            
-            if (currentStep === null && etape) {
-                document.getElementById('waitingState').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'block';
-            }
-
-            currentStep = etape;
-            updateProgress(etape);
-
-            if (data.trafficAlert) {
-                showTrafficAlert(data.trafficAlert);
-                addNotification(`⚠️ ${data.trafficAlert.message}`, time, true);
-            }
-
-            document.querySelectorAll('.stop-card').forEach(c => {
-                c.classList.remove('completed', 'active');
-            });
-
-            const msgElement = document.getElementById('inspirationalMessage');
-            const bigIcon = document.getElementById('bigIcon');
-            const bigLocation = document.getElementById('bigLocation');
-            const bigTime = document.getElementById('bigTime');
-            
-            bigTime.innerText = time;
-
-            switch(etape) {
-                case 'depart':
-                    msgElement.innerText = MESSAGES.depart.principal;
-                    bigIcon.innerHTML = '🚌';
-                    bigLocation.innerText = 'Départ Église Charisma';
-                    document.getElementById('cardEglise').classList.add('completed');
-                    document.getElementById('cardBrement').classList.add('active');
-                    document.getElementById('badgeEglise').innerText = '✓ DÉPART';
-                    document.getElementById('badgeBrement').innerText = '▶ EN COURS';
-                    document.getElementById('badgeNoisy').innerText = '⏱ À VENIR';
-                    document.getElementById('badgeRetour').innerText = '⏱ À VENIR';
-                    if (data.passengers) {
-                        passengersData.eglise = data.passengers;
-                        updatePassengerDisplay('eglise', data.passengers);
-                        document.getElementById('passengersEglise').style.display = 'flex';
-                    }
-                    break;
-
-                case 'brement':
-                    msgElement.innerText = MESSAGES.brement.principal;
-                    bigIcon.innerHTML = '🏠';
-                    bigLocation.innerText = 'Arrêt Brement';
-                    document.getElementById('cardEglise').classList.add('completed');
-                    document.getElementById('cardBrement').classList.add('completed');
-                    document.getElementById('cardNoisy').classList.add('active');
-                    document.getElementById('badgeEglise').innerText = '✓ DÉPART';
-                    document.getElementById('badgeBrement').innerText = '✓ ARRIVÉE';
-                    document.getElementById('badgeNoisy').innerText = '▶ EN COURS';
-                    document.getElementById('badgeRetour').innerText = '⏱ À VENIR';
-                    if (data.passengers) {
-                        passengersData.brement = data.passengers;
-                        updatePassengerDisplay('brement', data.passengers);
-                        document.getElementById('passengersBrement').style.display = 'flex';
-                    }
-                    break;
-
-                case 'noisy':
-                    msgElement.innerText = MESSAGES.noisy.principal;
-                    bigIcon.innerHTML = '🚉';
-                    bigLocation.innerText = 'Gare Noisy-le-Sec';
-                    document.getElementById('cardEglise').classList.add('completed');
-                    document.getElementById('cardBrement').classList.add('completed');
-                    document.getElementById('cardNoisy').classList.add('completed');
-                    document.getElementById('cardRetour').classList.add('active');
-                    document.getElementById('badgeEglise').innerText = '✓ DÉPART';
-                    document.getElementById('badgeBrement').innerText = '✓ ARRIVÉE';
-                    document.getElementById('badgeNoisy').innerText = '✓ ARRIVÉE';
-                    document.getElementById('badgeRetour').innerText = '▶ EN COURS';
-                    if (data.passengers) {
-                        passengersData.noisy = data.passengers;
-                        updatePassengerDisplay('noisy', data.passengers);
-                        document.getElementById('passengersNoisy').style.display = 'flex';
-                    }
-                    break;
-
-                case 'retour':
-                    msgElement.innerText = MESSAGES.retour.principal;
-                    bigIcon.innerHTML = '⛪';
-                    bigLocation.innerText = 'Retour Église Charisma';
-                    document.querySelectorAll('.stop-card').forEach(c => {
-                        c.classList.add('completed');
-                    });
-                    document.getElementById('badgeEglise').innerText = '✓ DÉPART';
-                    document.getElementById('badgeBrement').innerText = '✓ ARRIVÉE';
-                    document.getElementById('badgeNoisy').innerText = '✓ ARRIVÉE';
-                    document.getElementById('badgeRetour').innerText = '✓ ARRIVÉE';
-                    if (data.passengers) {
-                        passengersData.retour = data.passengers;
-                        updatePassengerDisplay('retour', data.passengers);
-                        document.getElementById('passengersRetour').style.display = 'flex';
-                    }
-                    break;
-            }
-
-            addNotification(`${MESSAGES[etape].court}`, time);
-        }
-
-        function updatePassengerDisplay(stop, count) {
-            const countElement = document.getElementById(`count${stop.charAt(0).toUpperCase() + stop.slice(1)}`);
-            if (countElement) {
-                countElement.innerText = count;
-            }
-        }
-
-        function addNotification(message, time, isTraffic = false) {
+        function addNotification(message, time) {
             const list = document.getElementById('notificationsList');
             const newNotif = document.createElement('div');
-            newNotif.className = `notif-item ${isTraffic ? 'notif-traffic' : ''}`;
+            newNotif.className = 'notif-item';
             newNotif.innerHTML = `
                 <div class="notif-time">${time}</div>
                 <div class="notif-message">${message}</div>
             `;
             list.insertBefore(newNotif, list.firstChild);
+            while(list.children.length > 12) list.removeChild(list.lastChild);
+        }
+
+        function updateDisplay(data) {
+            if (!data || (data.route && data.route !== 'navieo')) return;
             
-            while(list.children.length > 10) {
-                list.removeChild(list.lastChild);
+            const stopId = data.etape;
+            const time = data.time || new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            
+            if (currentStopIndex === -1 && stopId) {
+                document.getElementById('waitingState').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+            }
+            
+            const stopIndex = STOPS.findIndex(s => s.id === stopId);
+            if (stopIndex !== -1) {
+                currentStopIndex = stopIndex;
+                const currentStop = STOPS[stopIndex];
+                document.getElementById('statusIcon').innerHTML = currentStop.emoji;
+                document.getElementById('currentLocation').innerHTML = currentStop.name;
+                document.getElementById('currentTime').innerHTML = time;
+                document.getElementById('inspirationalMessage').innerHTML = `🚐 Arrivée à ${currentStop.name}`;
+                
+                renderStops();
+                updateProgress();
+            }
+            
+            if (data.passengers) {
+                passengersData[stopId] = data.passengers;
+                renderStops();
+            }
+            
+            if (data.trafficAlert) {
+                showTrafficAlert(data.trafficAlert);
+                addNotification(`⚠️ ${data.trafficAlert.message}`, time);
+            } else if (stopId) {
+                const stop = STOPS.find(s => s.id === stopId);
+                if (stop) {
+                    addNotification(`📍 ${stop.name} - Arrivée`, time);
+                }
             }
         }
 
         database.ref('bus-status').on('value', (snapshot) => {
             const data = snapshot.val();
-            if (data) {
-                updateDisplay(data);
-            }
+            if (data) updateDisplay(data);
         });
 
         database.ref('passengers').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 passengersData = { ...passengersData, ...data };
-                Object.keys(data).forEach(stop => {
-                    updatePassengerDisplay(stop, data[stop]);
-                    const passengerDiv = document.getElementById(`passengers${stop.charAt(0).toUpperCase() + stop.slice(1)}`);
-                    if (passengerDiv) passengerDiv.style.display = 'flex';
-                });
+                renderStops();
+            }
+        });
+
+        database.ref('bus-status/trafficAlert').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                showTrafficAlert(data);
+                addNotification(`⚠️ ${data.message}`, data.time);
             }
         });
 
         function updateTime() {
             const now = new Date();
-            const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-            const bigTime = document.getElementById('bigTime');
-            if (bigTime) bigTime.innerText = time;
+            const time = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            const timeElement = document.getElementById('currentTime');
+            if (timeElement && document.getElementById('mainContent').style.display === 'block') {
+                timeElement.innerText = time;
+            }
         }
         
         updateTime();
         setInterval(updateTime, 1000);
+        renderStops();
     </script>
 </body>
 </html>
